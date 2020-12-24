@@ -4,8 +4,6 @@ import useAxios from 'axios-hooks'
 import Container from 'react-bootstrap/Container';
 
 
-const baseUrl = process.env.REACT_APP_MONEYWISE_BASE_URL;
-
 interface IDayByDayApi {
     daybydays: {
         date: string;
@@ -132,7 +130,7 @@ export const DayByDayContainer = ({ userid, currentTime }: { userid: string, cur
     const end = new Date(currentTime + (queryRangeDays * 24 * 60 * 60 * 1000))
     
     const [{ data, loading, error }] = useAxios(
-        `${baseUrl}/api/daybydays?${highLowEnabled ? 'highLow&' : ''}userid=${userid}&startDate=${start.toISOString()}&endDate=${end.toISOString()}`
+        `/api/daybydays?${highLowEnabled ? 'highLow&' : ''}userid=${userid}&startDate=${start.toISOString()}&endDate=${end.toISOString()}`
     );
 
     if (loading) {

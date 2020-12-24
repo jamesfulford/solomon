@@ -155,7 +155,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
 
 CORS_ORIGIN_ALLOW_ALL = False
-CORS_ORIGIN_WHITELIST = os.environ["CORS_ORIGIN_WHITELIST_CSV"].split(",")
+CORS_ORIGIN_WHITELIST = ""
 
 #
 # Rest framework

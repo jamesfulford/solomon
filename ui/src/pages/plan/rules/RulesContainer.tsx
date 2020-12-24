@@ -9,15 +9,13 @@ import sortBy from 'lodash/sortBy';
 import Container from 'react-bootstrap/Container';
 
 
-const baseUrl = process.env.REACT_APP_MONEYWISE_BASE_URL;
-
 // Modal Interactions
 let isShown = false;
 let modalRule: IApiRule;
 
 export const RulesContainer = ({ userid, onRefresh = () => {} }: { userid: string, onRefresh?: () => void }) => {
     const [{ data, loading, error }, refetch] = useAxios(
-        `${baseUrl}/api/rules?userid=${userid}`
+        `/api/rules?userid=${userid}`
     )
 
     const triggerRefresh = useCallback(() => {
@@ -26,7 +24,7 @@ export const RulesContainer = ({ userid, onRefresh = () => {} }: { userid: strin
     }, [refetch, onRefresh])
 
     const createNewRule = useCallback((rule: IApiRuleMutate) => {
-        axios.post(`${baseUrl}/api/rules?userid=${userid}`, rule)
+        axios.post(`/api/rules?userid=${userid}`, rule)
             .then((response) => {
                 console.log('Created rule', response.data);
                 triggerRefresh();
@@ -67,7 +65,7 @@ export const RulesContainer = ({ userid, onRefresh = () => {} }: { userid: strin
     }, [triggerRefresh]);
 
     const deleteHandler = useCallback((id: string) => {
-        axios.delete(`${baseUrl}/api/rules/${id}?userid=${userid}`)
+        axios.delete(`/api/rules/${id}?userid=${userid}`)
             .then(() => {
                 triggerRefresh();
                 closeModal();
@@ -79,7 +77,7 @@ export const RulesContainer = ({ userid, onRefresh = () => {} }: { userid: strin
     }, [triggerRefresh, closeModal]);
 
     const updateExistingRule = useCallback((id: string, rule: IApiRuleMutate) => {
-        axios.put(`${baseUrl}/api/rules/${id}?userid=${userid}`, rule)
+        axios.put(`/api/rules/${id}?userid=${userid}`, rule)
         .then((response) => {
             console.log('Updated rule', response.data);
             closeModal();

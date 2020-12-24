@@ -4,8 +4,6 @@ import { Transaction } from './Transaction'
 import useAxios from 'axios-hooks'
 
 
-const baseUrl = process.env.REACT_APP_MONEYWISE_BASE_URL;
-
 export function limitShownTransactions(transactions: IApiTransaction[], showEnd: Date): IApiTransaction[] {
     return transactions
         .filter(t => {
@@ -24,7 +22,7 @@ export const TransactionsContainer = ({ userid, currentTime }: { userid: string,
     const downloadQueryEnd = new Date(now.getTime() + (400 * 24 * 60 * 60 * 1000)); // add 400 days (13 months plus some buffer)
 
     const [{ data, loading, error }] = useAxios(
-        `${baseUrl}/api/transactions?userid=${userid}&startDate=${start.toISOString()}&endDate=${queryEnd.toISOString()}`
+        `/api/transactions?userid=${userid}&startDate=${start.toISOString()}&endDate=${queryEnd.toISOString()}`
     )
     
     if (loading) {
@@ -45,7 +43,7 @@ export const TransactionsContainer = ({ userid, currentTime }: { userid: string,
 
 
     return <div data-testid="transactions-showing" className="table-responsive">
-        <div className="text-right mb-1"><a href={`${baseUrl}/api/export_transactions?userid=${userid}&startDate=${start.toISOString()}&endDate=${downloadQueryEnd.toISOString()}`}>Download CSV</a></div>
+        <div className="text-right mb-1"><a href={`/api/export_transactions?userid=${userid}&startDate=${start.toISOString()}&endDate=${downloadQueryEnd.toISOString()}`}>Download CSV</a></div>
         <table className="table table-sm table-hover">
             <thead>
                 <tr>

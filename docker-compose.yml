@@ -1,9 +1,46 @@
-version: '2.0'
+version: '3.4'
 
 services:
-  moneywise-backend:
-    image: moneywise-backend
+  solomon:
+    image: jamespfulford/solomon
+    environment:
+      # TODO: move to secrets
+      - DJANGO_SECRET_KEY=a-random-string-of-junk
+      - DB_USERNAME=admin
+      - DB_PASSWORD=admin
+      - DB_DATABASE_NAME=data
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DEBUG=${DEBUG}
+    depends_on:
+      migrations:
+        # ideally, would run once this container is finished
+        condition: service_started 
+    healthcheck:
+      test: ["CMD", "python3", "health.py"]
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+  
+  migrations:
+    image: jamespfulford/solomon
+    command: "python3 manage.py migrate"
+    environment:
+      # TODO: move to secrets
+      - DJANGO_SECRET_KEY=a-random-string-of-junk
+      - DB_USERNAME=admin
+      - DB_PASSWORD=admin
+      - DB_DATABASE_NAME=data
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DEBUG=${DEBUG}
+  
+  solomon-ui:
+    image: solomon-ui
     build:
-      context: ./backend
+      context: ./ui
+    depends_on:
+      solomon:
+        condition: service_healthy
     ports:
-      - 8000:8000
+      - 80:80
