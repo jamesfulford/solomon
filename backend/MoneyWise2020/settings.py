@@ -98,8 +98,19 @@ if 'test' in sys.argv:
 else:
     # everything else runs with MySQL
     database_name = open("/run/secrets/db-name").read().strip()
-    username = open("/run/secrets/db-username").read().strip()
-    password = open("/run/secrets/db-password").read().strip()
+
+    username = None
+    try:
+        username = open("/run/secrets/db-migration-username").read().strip()
+    except:
+        username = open("/run/secrets/db-username").read().strip()
+
+    password = None
+    try:
+        password = open("/run/secrets/db-migration-password").read().strip()
+    except:
+        password = open("/run/secrets/db-password").read().strip()
+
     host = open("/run/secrets/db-host").read().strip()
     port = open("/run/secrets/db-port").read().strip()
 

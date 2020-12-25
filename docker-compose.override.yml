@@ -14,15 +14,20 @@ services:
       - 3000:3000
     environment:
       - DEBUG=${DEBUG}
+    depends_on:
+      migrations:
+        condition: service_started
 
   # included for convenience
   # exits when complete (which causes prod deploy failure)
   migrations:
     image: 383314943195.dkr.ecr.us-east-1.amazonaws.com/solomon:latest
     command: "python3 manage.py migrate"
+    networks:
+      - solomon
     secrets:
-      - db-username
-      - db-password
+      - db-migration-username
+      - db-migration-password
       - db-host
       - db-port
       - db-name
@@ -40,6 +45,11 @@ services:
 
   mysql:
     image: mysql:5.7
+    networks:
+      - solomon
+    command: --init-file /tmp/seed-database.sql
+    volumes:
+      - .:/tmp
     restart: always
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-padmin"]
@@ -48,10 +58,7 @@ services:
     ports:
       - 3306:3306
     environment:
-      MYSQL_DATABASE_FILE: /run/secrets/db-name
       MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db-rootpassword
-      MYSQL_USER_FILE: /run/secrets/db-username
-      MYSQL_PASSWORD_FILE: /run/secrets/db-password
     secrets:
       - db-name
       - db-rootpassword
@@ -59,23 +66,33 @@ services:
       - db-password
 
   myadmin:
+    networks:
+      - solomon
     image: phpmyadmin/phpmyadmin
     ports:
       - 8090:80
     environment:
-      PMA_HOST: mysql
+      PMA_HOST: solomon.cluster-cqfzkipbivmf.us-east-1.rds.amazonaws.com
 
 secrets:
   db-name:
     file: ./local-secrets/db-name.txt
+
   db-username:
     file: ./local-secrets/db-username.txt
   db-password:
     file: ./local-secrets/db-password.txt
+  
+  db-migration-username:
+    file: ./local-secrets/db-migration-username.txt
+  db-migration-password:
+    file: ./local-secrets/db-migration-password.txt
+
   db-host:
     file: ./local-secrets/db-host.txt
   db-port:
     file: ./local-secrets/db-port.txt
+
   db-rootpassword:
     file: ./local-secrets/db-rootpassword.txt
 

@@ -1,10 +1,16 @@
 version: '3.4'
 
+networks:
+  solomon:
+    name: solomon
+
 services:
 
   solomon:
     image: 383314943195.dkr.ecr.us-east-1.amazonaws.com/solomon:latest
     restart: always
+    networks:
+      - solomon
     healthcheck:
       test: ["CMD", "python3", "health.py"]
       timeout: 3s
@@ -23,6 +29,8 @@ services:
   solomon-ui:
     image: 383314943195.dkr.ecr.us-east-1.amazonaws.com/solomon-ui:latest
     restart: always
+    networks:
+      - solomon
     depends_on:
       solomon:
         condition: service_healthy
@@ -46,7 +54,7 @@ secrets:
     name: "arn:aws:secretsmanager:us-east-1:383314943195:secret:db-password-9l7uvI"
   db-host:
     external: true
-    name: "arn:aws:secretsmanager:us-east-1:383314943195:secret:db-host-l1GiK1"
+    name: "arn:aws:secretsmanager:us-east-1:383314943195:secret:db-host-kQqeJI"
   db-port:
     external: true
     name: "arn:aws:secretsmanager:us-east-1:383314943195:secret:db-port-b2TcyA"
