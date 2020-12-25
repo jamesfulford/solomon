@@ -7,7 +7,7 @@ networks:
 services:
 
   solomon:
-    image: 383314943195.dkr.ecr.us-east-1.amazonaws.com/solomon:latest
+    image: 383314943195.dkr.ecr.us-east-1.amazonaws.com/solomon:${TAG:-latest}
     restart: always
     networks:
       - solomon
@@ -28,7 +28,7 @@ services:
   # For continuous uptime, that means our code needs to support records pre- and post- migration.
   
   solomon-ui:
-    image: 383314943195.dkr.ecr.us-east-1.amazonaws.com/solomon-ui:latest
+    image: 383314943195.dkr.ecr.us-east-1.amazonaws.com/solomon-ui:${TAG:-latest}
     restart: always
     networks:
       - solomon
