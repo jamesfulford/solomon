@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
-SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
+SECRET_KEY = open("/run/secrets/django-secret-key").read().strip()
 
 DEBUG = False
 
@@ -97,11 +97,11 @@ if 'test' in sys.argv:
     }
 else:
     # everything else runs with MySQL
-    database_name = os.environ["DB_DATABASE_NAME"]
-    username = os.environ["DB_USERNAME"]
-    password = os.environ["DB_PASSWORD"]
-    host = os.environ["DB_HOST"]
-    port = os.environ["DB_PORT"]
+    database_name = open("/run/secrets/db-name").read().strip()
+    username = open("/run/secrets/db-username").read().strip()
+    password = open("/run/secrets/db-password").read().strip()
+    host = open("/run/secrets/db-host").read().strip()
+    port = open("/run/secrets/db-port").read().strip()
 
     DATABASES = {
         'default': {

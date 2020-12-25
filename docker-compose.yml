@@ -1,46 +1,52 @@
 version: '3.4'
 
 services:
+
   solomon:
-    image: jamespfulford/solomon
-    environment:
-      # TODO: move to secrets
-      - DJANGO_SECRET_KEY=a-random-string-of-junk
-      - DB_USERNAME=admin
-      - DB_PASSWORD=admin
-      - DB_DATABASE_NAME=data
-      - DB_HOST=mysql
-      - DB_PORT=3306
-      - DEBUG=${DEBUG}
-    depends_on:
-      migrations:
-        # ideally, would run once this container is finished
-        condition: service_started 
+    image: 383314943195.dkr.ecr.us-east-1.amazonaws.com/solomon:latest
+    restart: always
     healthcheck:
       test: ["CMD", "python3", "health.py"]
       timeout: 3s
       retries: 10
       start_period: 10s
-  
-  migrations:
-    image: jamespfulford/solomon
-    command: "python3 manage.py migrate"
-    environment:
-      # TODO: move to secrets
-      - DJANGO_SECRET_KEY=a-random-string-of-junk
-      - DB_USERNAME=admin
-      - DB_PASSWORD=admin
-      - DB_DATABASE_NAME=data
-      - DB_HOST=mysql
-      - DB_PORT=3306
-      - DEBUG=${DEBUG}
+    secrets:
+      - db-username
+      - db-password
+      - db-host
+      - db-port
+      - db-name
+      - django-secret-key
+  # Migrations need to be applied outside of compose, unfortunately.
+  # For continuous uptime, that means our code needs to support records pre- and post- migration.
   
   solomon-ui:
-    image: solomon-ui
-    build:
-      context: ./ui
+    image: 383314943195.dkr.ecr.us-east-1.amazonaws.com/solomon-ui:latest
+    restart: always
     depends_on:
       solomon:
         condition: service_healthy
     ports:
       - 80:80
+
+secrets:
+  django-secret-key:
+    external: true
+    name: "arn:aws:secretsmanager:us-east-1:383314943195:secret:django-secret-key-i8IaHO"
+  
+  # in prod, we might not use our own container for mysql, instead using Aurora or something
+  db-name:
+    external: true
+    name: "arn:aws:secretsmanager:us-east-1:383314943195:secret:db-name-Am5t7x"
+  db-username:
+    external: true
+    name: "arn:aws:secretsmanager:us-east-1:383314943195:secret:db-username-7LkWbk"
+  db-password:
+    external: true
+    name: "arn:aws:secretsmanager:us-east-1:383314943195:secret:db-password-9l7uvI"
+  db-host:
+    external: true
+    name: "arn:aws:secretsmanager:us-east-1:383314943195:secret:db-host-l1GiK1"
+  db-port:
+    external: true
+    name: "arn:aws:secretsmanager:us-east-1:383314943195:secret:db-port-b2TcyA"
