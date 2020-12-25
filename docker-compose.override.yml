@@ -60,10 +60,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db-rootpassword
     secrets:
-      - db-name
       - db-rootpassword
-      - db-username
-      - db-password
 
   myadmin:
     networks:
@@ -72,7 +69,7 @@ services:
     ports:
       - 8090:80
     environment:
-      PMA_HOST: solomon.cluster-cqfzkipbivmf.us-east-1.rds.amazonaws.com
+      PMA_HOST: ${DB_HOST:-mysql}
 
 secrets:
   db-name:

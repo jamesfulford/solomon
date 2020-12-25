@@ -6,12 +6,23 @@ db_password=`cat ./secrets/db-password`
 db_migration_username=`cat ./secrets/db-migration-username`
 db_migration_password=`cat ./secrets/db-migration-password`
 
-mysql_script=`cat seed-database.sql`
+script_path=`mktemp`
+cp seed-database.sql $script_path
+trap "rm $script_path" EXIT
 
-mysql_script=`echo $mysql_script | sed "s/db_name/$db_name/g"`
-mysql_script=`echo $mysql_script | sed "s/db_username/$db_username/g"`
-mysql_script=`echo $mysql_script | sed "s/db_password/$db_password/g"`
-mysql_script=`echo $mysql_script | sed "s/db_migration_username/$db_migration_username/g"`
-mysql_script=`echo $mysql_script | sed "s/db_migration_password/$db_migration_password/g"`
+sed -i'.bak' "s/db_name/$db_name/g" $script_path
+sed -i'.bak' "s/db_username/$db_username/g" $script_path
+sed -i'.bak' "s/db_password/$db_password/g" $script_path
+sed -i'.bak' "s/db_migration_username/$db_migration_username/g" $script_path
+sed -i'.bak' "s/db_migration_password/$db_migration_password/g" $script_path
 
-echo $mysql_script | mysql -uadmin -p`cat secrets/db-rootpassword` -h `cat secrets/db-host`
+echo "Initializing database..."
+mysql -uadmin -p`cat secrets/db-rootpassword` -h `cat secrets/db-host` < $script_path
+
+./prod-sql.sh "select * from information_schema.USER_PRIVILEGES;"
+
+echo
+echo
+echo "Running migrations..."
+docker context use default
+docker-compose -f migrations.compose.yml run --rm migrations

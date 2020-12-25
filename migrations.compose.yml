@@ -1,0 +1,36 @@
+version: '3.4'
+
+# used in seed-database.sh to execute migrations against prod.
+
+services:
+
+  # exits when complete (which causes prod deploy failure)
+  migrations:
+    image: 383314943195.dkr.ecr.us-east-1.amazonaws.com/solomon:latest
+    command: "python3 manage.py migrate"
+    secrets:
+      - db-migration-username
+      - db-migration-password
+      - db-host
+      - db-port
+      - db-name
+      - django-secret-key
+    build:
+      context: ./backend
+
+secrets:
+  db-name:
+    file: ./secrets/db-name
+  
+  db-migration-username:
+    file: ./secrets/db-migration-username
+  db-migration-password:
+    file: ./secrets/db-migration-password
+
+  db-host:
+    file: ./secrets/db-host
+  db-port:
+    file: ./secrets/db-port
+
+  django-secret-key:
+    file: ./secrets/django-secret-key
