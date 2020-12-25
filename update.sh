@@ -17,5 +17,7 @@ docker compose up
 docker context use default
 
 # tagging
+git tag -d prod
+git push origin :prod
 git tag -a prod -m "prod deployed `date`"
-git push tag
+git push origin prod
