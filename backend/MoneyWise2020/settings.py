@@ -42,7 +42,7 @@ TEST_OUTPUT_DIR = 'xmlrunner'
 INSTALLED_APPS = [
     'src',
     'rest_framework',
-#    'corsheaders',
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -169,7 +169,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
 
 CORS_ORIGIN_ALLOW_ALL = False
-CORS_ORIGIN_WHITELIST = ""
+cors_origin_whitelist_string = os.environ.get("CORS_ORIGIN_WHITELIST", "")
+CORS_ORIGIN_WHITELIST = cors_origin_whitelist_string.split(",") if cors_origin_whitelist_string else []
 
 #
 # Rest framework

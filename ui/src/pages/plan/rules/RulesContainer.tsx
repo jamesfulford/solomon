@@ -13,9 +13,11 @@ import Container from 'react-bootstrap/Container';
 let isShown = false;
 let modalRule: IApiRule;
 
+const baseUrl = process.env.REACT_APP_BASE_URL || '';
+
 export const RulesContainer = ({ userid, onRefresh = () => {} }: { userid: string, onRefresh?: () => void }) => {
     const [{ data, loading, error }, refetch] = useAxios(
-        `/api/rules?userid=${userid}`
+        `${baseUrl}/api/rules?userid=${userid}`
     )
 
     const triggerRefresh = useCallback(() => {
@@ -24,7 +26,7 @@ export const RulesContainer = ({ userid, onRefresh = () => {} }: { userid: strin
     }, [refetch, onRefresh])
 
     const createNewRule = useCallback((rule: IApiRuleMutate) => {
-        axios.post(`/api/rules?userid=${userid}`, rule)
+        axios.post(`${baseUrl}/api/rules?userid=${userid}`, rule)
             .then((response) => {
                 console.log('Created rule', response.data);
                 triggerRefresh();
@@ -65,7 +67,7 @@ export const RulesContainer = ({ userid, onRefresh = () => {} }: { userid: strin
     }, [triggerRefresh]);
 
     const deleteHandler = useCallback((id: string) => {
-        axios.delete(`/api/rules/${id}?userid=${userid}`)
+        axios.delete(`${baseUrl}/api/rules/${id}?userid=${userid}`)
             .then(() => {
                 triggerRefresh();
                 closeModal();
@@ -77,7 +79,7 @@ export const RulesContainer = ({ userid, onRefresh = () => {} }: { userid: strin
     }, [triggerRefresh, closeModal]);
 
     const updateExistingRule = useCallback((id: string, rule: IApiRuleMutate) => {
-        axios.put(`/api/rules/${id}?userid=${userid}`, rule)
+        axios.put(`${baseUrl}/api/rules/${id}?userid=${userid}`, rule)
         .then((response) => {
             console.log('Updated rule', response.data);
             closeModal();

@@ -7,7 +7,9 @@ COPY package.json yarn.lock ./
 RUN yarn --frozen-lockfile
 COPY ./src ./src
 COPY ./public ./public
-RUN yarn build
+
+ARG REACT_APP_BASE_URL
+RUN REACT_APP_BASE_URL=$REACT_APP_BASE_URL yarn build
 # Build Stage 2
 # This build takes the production build from staging build
 #

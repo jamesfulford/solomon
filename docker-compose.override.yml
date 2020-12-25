@@ -8,12 +8,15 @@ services:
   solomon:
     build:
       context: ./backend
+      args:
+        REACT_APP_BASE_URL: /
     volumes:
       - ./backend:/app
     ports:
       - 3000:3000
     environment:
       - DEBUG=${DEBUG}
+      - CORS_ORIGIN_WHITELIST=https://localhost:8080
     depends_on:
       migrations:
         condition: service_started
