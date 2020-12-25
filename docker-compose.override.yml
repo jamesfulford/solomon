@@ -17,6 +17,8 @@ services:
     depends_on:
       migrations:
         condition: service_started
+    healthcheck:
+      interval: 5s
 
   # included for convenience
   # exits when complete (which causes prod deploy failure)
@@ -42,6 +44,8 @@ services:
   solomon-ui:
     build:
       context: ./ui
+    healthcheck:
+      interval: 5s
 
   mysql:
     image: mysql:5.7
@@ -52,9 +56,12 @@ services:
       - .:/tmp
     restart: always
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-padmin"]
+      # keep local root password in sync with local-secrets/db-rootpassword
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-prootpasswordforlocal"]
+      interval: 5s
       timeout: 3s
-      retries: 10
+      retries: 3
+      start_period: 0s
     ports:
       - 3306:3306
     environment:
