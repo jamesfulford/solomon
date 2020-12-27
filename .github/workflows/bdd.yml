@@ -1,0 +1,19 @@
+name: BDD
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Start environment
+        run: docker-compose up -d
+
+      - name: Run BDD tests
+        run: docker-compose exec -- solomon python -m behave
+
