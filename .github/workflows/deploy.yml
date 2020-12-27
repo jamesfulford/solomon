@@ -33,12 +33,16 @@ jobs:
         echo "$DB_PASSWORD" > ./secrets/db-password
         echo "$DB_MIGRATION_USERNAME" > ./secrets/db-migration-username
         echo "$DB_MIGRATION_PASSWORD" > ./secrets/db-migration-password
+        echo "$DB_ROOTPASSWORD" > ./secrets/db-rootpassword
+        echo "$DB_HOST" > ./secrets/db-host
       env:
         DB_NAME: ${{secrets.DB_NAME}}
         DB_USERNAME: ${{secrets.DB_USERNAME}}
         DB_PASSWORD: ${{secrets.DB_PASSWORD}}
         DB_MIGRATION_USERNAME: ${{secrets.DB_MIGRATION_USERNAME}}
         DB_MIGRATION_PASSWORD: ${{secrets.DB_MIGRATION_PASSWORD}}
+        DB_ROOTPASSWORD: ${{secrets.DB_ROOTPASSWORD}}
+        DB_HOST: ${{secrets.DB_HOST}}
 
     - name: Docker Layer Caching
       uses: satackey/action-docker-layer-caching@v0.0.11
