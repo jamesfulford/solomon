@@ -38,10 +38,3 @@ if [[ "0" != "$return_code" ]]; then
 fi
 
 set -e
-
-
-# tag commit currently deployed in prod
-git tag -d prod
-git push origin :prod
-git tag -a prod -m "prod deployed `date`"
-git push origin prod
