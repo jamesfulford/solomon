@@ -24,9 +24,12 @@ jobs:
         with:
           node-version: 12.x
           check-latest: yes
+    
+      - name: Yarn Install
+        uses: bahmutov/npm-install@v1.6.0
+        with:
+          working-directory: ui
+          useLockFile: yes
 
       - name: Frontend unit tests
-        run: |
-          cd ui
-          yarn --frozen-lockfile
-          CI=true yarn test -u --ci --coverage --reporters=default --reporters=jest-junit
+        run: CI=true yarn test -u --ci --coverage --reporters=default --reporters=jest-junit
