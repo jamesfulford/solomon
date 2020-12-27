@@ -7,6 +7,7 @@ import { Modal } from './RuleModal'
 import axios from 'axios';
 import sortBy from 'lodash/sortBy';
 import Container from 'react-bootstrap/Container';
+import { isHighLowEnabled } from '../../../flags';
 
 
 // Modal Interactions
@@ -76,7 +77,7 @@ export const RulesContainer = ({ userid, onRefresh = () => {} }: { userid: strin
                 // TODO: toast an error
                 console.error('UHOH', e);
             })
-    }, [triggerRefresh, closeModal]);
+    }, [triggerRefresh, closeModal, userid]);
 
     const updateExistingRule = useCallback((id: string, rule: IApiRuleMutate) => {
         axios.put(`${baseUrl}/api/rules/${id}?userid=${userid}`, rule)
@@ -94,9 +95,11 @@ export const RulesContainer = ({ userid, onRefresh = () => {} }: { userid: strin
 
     const onFailedValidation = useCallback((message: string) => console.log('Bad input', message), []);
 
+    const flags = { isHighLowEnabled: isHighLowEnabled(userid) };
+
     if (loading) {
         return <>
-            <CreateForm onSubmit={createNewRule} onFailedValidation={onFailedValidation} />
+            <CreateForm onSubmit={createNewRule} onFailedValidation={onFailedValidation} flags={flags} />
             <div className="spinner-border" role="status">
                 <span data-testid="rules-loading" className="visually-hidden"></span>
             </div>
@@ -105,7 +108,7 @@ export const RulesContainer = ({ userid, onRefresh = () => {} }: { userid: strin
     
     if (error) {
         return <>
-            <CreateForm onSubmit={createNewRule} onFailedValidation={onFailedValidation} />
+            <CreateForm onSubmit={createNewRule} onFailedValidation={onFailedValidation} flags={flags} />
             <p data-testid="rules-load-error">Oops! Looks like we can't get your rules right now. Try reloading the page.</p>
         </>
     }
@@ -114,7 +117,7 @@ export const RulesContainer = ({ userid, onRefresh = () => {} }: { userid: strin
 
     if (!rules?.length) { // empty
         return <>
-            <CreateForm onSubmit={createNewRule} onFailedValidation={onFailedValidation} />
+            <CreateForm onSubmit={createNewRule} onFailedValidation={onFailedValidation} flags={flags} />
             <Container className="text-center">
                 <p data-testid="no-rules-found">You have no rules.</p>
             </Container>
@@ -124,7 +127,7 @@ export const RulesContainer = ({ userid, onRefresh = () => {} }: { userid: strin
     const sortedRules = sortBy(rules, (r: IApiRule) => r.value);
     
     return <>
-        <CreateForm onSubmit={createNewRule} onFailedValidation={onFailedValidation} />
+        <CreateForm onSubmit={createNewRule} onFailedValidation={onFailedValidation} flags={flags} />
         
         {isShown ? (
                 <Modal

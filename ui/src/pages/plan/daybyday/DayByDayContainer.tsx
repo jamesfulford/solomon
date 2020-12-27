@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Chart from "react-google-charts";
 import useAxios from 'axios-hooks'
 import Container from 'react-bootstrap/Container';
+import { isHighLowEnabled } from '../../../flags';
 
 
 const baseUrl = process.env.REACT_APP_BASE_URL || '';
@@ -91,7 +92,6 @@ const DayByDayChart = ({ daybyday, chartType }: { daybyday: IDayByDayApi, chartT
                     colors: [black, green],
                 }}
             />
-            break;
         case ChartTab.UNCERTAINTY:
             const uncertaintyData = [
                 ['Day', '90th Percentile', 'Expected', '10th Percentile'],
@@ -113,14 +113,7 @@ const DayByDayChart = ({ daybyday, chartType }: { daybyday: IDayByDayApi, chartT
                     colors: [green, black, red],
                 }}
             />
-            break;
     }
-}
-
-function isHighLowEnabled(userid: string): boolean {
-    return [
-        'google-oauth2|113612696937596388912', // james.patrick.fulford@gmail.com
-    ].includes(userid);
 }
 
 export const DayByDayContainer = ({ userid, currentTime }: { userid: string, currentTime: number }) => {

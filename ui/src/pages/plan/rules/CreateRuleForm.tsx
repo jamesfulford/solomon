@@ -5,11 +5,14 @@ import './CreateRuleForm.css'
 
 export const CreateForm = ({
     onSubmit,
-    onFailedValidation = () => {}
+    onFailedValidation = () => {},
+    flags = {},
 }: {
     onSubmit: (rule: IApiRuleMutate) => void,
     onFailedValidation: (message: string) => void,
+    flags?: { isHighLowEnabled?: boolean }
 }) => {
+
     const [name, setName] = useState('');
     const [value, setValue] = useState<number | undefined>(undefined);
     const [frequency, setFrequency] = useState<string>("MONTHLY");
@@ -149,6 +152,17 @@ export const CreateForm = ({
             }} />
         </div>
 
+        { flags.isHighLowEnabled && <div>
+            <a className="btn btn-link" onClick={() => setUncertainty(x => !x)}>I'm uncertain how much this will be</a>
+
+            {(uncertainty) && <>
+                <label htmlFor="High" className="sr-only">Likely high value</label>
+                <input className="form-control" type="number" name="High" id="High" value={highUncertainty} onChange={e => setHighUncertainty(Number(e.target.value))} />
+                <label htmlFor="Low" className="sr-only">Likely low value</label>
+                <input className="form-control" type="number" name="Low" id="Low" value={lowUncertainty} onChange={e => setLowUncertainty(Number(e.target.value))} />
+            </>}
+        </div>}
+
         {/* Recurrence-rule specific logics */}
         <div className="form-inline mt-2 d-flex justify-content-between">
             {/* Frequency selector */}
@@ -216,21 +230,6 @@ export const CreateForm = ({
                 <input className="form-control form-control-sm" placeholder="End Date" type="date" name="End" id="End" value={endDate} onChange={e => setEndDate(e.target.value)} />
             </>}
         </div>
-
-        <div className="col-md-4 mb-3">
-        <label htmlFor="Uncertainty">Uncertainty:</label>
-        <input className="form-control" type="checkbox" name="Uncertainty" id="Uncertainty" checked={uncertainty} onChange={e => setUncertainty(e.target.checked)} />
-        </div>
-
-        {(uncertainty) && <>
-            <div className="col-md-4 mb-4">
-                <label htmlFor="High">High Uncertainty:</label>
-                <input className="form-control" type="number" name="High" id="High" value={highUncertainty} onChange={e => setHighUncertainty(Number(e.target.value))} />
-                <label htmlFor="Low">Low Uncertainty:</label>
-                <input className="form-control" type="number" name="Low" id="Low" value={lowUncertainty} onChange={e => setLowUncertainty(Number(e.target.value))} />
-            </div>
-        </>}
-
     
         <div className="d-flex flex-row-reverse">
             <button className="btn btn-outline-primary btn-sm mb-2 mt-2">Submit</button>
