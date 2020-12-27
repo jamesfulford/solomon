@@ -1,0 +1,29 @@
+name: Frontend Unit Tests
+
+on:
+  pull_request:
+    branches: [ main ]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v2.1.4
+        with:
+          node-version: 12.x
+          check-latest: yes
+    
+      - name: Yarn Install
+        uses: bahmutov/npm-install@v1.6.0
+        with:
+          working-directory: ui
+          useLockFile: yes
+
+      - name: Frontend unit tests
+        run: cd ui; CI=true yarn test -u --ci --coverage --reporters=default --reporters=jest-junit
