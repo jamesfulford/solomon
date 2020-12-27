@@ -48,7 +48,8 @@ class HandlerTests(TestCase):
             "calculations": {
                 "balance": 100.0,
                 "working_capital": 100.0
-            }
+            },
+            "labels": {},
         }]
 
         self.assertEqual(expected, actual)
@@ -81,7 +82,8 @@ class HandlerTests(TestCase):
             "calculations": {
                 "balance": -10.0,
                 "working_capital": -10.0
-            }
+            },
+            "labels": {},
         }, {
             "rule_id": "rule-1",
             "id": "rule-1::2018-07-01",
@@ -90,7 +92,8 @@ class HandlerTests(TestCase):
             "calculations": {
                 "balance": 90.0,
                 "working_capital": 80.0
-            }
+            },
+            "labels": {},
         },{
             "rule_id": "rule-2",
             "id": "rule-2::2018-07-02",
@@ -99,7 +102,8 @@ class HandlerTests(TestCase):
             "calculations": {
                 "balance": 80.0,
                 "working_capital": 80.0
-            }
+            },
+            "labels": {},
         }]
 
         self.assertEqual(expected, actual)
@@ -128,7 +132,8 @@ class HandlerTests(TestCase):
             "calculations": {
                 "balance": 100.0,
                 "working_capital": 100.0
-            }
+            },
+            "labels": {},
         }, {
             "rule_id": "rule-1",
             "id": "rule-1::2018-07-02",
@@ -137,7 +142,8 @@ class HandlerTests(TestCase):
             "calculations": {
                 "balance": 200.0,
                 "working_capital": 200.0
-            }
+            },
+            "labels": {},
         }]
 
         self.assertEqual(expected, actual)
@@ -167,7 +173,8 @@ class HandlerTests(TestCase):
             "calculations": {
                 "balance": 100.0,
                 "working_capital": 100.0
-            }
+            },
+            "labels": {},
         }, {
             "rule_id": "rule-1",
             "id": "rule-1::2018-07-05",
@@ -176,7 +183,8 @@ class HandlerTests(TestCase):
             "calculations": {
                 "balance": 200.0,
                 "working_capital": 200.0
-            }
+            },
+            "labels": {},
         }]
 
         self.assertEqual(expected, actual)
@@ -205,7 +213,8 @@ class HandlerTests(TestCase):
             "calculations": {
                 "balance": 100.0,
                 "working_capital": 100.0
-            }
+            },
+            "labels": {},
         }, {
             "rule_id": "rule-1",
             "id": "rule-1::2019-06-21",
@@ -214,7 +223,8 @@ class HandlerTests(TestCase):
             "calculations": {
                 "balance": 200.0,
                 "working_capital": 200.0
-            }
+            },
+            "labels": {},
         }]
 
         self.assertEqual(expected, actual)
@@ -243,7 +253,8 @@ class HandlerTests(TestCase):
             "calculations": {
                 "balance": 100.0,
                 "working_capital": 100.0
-            }
+            },
+            "labels": {},
         }]
 
         self.assertEqual(expected, actual)
