@@ -1,6 +1,5 @@
 import React from 'react';
 import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
 import { Header } from './components/Header';
 
 import {
@@ -26,7 +25,7 @@ function App() {
         </Switch>
       <Container fluid style={{ background: '#f8f9fa' }} className="mt-3">
         <Container className="text-center">
-          MoneyWise &#169; 2020
+          &#169; An Ounce of Silver Technologies
         </Container>
       </Container>
     </>

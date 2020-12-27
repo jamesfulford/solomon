@@ -1,5 +1,5 @@
 # Solomon
-## Redeem God's Wealth
+## Take back your bank account
 
 ## Concepts
 

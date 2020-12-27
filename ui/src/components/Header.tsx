@@ -5,11 +5,12 @@ import { Link } from 'react-router-dom';
 import logo from './MoneyWise.svg'
 
 export const Header = () => {
+    const { isAuthenticated } = useAuth0();
     return <Navbar bg="light" expand="lg" className="mb-3">
         <Link to="/">
-            <Navbar.Brand><img width={48} height={48} src={logo} />moneywise</Navbar.Brand>
+            <Navbar.Brand><img width={48} height={48} src={logo} alt="logo" />Solomon</Navbar.Brand>
         </Link>
-        <Link to="/plan">Plan</Link>
+        {isAuthenticated && <Link to="/plan">Plan</Link>}
         <LoginSection />
     </Navbar>
 }
@@ -23,7 +24,7 @@ const LoginSection = () => {
     if (isAuthenticated) {
         return <>
             <span className="ml-auto">Hello, {user.given_name}</span>
-            <button className="btn btn-outline-primary ml-3" onClick={() => logout()}>Logout</button> 
+            <button className="btn btn-outline-primary ml-3" onClick={() => logout({ returnTo: window.location.origin })}>Logout</button> 
         </>
     }
 
