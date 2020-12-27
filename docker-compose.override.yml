@@ -61,10 +61,9 @@ services:
     healthcheck:
       # keep local root password in sync with local-secrets/db-rootpassword
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-prootpasswordforlocal"]
-      interval: 5s
+      interval: 15s
       timeout: 3s
       retries: 3
-      start_period: 0s
     ports:
       - 3306:3306
     environment:
