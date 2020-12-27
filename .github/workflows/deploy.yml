@@ -35,6 +35,8 @@ jobs:
         echo "$DB_MIGRATION_PASSWORD" > ./secrets/db-migration-password
         echo "$DB_ROOTPASSWORD" > ./secrets/db-rootpassword
         echo "$DB_HOST" > ./secrets/db-host
+        echo "$DB_PORT" > ./secrets/db-port
+        echo "$DJANGO_SECRET_KEY" > ./secrets/django-secret-key
       env:
         DB_NAME: ${{secrets.DB_NAME}}
         DB_USERNAME: ${{secrets.DB_USERNAME}}
@@ -43,6 +45,8 @@ jobs:
         DB_MIGRATION_PASSWORD: ${{secrets.DB_MIGRATION_PASSWORD}}
         DB_ROOTPASSWORD: ${{secrets.DB_ROOTPASSWORD}}
         DB_HOST: ${{secrets.DB_HOST}}
+        DB_PORT: ${{secrets.DB_PORT}}
+        DJANGO_SECRET_KEY: ${{secrets.DJANGO_SECRET_KEY}}
 
     - name: Docker Layer Caching
       uses: satackey/action-docker-layer-caching@v0.0.11
