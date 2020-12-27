@@ -50,6 +50,9 @@ jobs:
 
     - name: Docker Layer Caching
       uses: satackey/action-docker-layer-caching@v0.0.11
+    
+    - name: Add solomon context
+      run: docker context create ecs --from-env solomon
 
     - name: Run update script
       run: |
