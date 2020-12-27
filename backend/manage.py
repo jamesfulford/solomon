@@ -6,9 +6,8 @@ import sys
 
 
 def main():
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'MoneyWise2020.settings')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'solomon.settings')
 
-    # start new section
     from django.conf import settings
 
     if settings.DEBUG:
@@ -19,7 +18,6 @@ def main():
             ptvsd.enable_attach(address=('0.0.0.0', 3000))
             ptvsd.wait_for_attach()
             print('Attached!')
-    # end new section
     
     try:
         from django.core.management import execute_from_command_line
