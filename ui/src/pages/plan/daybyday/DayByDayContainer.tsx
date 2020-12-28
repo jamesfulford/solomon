@@ -61,6 +61,13 @@ enum ChartTab {
     UNCERTAINTY = "Uncertainty",
 }
 
+// Chart Wishlist
+// - explain moves
+// - highlight saving for one-time events (how long does it take?)
+// - disposable income separate from set_aside in tooltip
+// - better x axis markers
+// - less coloring overlaps
+// - should not be a line chart, should be "steppy" like _| instead of / between points (still same as before)
 const DayByDayChart = ({ daybyday, chartType, setAside }: { daybyday: IDayByDayApi, chartType: ChartTab, setAside: number }) => {
     if (!daybyday.daybydays.length) {
         return <Container className="text-center">
