@@ -44,7 +44,7 @@ def rules_handler(request):
             return(create_rule(request, userid))
     except Exception as e:
         # TODO: global exception handler
-        response_message = {'message': "Apologies, we had a small hiccup. Please try again (just in case!) or contact moneywise support."}
+        response_message = {'message': "Apologies, we had a small hiccup. Please try again (just in case!) or contact support."}
         logging.error(f"Unexpected error: {e}")
         return Response(response_message, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -66,7 +66,7 @@ def rules_by_id_handler(request, rule_id):
         logging.warn(response_message)
         return Response(response_message, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
-        response_message = {'message': "Apologies, we had a small hiccup. Please try again (just in case!) or contact moneywise support."}
+        response_message = {'message': "Apologies, we had a small hiccup. Please try again (just in case!) or contact support."}
         logging.error(f"Unexpected error: {e}")
         return Response(response_message, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -268,7 +268,7 @@ def export_transactions(request):
     results = list(map(lambda i: i.serialize(), transactions))
 
     response = HttpResponse(content_type='text/csv')
-    fileName = "MoneyWiseTransactions." + parameters.start.strftime('%Y-%-m-%-d') + "." + parameters.end.strftime('%Y-%-m-%-d') + ".csv" 
+    fileName = "Transactions." + parameters.start.strftime('%Y-%-m-%-d') + "." + parameters.end.strftime('%Y-%-m-%-d') + ".csv" 
     response['Content-Disposition'] = 'attachment; filename="' + fileName + '"'
 
     fieldnames = ['rule_id', 'value', 'day', 'balance', 'disposable_income']
