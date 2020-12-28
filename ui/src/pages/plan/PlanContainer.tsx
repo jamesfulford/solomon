@@ -19,6 +19,8 @@ export const PlanContainer = () => {
 
     const { isAuthenticated, isLoading, loginWithRedirect, user } = useAuth0();
     const token = useToken();
+    const [currentBalance, setCurrentBalance] = useState(0);
+    const [setAside, setSetAside] = useState(0);
     
     if (!isLoading && !isAuthenticated) {
         return <Container className="justify-content-middle">
@@ -35,6 +37,22 @@ export const PlanContainer = () => {
     return <Container fluid style={{ paddingLeft: '10%', paddingRight: "10%" }}>
         <Row>
             <Col className="d-flex align-items-middle flex-column align-items-stretch">
+                <div className="d-flex align-items-end mb-3">
+                    <Container className="text-center">
+                        <label htmlFor="Balance">Balance</label>
+                        <input className="form-control form-control-sm" id="Balance" type="number" placeholder="Balance" step="0.01" value={currentBalance} onChange={e => {
+                            const newValue = Number(e.target.value || '0');
+                            setCurrentBalance(newValue);
+                        }} />
+                    </Container>
+                    <Container className="text-center">
+                        <label htmlFor="setAside">Set Aside</label>
+                        <input className="form-control form-control-sm" id="setAside" type="number" placeholder="setAside" step="0.01" value={setAside} onChange={e => {
+                            const newValue = Number(e.target.value || '0');
+                            setSetAside(newValue);
+                        }} />
+                    </Container>
+                </div>
                 <Container className="text-center">
                     <h4>Rules</h4>
                 </Container>
@@ -45,10 +63,10 @@ export const PlanContainer = () => {
                     <h4 data-testid="transactions">Upcoming Transactions</h4>
                 </Container>
                 <div style={{ minHeight: 450 }}>
-                    <DayByDayContainer userid={userid} currentTime={currentTime} />
+                    <DayByDayContainer userid={userid} currentTime={currentTime} currentBalance={currentBalance} setAside={setAside} />
                 </div>
                 <hr />
-                <TransactionsContainer userid={userid} currentTime={currentTime} />
+                <TransactionsContainer userid={userid} currentTime={currentTime} currentBalance={currentBalance} setAside={setAside} />
             </Col>
         </Row>
     </Container>

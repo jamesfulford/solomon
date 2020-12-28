@@ -15,7 +15,7 @@ export function limitShownTransactions(transactions: IApiTransaction[], showEnd:
         .slice(0, 50);
 }
 
-export const TransactionsContainer = ({ userid, currentTime }: { userid: string, currentTime: number }) => {
+export const TransactionsContainer = ({ userid, currentTime, currentBalance, setAside }: { userid: string, currentTime: number, currentBalance: number, setAside: number }) => {
     const now = new Date(currentTime)
     const start = now;
     const queryEnd = new Date(now.getTime() + (120 * 24 * 60 * 60 * 1000)); // add 120 days
@@ -24,7 +24,7 @@ export const TransactionsContainer = ({ userid, currentTime }: { userid: string,
     const downloadQueryEnd = new Date(now.getTime() + (400 * 24 * 60 * 60 * 1000)); // add 400 days (13 months plus some buffer)
 
     const [{ data, loading, error }] = useAxios(
-        `${baseUrl}/api/transactions?userid=${userid}&startDate=${start.toISOString()}&endDate=${queryEnd.toISOString()}`
+        `${baseUrl}/api/transactions?userid=${userid}&startDate=${start.toISOString()}&endDate=${queryEnd.toISOString()}&currentBalance=${currentBalance}&setAside=${setAside}`
     )
     
     if (loading) {

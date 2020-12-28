@@ -61,7 +61,7 @@ enum ChartTab {
     UNCERTAINTY = "Uncertainty",
 }
 
-const DayByDayChart = ({ daybyday, chartType }: { daybyday: IDayByDayApi, chartType: ChartTab }) => {
+const DayByDayChart = ({ daybyday, chartType, setAside }: { daybyday: IDayByDayApi, chartType: ChartTab, setAside: number }) => {
     if (!daybyday.daybydays.length) {
         return <Container className="text-center">
             <p data-testid="daybyday-empty">Nothing's here...</p>
@@ -74,12 +74,14 @@ const DayByDayChart = ({ daybyday, chartType }: { daybyday: IDayByDayApi, chartT
                 [
                     'Day', 
                     'Balance', 
-                    'Disposable Income',
+                    'Disposable Income + Set Aside',
+                    'Set Aside',
                 ],
                 ...daybyday.daybydays.map(candle => [
                     candle.date,
                     Number(candle.balance.low),
-                    Number(candle.working_capital.low),
+                    Number(candle.working_capital.low) + setAside,
+                    setAside,
                 ])
             ]
             return <Chart
@@ -89,7 +91,7 @@ const DayByDayChart = ({ daybyday, chartType }: { daybyday: IDayByDayApi, chartT
                 data={disposableIncomeData}
                 options={{
                     ...options,
-                    colors: [black, green],
+                    colors: [black, green, red],
                 }}
             />
         case ChartTab.UNCERTAINTY:
@@ -116,7 +118,7 @@ const DayByDayChart = ({ daybyday, chartType }: { daybyday: IDayByDayApi, chartT
     }
 }
 
-export const DayByDayContainer = ({ userid, currentTime }: { userid: string, currentTime: number }) => {
+export const DayByDayContainer = ({ userid, currentTime, currentBalance, setAside }: { userid: string, currentTime: number, currentBalance: number, setAside: number }) => {
     const highLowEnabled = isHighLowEnabled(userid);
     const [chartType, setChartType] = useState<ChartTab>(ChartTab.DISPOSABLE_INCOME);
     const [queryRangeDays, setQueryRangeDays] = useState(90);
@@ -125,7 +127,7 @@ export const DayByDayContainer = ({ userid, currentTime }: { userid: string, cur
     const end = new Date(currentTime + (queryRangeDays * 24 * 60 * 60 * 1000))
     
     const [{ data, loading, error }] = useAxios(
-        `${baseUrl}/api/daybydays?${highLowEnabled ? 'highLow&' : ''}userid=${userid}&startDate=${start.toISOString()}&endDate=${end.toISOString()}`
+        `${baseUrl}/api/daybydays?${highLowEnabled ? 'highLow&' : ''}userid=${userid}&startDate=${start.toISOString()}&endDate=${end.toISOString()}&currentBalance=${currentBalance}&setAside=${setAside}`
     );
 
     if (loading) {
@@ -158,7 +160,7 @@ export const DayByDayContainer = ({ userid, currentTime }: { userid: string, cur
                 </a>
             </li>)}
         </ul>
-        <DayByDayChart chartType={chartType} daybyday={daybyday} /> 
+        <DayByDayChart chartType={chartType} daybyday={daybyday} setAside={setAside} /> 
         <div className="text-center">
             <button className="btn btn-outline-primary btn-sm" onClick={() => {setQueryRangeDays(90)}}>3m</button>&nbsp;
             <button className="btn btn-outline-primary btn-sm" onClick={() => {setQueryRangeDays(365)}}>1y</button>&nbsp;
