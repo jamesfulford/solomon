@@ -38,10 +38,10 @@ def generate_daybydays(context) -> List[Instance]:
     first_transaction.set_calculation("high_prediction", context.parameters.current) # starts at current
 
     # initial_working_capital is before the first transaction
-    # it will be the working_capital of the first transaction or the current value, whichever is lower.
+    # it will be the working_capital of the first transaction or the current working capital (current - set_aside), whichever is lower.
     # (current will be used in case of first transaction triggering working_capital growth,
     # so users don't assume they have money that they'll get when their first transaction comes in)
-    initial_working_capital = min(transactions[0].get_calculation("working_capital"), context.parameters.current)
+    initial_working_capital = min(transactions[0].get_calculation("working_capital"), context.parameters.current - context.parameters.set_aside)
     first_transaction.set_calculation("working_capital", initial_working_capital)
 
     transactions.insert(0, first_transaction)
