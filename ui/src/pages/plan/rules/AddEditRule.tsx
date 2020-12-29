@@ -57,6 +57,7 @@ function workingStateRRuleToString(rrule: WorkingState['rrule']): string {
         dtstart: rrule.dtstart ? new Date(rrule.dtstart) : undefined,
         until: rrule.until ? new Date(rrule.until) : undefined,
         bymonthday: freq === RRule.MONTHLY ? rrule.bymonthday : undefined,
+        byweekday: freq === RRule.WEEKLY ? rrule.byweekday : undefined,
     };
 
     return new RRule(rruleOptions).toString();
