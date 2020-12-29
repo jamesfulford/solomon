@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import RRule, { ByWeekday, Options } from 'rrule';
-import { IApiRule, IApiRuleMutate } from './IRule';
+import { IApiRuleMutate } from './IRule';
 import './AddEditRule.css'
 import { Field, FieldArray, FieldProps, Form, Formik } from 'formik';
 
@@ -135,9 +135,10 @@ export const AddEditRule = ({
     onUpdate: (rule: IApiRuleMutate) => Promise<void>,
     onDelete: () => Promise<void>,
     flags?: { isHighLowEnabled?: boolean },
-    rule?: IApiRule,
+    rule?: IApiRuleMutate,
 }) => {
     const [intentionToCopy, setIntentionToCopy] = useState(false);
+    const canUpdate = Boolean(rule && "id" in rule);
 
     async function submit(fields: WorkingState, { setSubmitting }: any) {
         let final: IApiRuleMutate;
@@ -148,7 +149,7 @@ export const AddEditRule = ({
             return;
         }
 
-        if (!rule || intentionToCopy) {
+        if (!canUpdate || intentionToCopy) {
             await onCreate(final);
         } else {
             await onUpdate(final);
@@ -346,14 +347,14 @@ export const AddEditRule = ({
             
                 <div className="d-flex flex-row-reverse justify-content-between">
                     <div className="d-flex flex-row-reverse align-items-center">
-                        <button className="btn btn-outline-primary btn-sm mb-2 mt-2">{(!rule || intentionToCopy) ? 'Create' : `Update ${rule.name}`}</button>
-                        {rule && <>
+                        <button className="btn btn-outline-primary btn-sm mb-2 mt-2">{(!canUpdate || intentionToCopy) ? 'Create' : `Update ${rule?.name}`}</button>
+                        {canUpdate && <>
                             <label className="mb-1 mr-3" htmlFor="intentionToCopy">Copy</label>
                             <input id="intentionToCopy" type="checkbox" className="mr-2" checked={intentionToCopy} onChange={e => setIntentionToCopy(e.target.checked)}></input>
                         </>}
                     </div>
 
-                    {rule && <button type="button" className="btn btn-outline-danger btn-sm mb-2 mt-2" onClick={e => {
+                    {canUpdate && <button type="button" className="btn btn-outline-danger btn-sm mb-2 mt-2" onClick={e => {
                         e.preventDefault();
                         e.stopPropagation();
                         onDelete();
