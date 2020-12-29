@@ -182,6 +182,8 @@ export const AddEditRule = ({
             
             const interval = props.getFieldMeta('rrule.interval').value as WorkingState["rrule"]["interval"] || 1;
 
+            const currentRRule = new RRule(RRule.parseString(workingStateRRuleToString(props.getFieldMeta("rrule").value as WorkingState["rrule"])));
+
             return <Form>
                 <div className="form-inline d-flex justify-content-between">
 
@@ -346,7 +348,20 @@ export const AddEditRule = ({
                         </>}
                     </Field>}
                 </div>
+
+                {/* Explaining input */}
+                <div className="alert alert-light p-0 m-0 mt-1 text-center">
+                    {(() => {
+                        // Next 2 days
+                        const [next, oneAfter] = currentRRule.all((d, index) => index <= 1)
+                            .map(d => d.toISOString().split("T")[0]);
+                        
+                        return <p className="m-0">Next is {next}, then {oneAfter}.</p>
+                    })()
+                    }
+                </div>
             
+                {/* Submission / Actions */}
                 <div className="d-flex flex-row-reverse justify-content-between">
                     <div className="d-flex flex-row-reverse align-items-center">
                         <button className="btn btn-outline-primary btn-sm mb-2 mt-2">{(!canUpdate || intentionToCopy) ? 'Create' : `Update ${rule?.name}`}</button>
@@ -363,7 +378,6 @@ export const AddEditRule = ({
                     }}>Delete</button>}
                 </div>
             </Form>
-
         }}
     </Formik>
 }
