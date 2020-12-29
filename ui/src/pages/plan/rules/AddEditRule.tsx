@@ -95,6 +95,7 @@ function convertWorkingStateToApiRuleMutate(fields: WorkingState, flags: any): I
 const defaultValues: WorkingState = {
     rrule: {
         freq: RRule.MONTHLY,
+        bymonthday: 1,
         interval: 1,
         dtstart: '',
         until: '',
