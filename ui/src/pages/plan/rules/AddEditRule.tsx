@@ -47,12 +47,16 @@ function workingStateRRuleToString(rrule: WorkingState['rrule']): string {
             dtstart: new Date(rrule.dtstart),
         }).toString();
     }
+    
+    // at this point it isn't "ONCE"
+    const freq = Number(rrule.freq) as Options["freq"];
 
     const rruleOptions = {
         ...rrule,
-        freq: rrule.freq as Options["freq"], // at this point it isn't "ONCE"
+        freq,
         dtstart: rrule.dtstart ? new Date(rrule.dtstart) : undefined,
         until: rrule.until ? new Date(rrule.until) : undefined,
+        bymonthday: freq === RRule.MONTHLY ? rrule.bymonthday : undefined,
     };
 
     return new RRule(rruleOptions).toString();
