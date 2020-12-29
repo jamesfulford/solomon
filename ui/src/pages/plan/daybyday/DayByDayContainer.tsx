@@ -159,12 +159,13 @@ export const DayByDayContainer = ({ userid, currentTime, currentBalance, setAsid
                 ChartTab.DISPOSABLE_INCOME,
                 ChartTab.UNCERTAINTY,
             ].map(chart => <li className="nav-item" key={chart}>
-                <a
+                <button
+                    type="button"
                     className={"nav-link " + (chart === chartType ? 'active' : '')}
                     onClick={() => setChartType(chart as any)}
                 >
                     {chart}
-                </a>
+                </button>
             </li>)}
         </ul>
         <DayByDayChart chartType={chartType} daybyday={daybyday} setAside={setAside} /> 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import RRule, { ByWeekday, Options } from 'rrule';
-import { IApiRuleMutate } from './IRule';
-import './CreateRuleForm.css'
+import { IApiRule, IApiRuleMutate } from './IRule';
+import './AddEditRule.css'
 import { Field, FieldArray, FieldProps, Form, Formik } from 'formik';
 
 
@@ -39,18 +39,8 @@ function workingStateRRuleToString(rrule: WorkingState['rrule']): string {
 
     // - TODO: yearly hebrew
 
-    // Yearly: need to know when first instance is to recur properly
-    if (rrule.freq == RRule.YEARLY && !rrule.dtstart) {
-        throw new Error("Start date is required");
-    }
-
-    // Intervals without start dates are ambiguous
-    if ((rrule.interval && rrule.interval > 1) && !rrule.dtstart) {
-        throw new Error("Start date is required");
-    }
-
     if (rrule.freq === "ONCE") {
-        if (!rrule.dtstart) throw new Error('Start date is required');
+        if (!rrule.dtstart) throw new Error('Start date is required'); // should never happen, enforced by UI `required` attribute
         return new RRule({
             freq: RRule.YEARLY,
             count: 1,
@@ -135,29 +125,35 @@ function ruleToWorkingState(rule?: IApiRuleMutate) {
 }
 
 export const AddEditRule = ({
-    onSubmit,
+    onCreate,
+    onUpdate,
+    onDelete,
     flags = {},
     rule
 }: {
-    onSubmit: (rule: IApiRuleMutate) => Promise<void>,
+    onCreate: (rule: IApiRuleMutate) => Promise<void>,
+    onUpdate: (rule: IApiRuleMutate) => Promise<void>,
+    onDelete: () => Promise<void>,
     flags?: { isHighLowEnabled?: boolean },
-    rule?: IApiRuleMutate,
+    rule?: IApiRule,
 }) => {
+    const [intentionToCopy, setIntentionToCopy] = useState(false);
+
     async function submit(fields: WorkingState, { setSubmitting }: any) {
         let final: IApiRuleMutate;
         try {
             final = convertWorkingStateToApiRuleMutate(fields, flags);
         } catch (e) {
             console.error(e)
-            alert("Error");
             return;
         }
 
-        // debugging
-        alert(JSON.stringify(final));
-        console.log(final)
+        if (!rule || intentionToCopy) {
+            await onCreate(final);
+        } else {
+            await onUpdate(final);
+        }
 
-        await onSubmit(final);
         setSubmitting(false);
     }
 
@@ -166,7 +162,7 @@ export const AddEditRule = ({
         HIGH_MID_LOW = "HIGH_MID_LOW",
     }
 
-    // TODO: work out UX for different value inputs
+    // TODO: fix editing for this, decide on good UX
     const [valueInputMode, setValueInputMode] = useState<ValueInputMode>(ValueInputMode.VALUE);
 
     const initialValues = ruleToWorkingState(rule);
@@ -206,10 +202,10 @@ export const AddEditRule = ({
                     </Field>}
 
                     { flags.isHighLowEnabled && <div>
-                        <a className="btn btn-link" onClick={() => setValueInputMode(x => {
+                        <button type="button" className="btn btn-link" onClick={() => setValueInputMode(x => {
                             // Toggle
                             return x === ValueInputMode.VALUE ? ValueInputMode.HIGH_MID_LOW : ValueInputMode.VALUE;
-                        })}>I'm uncertain how much this will be</a>
+                        })}>I'm uncertain how much this will be</button>
 
                         {(valueInputMode === ValueInputMode.HIGH_MID_LOW) && <>
                             <Field name="lowvalue">
@@ -298,7 +294,8 @@ export const AddEditRule = ({
                                     { rruleday: RRule.SA.weekday, displayday: "S" },
                                 ];
                                 return <>
-                                    {days.map(({ rruleday, displayday }) => <a 
+                                    {days.map(({ rruleday, displayday }) => <button
+                                        type="button"
                                         className={"btn btn-sm " + (byweekday.includes(rruleday) ? 'btn-primary' : 'btn-outline-primary')}
                                         data-dayofweek={rruleday}
                                         key={rruleday.toString()}
@@ -311,7 +308,7 @@ export const AddEditRule = ({
                                             arrayHelpers.push(rruleday);
                                         }}>
                                         {displayday}
-                                    </a>)}
+                                    </button>)}
                                 </>
                             }}
                         </FieldArray>
@@ -347,8 +344,20 @@ export const AddEditRule = ({
                     </Field>}
                 </div>
             
-                <div className="d-flex flex-row-reverse">
-                    <button className="btn btn-outline-primary btn-sm mb-2 mt-2">Submit</button>
+                <div className="d-flex flex-row-reverse justify-content-between">
+                    <div className="d-flex flex-row-reverse align-items-center">
+                        <button className="btn btn-outline-primary btn-sm mb-2 mt-2">{(!rule || intentionToCopy) ? 'Create' : `Update ${rule.name}`}</button>
+                        {rule && <>
+                            <label className="mb-1 mr-3" htmlFor="intentionToCopy">Copy</label>
+                            <input id="intentionToCopy" type="checkbox" className="mr-2" checked={intentionToCopy} onChange={e => setIntentionToCopy(e.target.checked)}></input>
+                        </>}
+                    </div>
+
+                    {rule && <button type="button" className="btn btn-outline-danger btn-sm mb-2 mt-2" onClick={e => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onDelete();
+                    }}>Delete</button>}
                 </div>
             </Form>
 
