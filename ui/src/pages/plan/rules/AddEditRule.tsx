@@ -306,8 +306,9 @@ export const AddEditRule = ({
                                             e.stopPropagation();
                                             if (byweekday.includes(rruleday)) {
                                                 arrayHelpers.remove(byweekday.indexOf(rruleday));
+                                            } else {
+                                                arrayHelpers.push(rruleday);
                                             }
-                                            arrayHelpers.push(rruleday);
                                         }}>
                                         {displayday}
                                     </button>)}
