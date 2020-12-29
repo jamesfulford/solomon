@@ -1,0 +1,357 @@
+import React, { useState } from 'react';
+import RRule, { ByWeekday, Options } from 'rrule';
+import { IApiRuleMutate } from './IRule';
+import './CreateRuleForm.css'
+import { Field, FieldArray, FieldProps, Form, Formik } from 'formik';
+
+
+type WorkingState = Omit<
+    Omit<
+        IApiRuleMutate,
+        'rrule'
+    >, 
+    'value'
+> & {
+    // omit overrides
+    rrule: Partial<
+        Omit<Omit<Omit<
+            Options,
+            'freq'>,
+            'dtstart'>,
+            'until'> 
+        & {
+        freq: Options['freq'] | 'ONCE';
+
+        dtstart?: string;
+        until?: string;
+    }>,
+    value: string,
+
+    // working state needed in submission
+    lowvalue: string,
+    highvalue: string,
+};
+
+function workingStateRRuleToString(rrule: WorkingState['rrule']): string {
+    // normally goes to RRule package, but:
+    // - freq === "ONCE"
+    // - dtstart and until translate
+
+    // - TODO: yearly hebrew
+
+    // Yearly: need to know when first instance is to recur properly
+    if (rrule.freq == RRule.YEARLY && !rrule.dtstart) {
+        throw new Error("Start date is required");
+    }
+
+    // Intervals without start dates are ambiguous
+    if ((rrule.interval && rrule.interval > 1) && !rrule.dtstart) {
+        throw new Error("Start date is required");
+    }
+
+    if (rrule.freq === "ONCE") {
+        if (!rrule.dtstart) throw new Error('Start date is required');
+        return new RRule({
+            freq: RRule.YEARLY,
+            count: 1,
+            dtstart: new Date(rrule.dtstart),
+        }).toString();
+    }
+
+    const rruleOptions = {
+        ...rrule,
+        freq: rrule.freq as Options["freq"], // at this point it isn't "ONCE"
+        dtstart: rrule.dtstart ? new Date(rrule.dtstart) : undefined,
+        until: rrule.until ? new Date(rrule.until) : undefined,
+    };
+
+    return new RRule(rruleOptions).toString();
+}
+
+function stringToWorkingStateRRule(rrulestring: string): WorkingState['rrule'] {
+    // inverse of workingStateRRuleToString, for editing
+    
+    const parsedOptions = RRule.fromString(rrulestring).options;
+    const dtstart = parsedOptions.dtstart?.toISOString().split("T")[0];
+    const until = parsedOptions.until?.toISOString().split("T")[0];
+    return {
+        ...parsedOptions,
+        // TODO: change UI listing to have same logic
+        freq: parsedOptions.count === 1 ? 'ONCE' : parsedOptions.freq,
+
+        dtstart,
+        until,
+    };
+}
+
+
+function convertWorkingStateToApiRuleMutate(fields: WorkingState, flags: any): IApiRuleMutate {
+
+    return {
+        name: fields.name,
+        value: Number(fields.value),
+
+        rrule: workingStateRRuleToString(fields.rrule),
+
+        labels: flags.isHighLowEnabled ? {
+            ...fields.labels,
+            'uncertainty': fields.lowvalue || fields.highvalue,
+            'highUncertainty': fields.highvalue ? Number(fields.highvalue) : Number(fields.value),
+            'lowUncertainty': fields.lowvalue ? Number(fields.lowvalue) : Number(fields.value),
+        }: fields.labels,
+    };
+}
+
+const defaultValues: WorkingState = {
+    rrule: {
+        freq: RRule.MONTHLY,
+        interval: 1,
+        dtstart: '',
+        until: '',
+    },
+
+    lowvalue: '',
+    value: '', // input=number is a pain for users
+    highvalue: '',
+
+    name: '',
+    labels: {},
+};
+
+function ruleToWorkingState(rule?: IApiRuleMutate) {
+    if (!rule) {
+        return defaultValues;
+    }
+
+    return {
+        rrule: stringToWorkingStateRRule(rule.rrule),
+        name: rule.name,
+        labels: rule.labels,
+        value: String(rule.value),
+
+        lowvalue: String(rule?.labels?.lowUncertainty || ''),
+        highvalue: String(rule?.labels?.highUncertainty || ''),
+    }
+}
+
+export const AddEditRule = ({
+    onSubmit,
+    flags = {},
+    rule
+}: {
+    onSubmit: (rule: IApiRuleMutate) => Promise<void>,
+    flags?: { isHighLowEnabled?: boolean },
+    rule?: IApiRuleMutate,
+}) => {
+    async function submit(fields: WorkingState, { setSubmitting }: any) {
+        let final: IApiRuleMutate;
+        try {
+            final = convertWorkingStateToApiRuleMutate(fields, flags);
+        } catch (e) {
+            console.error(e)
+            alert("Error");
+            return;
+        }
+
+        // debugging
+        alert(JSON.stringify(final));
+        console.log(final)
+
+        await onSubmit(final);
+        setSubmitting(false);
+    }
+
+    enum ValueInputMode {
+        VALUE = 'VALUE',
+        HIGH_MID_LOW = "HIGH_MID_LOW",
+    }
+
+    // TODO: work out UX for different value inputs
+    const [valueInputMode, setValueInputMode] = useState<ValueInputMode>(ValueInputMode.VALUE);
+
+    const initialValues = ruleToWorkingState(rule);
+
+    return <Formik initialValues={initialValues} onSubmit={submit}>
+        {(props) => {
+            const _freq = props.getFieldMeta('rrule.freq').value as WorkingState["rrule"]["freq"];
+            const isOnce = _freq === "ONCE";
+            // Sometimes its a string, sometimes its a number
+            const freq = isOnce ? _freq : Number(_freq);
+
+            const byweekday = (
+                props.getFieldMeta('rrule.byweekday').value as WorkingState["rrule"]["byweekday"]
+                || []) as ByWeekday[];
+            
+            const interval = props.getFieldMeta('rrule.interval').value as WorkingState["rrule"]["interval"] || 1;
+
+            return <Form>
+                <div className="form-inline d-flex justify-content-between">
+
+                    <Field name="name">
+                        {({
+                            field,
+                        }: FieldProps) => <>
+                            <label htmlFor="Name" className="sr-only">Rule name</label>
+                            <input className="form-control form-control-sm" id="Name" placeholder="Rule name" type="text" {...field} />
+                        </>}
+                    </Field>
+
+                    {valueInputMode === ValueInputMode.VALUE && <Field name="value">
+                        {({
+                            field,
+                        }: FieldProps) => <>
+                            <label htmlFor="Value" className="sr-only">Value</label>
+                            <input className="form-control form-control-sm" id="Value" placeholder="Value $" type="text" pattern="-?[0-9]+\.?[0-9]{0,2}?" {...field} />
+                        </>}
+                    </Field>}
+
+                    { flags.isHighLowEnabled && <div>
+                        <a className="btn btn-link" onClick={() => setValueInputMode(x => {
+                            // Toggle
+                            return x === ValueInputMode.VALUE ? ValueInputMode.HIGH_MID_LOW : ValueInputMode.VALUE;
+                        })}>I'm uncertain how much this will be</a>
+
+                        {(valueInputMode === ValueInputMode.HIGH_MID_LOW) && <>
+                            <Field name="lowvalue">
+                                {({
+                                    field,
+                                }: FieldProps) => <>
+                                    <label htmlFor="LowValue" className="sr-only">Bad (25%) Case Value</label>
+                                    <input className="form-control form-control-sm" id="LowValue" placeholder="Bad (25%) Case Value $" type="text" pattern="-?[0-9]+\.?[0-9]{0,2}?" {...field} />
+                                </>}
+                            </Field>
+
+                            <Field name="value">
+                                {({
+                                    field,
+                                }: FieldProps) => <>
+                                    <label htmlFor="Value" className="sr-only">Expected Case Value</label>
+                                    <input className="form-control form-control-sm" id="Value" placeholder="Expected Case Value $" type="text" pattern="-?[0-9]+\.?[0-9]{0,2}?" {...field} />
+                                </>}
+                            </Field>
+
+                            <Field name="highvalue">
+                                {({
+                                    field,
+                                }: FieldProps) => <>
+                                    <label htmlFor="HighValue" className="sr-only">Good (75%) Case Value</label>
+                                    <input className="form-control form-control-sm" id="HighValue" placeholder="Good (75%) Case Value $" type="text" pattern="-?[0-9]+\.?[0-9]{0,2}?" {...field} />
+                                </>}
+                            </Field>
+                        </>}
+                    </div>}
+                </div>
+                
+                {/* Recurrence-rule specific logics */}
+                <div className="form-inline mt-2 d-flex justify-content-between">
+                    <div>
+
+                        <Field name="rrule.freq">
+                            {({
+                                field,
+                            }: FieldProps) => <>
+                                <label htmlFor="Frequency" className="sr-only">Frequency</label>   
+                                <select className="form-control form-control-sm pl-1 pr-1" id="Frequency" {...field}>
+                                    <option value={RRule.WEEKLY}>Week{interval > 1 && 's'}</option>
+                                    <option value={RRule.MONTHLY}>Month</option>
+                                    <option value={RRule.YEARLY}>Year</option>
+                                    <option value={'ONCE'}>Once</option>
+                                </select>
+                            </>}
+                        </Field>
+
+                        {!isOnce && <Field name="rrule.interval">
+                            {({
+                                field,
+                            }: FieldProps) => <>
+                                <label htmlFor="Interval" className="sr-only">Interval</label>
+                                <input className="form-control form-control-sm" style={{ width: 48 }} id="Interval" placeholder="Interval" type="number" min="1" {...field} />
+                            </>}
+                        </Field>}
+
+                    </div>
+                    
+                    {/* Monthly day-of-month selector */}
+                    {freq === RRule.MONTHLY && <Field name="rrule.bymonthday">
+                        {({
+                            field,
+                        }: FieldProps) => <>
+                            <label htmlFor="bymonthday" className="sr-only">Day of month</label>
+                            <input className="form-control form-control-sm" id="bymonthday" placeholder="Day" style={{ width: 64 }}
+                                type="number" min="1" max="31" required
+                                {...field}
+                                />
+                        </>}
+                    </Field>}
+
+
+                    {(freq === RRule.WEEKLY) && <div role="group" className="btn-group" aria-label="Days of Week" data-testid="dayofweekcontrol">
+                        <FieldArray name="rrule.byweekday">
+                            {(arrayHelpers) => {
+                                const days = [
+                                    { rruleday: RRule.SU.weekday, displayday: "S" },
+                                    { rruleday: RRule.MO.weekday, displayday: "M" },
+                                    { rruleday: RRule.TU.weekday, displayday: "T" },
+                                    { rruleday: RRule.WE.weekday, displayday: "W" },
+                                    { rruleday: RRule.TH.weekday, displayday: "T" },
+                                    { rruleday: RRule.FR.weekday, displayday: "F" },
+                                    { rruleday: RRule.SA.weekday, displayday: "S" },
+                                ];
+                                return <>
+                                    {days.map(({ rruleday, displayday }) => <a 
+                                        className={"btn btn-sm " + (byweekday.includes(rruleday) ? 'btn-primary' : 'btn-outline-primary')}
+                                        data-dayofweek={rruleday}
+                                        key={rruleday.toString()}
+                                        onClick={e => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            if (byweekday.includes(rruleday)) {
+                                                arrayHelpers.remove(byweekday.indexOf(rruleday));
+                                            }
+                                            arrayHelpers.push(rruleday);
+                                        }}>
+                                        {displayday}
+                                    </a>)}
+                                </>
+                            }}
+                        </FieldArray>
+                    </div>}
+                </div>
+
+                <div className="form-inline mt-2 d-flex justify-content-between">
+                    {/* Start Date */}
+                    <Field name="rrule.dtstart">
+                        {({
+                            field,
+                        }: FieldProps) => <>
+                            <label htmlFor="Start" className="sr-only">Start</label>
+                            <input
+                                className="form-control form-control-sm" placeholder="Start Date" id="Start"
+                                type="date" required={
+                                    (interval > 1) || isOnce || freq === RRule.YEARLY
+                                }
+                                style={{ width: 150 }}
+                                {...field} />
+                        </>}
+                    </Field>
+
+                    {/* End Date */}
+                    {!isOnce && <Field name="rrule.until">
+                        {({ field }: FieldProps) => <>
+                            <label htmlFor="End" className="sr-only">End:</label>
+                            <input
+                                className="form-control form-control-sm" placeholder="End Date" id="End"
+                                style={{ width: 150 }}
+                                type="date" {...field} />
+                        </>}
+                    </Field>}
+                </div>
+            
+                <div className="d-flex flex-row-reverse">
+                    <button className="btn btn-outline-primary btn-sm mb-2 mt-2">Submit</button>
+                </div>
+            </Form>
+
+        }}
+    </Formik>
+}

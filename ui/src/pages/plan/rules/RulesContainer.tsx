@@ -8,6 +8,7 @@ import axios from 'axios';
 import sortBy from 'lodash/sortBy';
 import Container from 'react-bootstrap/Container';
 import { isHighLowEnabled } from '../../../flags';
+import { AddEditRule } from './AddEditRule';
 
 
 // Modal Interactions
@@ -27,11 +28,11 @@ export const RulesContainer = ({ userid, onRefresh = () => {} }: { userid: strin
     }, [refetch, onRefresh])
 
     const createNewRule = useCallback((rule: IApiRuleMutate) => {
-        axios.post(`${baseUrl}/api/rules?userid=${userid}`, rule)
+        return axios.post(`${baseUrl}/api/rules?userid=${userid}`, rule)
             .then((response) => {
                 console.log('Created rule', response.data);
                 triggerRefresh();
-            })
+            });
     }, [triggerRefresh, userid]);
     
     const showModal = useCallback((id: string, rule: IApiRule) => {
@@ -128,6 +129,8 @@ export const RulesContainer = ({ userid, onRefresh = () => {} }: { userid: strin
     
     return <>
         <CreateForm onSubmit={createNewRule} onFailedValidation={onFailedValidation} flags={flags} />
+        <hr />
+        <AddEditRule onSubmit={createNewRule} flags={flags} />
         
         {isShown ? (
                 <Modal
