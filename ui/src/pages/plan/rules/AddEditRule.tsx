@@ -198,7 +198,7 @@ export const AddEditRule = ({
                             field,
                         }: FieldProps) => <>
                             <label htmlFor="Name" className="sr-only">Rule name</label>
-                            <input className="form-control form-control-sm" id="Name" placeholder="Rule name" type="text" {...field} />
+                            <input className="form-control form-control-sm" id="Name" placeholder="Rule name" type="text" required maxLength={50} {...field} />
                         </>}
                     </Field>
 
@@ -207,7 +207,7 @@ export const AddEditRule = ({
                             field,
                         }: FieldProps) => <>
                             <label htmlFor="Value" className="sr-only">Value</label>
-                            <input className="form-control form-control-sm" id="Value" placeholder="Value $" type="text" pattern="-?[0-9]+\.?[0-9]{0,2}?" {...field} />
+                            <input className="form-control form-control-sm" id="Value" placeholder="Value $" type="text" maxLength={19} required pattern="-?[1-9][0-9]*\.?[0-9]{0,2}" {...field} />
                         </>}
                     </Field>}
 
