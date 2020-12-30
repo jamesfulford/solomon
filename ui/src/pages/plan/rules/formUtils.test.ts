@@ -1,5 +1,6 @@
 import { render, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import RRule, { Frequency } from 'rrule';
 
 export function setName(formElement: any, name: string) {
     const nameInput = formElement.getByLabelText(/Name/i);
@@ -13,7 +14,7 @@ export function setValue(formElement: any, value: number) {
     fireEvent.change(valueInput, { target: { value: String(value) }});
 }
 
-export function selectFrequency(formElement: any, frequency: string) {
+export function selectFrequency(formElement: any, frequency: Frequency) {
     const frequencyInput = formElement.getByLabelText(/Frequency/i);
     expect(frequencyInput).toBeInTheDocument();
     fireEvent.change(frequencyInput, { target: { value: frequency }});
@@ -48,7 +49,7 @@ export function clearStartDate(formElement: any) {
 }
 
 export function submit(formElement: any) {
-    const submitButton = formElement.getByRole("button", { name: /Submit/i });
+    const submitButton = formElement.getByRole("button", { name: /Create/i });
     expect(submitButton).toBeInTheDocument();
     fireEvent.click(submitButton);
 }
