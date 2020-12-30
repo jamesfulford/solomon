@@ -151,14 +151,18 @@ export const DayByDayContainer = ({ userid, currentTime, currentBalance, setAsid
         </div>
     }
 
-    const daybyday = data
+    const daybyday = data;
+
+    const tabs = [
+        ChartTab.DISPOSABLE_INCOME
+    ];
+    if (isHighLowEnabled(userid)) {
+        tabs.push(ChartTab.UNCERTAINTY);
+    }
 
     return <>
         <ul className="nav nav-tabs">
-            {[
-                ChartTab.DISPOSABLE_INCOME,
-                ChartTab.UNCERTAINTY,
-            ].map(chart => <li className="nav-item" key={chart}>
+            {tabs.map(chart => <li className="nav-item" key={chart}>
                 <button
                     type="button"
                     className={"nav-link " + (chart === chartType ? 'active' : '')}
