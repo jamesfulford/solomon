@@ -61,6 +61,13 @@ enum ChartTab {
     UNCERTAINTY = "Uncertainty",
 }
 
+// Chart Wishlist
+// - explain moves
+// - highlight saving for one-time events (how long does it take?)
+// - disposable income separate from set_aside in tooltip
+// - better x axis markers
+// - less coloring overlaps
+// - should not be a line chart, should be "steppy" like _| instead of / between points (still same as before)
 const DayByDayChart = ({ daybyday, chartType, setAside }: { daybyday: IDayByDayApi, chartType: ChartTab, setAside: number }) => {
     if (!daybyday.daybydays.length) {
         return <Container className="text-center">
@@ -144,20 +151,25 @@ export const DayByDayContainer = ({ userid, currentTime, currentBalance, setAsid
         </div>
     }
 
-    const daybyday = data
+    const daybyday = data;
+
+    const tabs = [
+        ChartTab.DISPOSABLE_INCOME
+    ];
+    if (isHighLowEnabled(userid)) {
+        tabs.push(ChartTab.UNCERTAINTY);
+    }
 
     return <>
         <ul className="nav nav-tabs">
-            {[
-                ChartTab.DISPOSABLE_INCOME,
-                ChartTab.UNCERTAINTY,
-            ].map(chart => <li className="nav-item" key={chart}>
-                <a
+            {tabs.map(chart => <li className="nav-item" key={chart}>
+                <button
+                    type="button"
                     className={"nav-link " + (chart === chartType ? 'active' : '')}
                     onClick={() => setChartType(chart as any)}
                 >
                     {chart}
-                </a>
+                </button>
             </li>)}
         </ul>
         <DayByDayChart chartType={chartType} daybyday={daybyday} setAside={setAside} /> 

@@ -19,8 +19,8 @@ export const PlanContainer = () => {
 
     const { isAuthenticated, isLoading, loginWithRedirect, user } = useAuth0();
     const token = useToken();
-    const [currentBalance, setCurrentBalance] = useState(0);
-    const [setAside, setSetAside] = useState(0);
+    const [currentBalance, setCurrentBalance] = useState('');
+    const [setAside, setSetAside] = useState('');
     
     if (!isLoading && !isAuthenticated) {
         return <Container className="justify-content-middle">
@@ -39,18 +39,20 @@ export const PlanContainer = () => {
             <Col className="d-flex align-items-middle flex-column align-items-stretch">
                 <div className="d-flex align-items-end mb-3">
                     <Container className="text-center">
-                        <label htmlFor="Balance">Balance</label>
-                        <input className="form-control form-control-sm" id="Balance" type="number" placeholder="Balance" step="0.01" value={currentBalance} onChange={e => {
-                            const newValue = Number(e.target.value || '0');
-                            setCurrentBalance(newValue);
-                        }} />
-                    </Container>
-                    <Container className="text-center">
-                        <label htmlFor="setAside">Set Aside</label>
-                        <input className="form-control form-control-sm" id="setAside" type="number" placeholder="setAside" step="0.01" value={setAside} onChange={e => {
-                            const newValue = Number(e.target.value || '0');
-                            setSetAside(newValue);
-                        }} />
+                        <h4>Parameters</h4>
+                        <label htmlFor="Balance" className="sr-only">Balance</label>
+                        <input className="form-control form-control-sm mb-2" id="Balance" type="text" placeholder="Balance" value={currentBalance} 
+                            maxLength={19} required pattern="-?[1-9][0-9]*\.?[0-9]{0,2}"
+                            onChange={e => {
+                                setCurrentBalance(e.target.value);
+                            }} />
+
+                        <label htmlFor="setAside" className="sr-only">Set Aside</label>
+                        <input className="form-control form-control-sm" id="setAside" type="text" placeholder="Set Aside" step="0.01" value={setAside}
+                            maxLength={19} required pattern="-?[1-9][0-9]*\.?[0-9]{0,2}"
+                            onChange={e => {
+                                setSetAside(e.target.value);
+                            }} />
                     </Container>
                 </div>
                 <Container className="text-center">
@@ -63,10 +65,10 @@ export const PlanContainer = () => {
                     <h4 data-testid="transactions">Upcoming Transactions</h4>
                 </Container>
                 <div style={{ minHeight: 450 }}>
-                    <DayByDayContainer userid={userid} currentTime={currentTime} currentBalance={currentBalance} setAside={setAside} />
+                    <DayByDayContainer userid={userid} currentTime={currentTime} currentBalance={Number(currentBalance)} setAside={Number(setAside)} />
                 </div>
                 <hr />
-                <TransactionsContainer userid={userid} currentTime={currentTime} currentBalance={currentBalance} setAside={setAside} />
+                <TransactionsContainer userid={userid} currentTime={currentTime} currentBalance={Number(currentBalance)} setAside={Number(setAside)} />
             </Col>
         </Row>
     </Container>
