@@ -41,11 +41,10 @@ function workingStateRRuleToString(rrule: WorkingState['rrule']): string {
     // - TODO: yearly hebrew
 
     if (rrule.freq === "ONCE") {
-        if (!rrule.dtstart) throw new Error('Start date is required'); // should never happen, enforced by UI `required` attribute
         return new RRule({
             freq: RRule.YEARLY,
             count: 1,
-            dtstart: new Date(rrule.dtstart),
+            dtstart: rrule.dtstart ? new Date(rrule.dtstart) : undefined,
         }).toString();
     }
     
@@ -72,7 +71,6 @@ function stringToWorkingStateRRule(rrulestring: string): WorkingState['rrule'] {
     const until = parsedOptions.until?.toISOString().split("T")[0];
     return {
         ...parsedOptions,
-        // TODO: change UI listing to have same logic
         freq: parsedOptions.count === 1 ? 'ONCE' : parsedOptions.freq,
 
         dtstart,
@@ -361,11 +359,11 @@ export const AddEditRule = ({
                         const _value = props.getFieldMeta("value").value as WorkingState["value"];
                         const value = Number(_value) || 0;
                         return <p className="m-0">
-                            {(value && Number.isFinite(value)) ? <Currency value={value} /> : 'Occurs'} {currentRRule.toText()}
+                            {(value && Number.isFinite(value)) ? <Currency value={value} /> : 'Occurs'} {isOnce ? `once on ${currentRRule.all()[0].toISOString().split('T')[0]}` : currentRRule.toText()}
                         </p>
                     })()}
                     
-                    {(() => {
+                    {!isOnce && (() => {
                         // Next 2 days
                         const [next, oneAfter] = currentRRule.all((d, index) => index <= 1)
                             .map(d => d.toISOString().split("T")[0]);

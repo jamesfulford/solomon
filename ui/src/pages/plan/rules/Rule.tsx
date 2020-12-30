@@ -7,6 +7,9 @@ import { Currency } from '../../../components/currency/Currency';
 function getRRuleDisplayString(rruleString: string): string {
     try {
         const rrule = RRule.fromString(rruleString);
+        if (rrule.origOptions.count === 1) {
+            return 'once';
+        }
         return rrule.toText();
     } catch (e) {
         return "(Oops, looks like an invalid recurrence rule)"
