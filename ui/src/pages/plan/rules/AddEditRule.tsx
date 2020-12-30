@@ -3,6 +3,7 @@ import RRule, { ByWeekday, Options } from 'rrule';
 import { IApiRuleMutate } from './IRule';
 import './AddEditRule.css'
 import { Field, FieldArray, FieldProps, Form, Formik } from 'formik';
+import { Currency } from '../../../components/currency/Currency';
 
 
 type WorkingState = Omit<
@@ -357,18 +358,25 @@ export const AddEditRule = ({
                 {/* Explaining input */}
                 <div className="alert alert-light p-0 m-0 mt-1 text-center">
                     {(() => {
+                        const _value = props.getFieldMeta("value").value as WorkingState["value"];
+                        const value = Number(_value) || 0;
+                        return <p className="m-0">
+                            {(value && Number.isFinite(value)) ? <Currency value={value} /> : 'Occurs'} {currentRRule.toText()}
+                        </p>
+                    })()}
+                    
+                    {(() => {
                         // Next 2 days
                         const [next, oneAfter] = currentRRule.all((d, index) => index <= 1)
                             .map(d => d.toISOString().split("T")[0]);
                         
                         return <p className="m-0">Next is {next}, then {oneAfter}.</p>
-                    })()
-                    }
+                    })()}
                 </div>
             
                 {/* Submission / Actions */}
                 <div className="d-flex flex-row-reverse justify-content-between">
-                    <div className="d-flex flex-row-reverse align-items-center">
+                    <div className="d-flex flex-row-reverse align-items-center" style={{ overflow: 'clip' }}>
                         <button className="btn btn-outline-primary btn-sm mb-2 mt-2">{(!canUpdate || intentionToCopy) ? 'Create' : `Update ${rule?.name}`}</button>
                         {canUpdate && <>
                             <label className="mb-1 mr-3" htmlFor="intentionToCopy">Copy</label>
