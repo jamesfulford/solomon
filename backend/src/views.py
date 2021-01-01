@@ -163,7 +163,7 @@ def hello_world(request):
 #
 
 
-def make_execution_parameters(request) -> ExecutionParameters:
+def make_execution_parameters(request, rules) -> ExecutionParameters:
     """
     Extracts execution parameters from request
     """
@@ -173,6 +173,7 @@ def make_execution_parameters(request) -> ExecutionParameters:
     else:
         start = date.today()
     
+    # end
     end = request.GET.get('endDate', '')
     if end:
         end = dateutil.parser.parse(end).date()
@@ -237,14 +238,19 @@ def get_rules_from_database(userid: str) -> ExecutionRules:
 def process_transactions(request, decoded):
     userid = decoded["sub"]
 
-    parameters = make_execution_parameters(request)
     rules = get_rules_from_database(userid)
+    parameters = make_execution_parameters(request, rules)
+    context = ExecutionContext(parameters, rules)
+    context.assert_valid()  # because we might calculate a new end date
 
     # Calculate transactions
-    transactions = get_transactions_up_to(ExecutionContext(parameters, rules))
+    transactions = get_transactions_up_to(context)
     results = list(map(lambda i: i.serialize(), transactions))
 
-    return Response({ "transactions": results })
+    return Response({
+        "transactions": results,
+        "params": context.serialize(),
+    })
 
 
 @use_global_exception_handler
@@ -254,13 +260,18 @@ def process_daybydays(request, decoded):
     userid = decoded["sub"]
 
     # Pull out parameters
-    parameters = make_execution_parameters(request)
     rules = get_rules_from_database(userid)
+    parameters = make_execution_parameters(request, rules)
+    context = ExecutionContext(parameters, rules)
+    context.assert_valid()  # because we might calculate a new end date
 
     # Calculate daybydays
-    daybydays = generate_daybydays(ExecutionContext(parameters, rules))
+    daybydays = generate_daybydays(context)
 
-    return Response({ "daybydays": daybydays })
+    return Response({
+        "daybydays": daybydays,
+        "params": context.serialize(),
+    })
 
 
 @use_global_exception_handler
@@ -268,10 +279,12 @@ def process_daybydays(request, decoded):
 @requires_scope("transactions:read")
 def export_transactions(request, decoded):
     userid = decoded["sub"]
-    parameters = make_execution_parameters(request)
     rules = get_rules_from_database(userid)
+    parameters = make_execution_parameters(request, rules)
+    context = ExecutionContext(parameters, rules)
+    context.assert_valid()  # because we might calculate a new end date
     
-    transactions = get_transactions_up_to(ExecutionContext(parameters, rules))
+    transactions = get_transactions_up_to(context)
     results = list(map(lambda i: i.serialize(), transactions))
 
     response = HttpResponse(content_type='text/csv')

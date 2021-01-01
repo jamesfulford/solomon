@@ -13,10 +13,10 @@ describe('transactions container', () => {
     function setUp(daybydays?: object, loading: boolean = false, error: boolean = false) {
         mockRefetch = jest.fn();
         require('axios-hooks').default.mockReturnValue([
-            { data: { daybydays }, loading, error },
+            { data: { daybydays, params: { minimumEndDate: '1971-01-01' } }, loading, error },
             mockRefetch
         ]);
-        element = render(<DayByDayContainer currentTime={1} />);
+        element = render(<DayByDayContainer currentTime={1} setAside={0} currentBalance={0} userid={""} />);
         axiosDelete = require('axios').default.delete
     }
 

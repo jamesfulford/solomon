@@ -160,6 +160,9 @@ export const DayByDayContainer = ({ userid, currentTime, currentBalance, setAsid
         tabs.push(ChartTab.UNCERTAINTY);
     }
 
+    const computedEndDate = new Date(daybyday.params.minimumEndDate);
+    const computedDurationDays = Math.round((computedEndDate.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
+
     return <>
         <ul className="nav nav-tabs">
             {tabs.map(chart => <li className="nav-item" key={chart}>
@@ -174,13 +177,20 @@ export const DayByDayContainer = ({ userid, currentTime, currentBalance, setAsid
         </ul>
         <DayByDayChart chartType={chartType} daybyday={daybyday} setAside={setAside} /> 
         <div className="text-center">
-            <button className="btn btn-outline-primary btn-sm" onClick={() => {setQueryRangeDays(90)}}>3m</button>&nbsp;
-            <button className="btn btn-outline-primary btn-sm" onClick={() => {setQueryRangeDays(365)}}>1y</button>&nbsp;
-            <button className="btn btn-outline-primary btn-sm" onClick={() => {setQueryRangeDays(365 * 2)}}>2y</button>&nbsp;
-            <button className="btn btn-outline-danger btn-sm" title="May not be as accurate, use with caution" onClick={() => {setQueryRangeDays(365 * 5)}}>5y</button>&nbsp;
-            <button className="btn btn-outline-danger btn-sm" title="May not be as accurate, use with caution" onClick={() => {setQueryRangeDays(365 * 10)}}>10y</button>&nbsp;
-            <button className="btn btn-outline-danger btn-sm" title="May not be as accurate, use with caution" onClick={() => {setQueryRangeDays(365 * 20)}}>20y</button>&nbsp;
-            <button className="btn btn-outline-danger btn-sm" title="May not be as accurate, use with caution" onClick={() => {setQueryRangeDays(365 * 30)}}>30y</button>&nbsp;
+            <button className="btn btn-outline-primary btn-sm mr-1" onClick={() => {setQueryRangeDays(Math.min(90, computedDurationDays))}}>Default</button>
+            {[
+                { days: 365, display: '1y', danger: false },
+                { days: 365 * 2, display: '2y', danger: false },
+                { days: 365 * 5, display: '5y', danger: true },
+                { days: 365 * 10, display: '10y', danger: true },
+                { days: 365 * 20, display: '20y', danger: true },
+                { days: 365 * 30, display: '30y', danger: true },
+            ]
+                .filter(({ days }) => days > computedDurationDays)
+                .map(({ days, display, danger }) => {
+                    return <button key={days} className={`btn ${danger ? 'btn-outline-danger' : 'btn-outline-primary'} btn-sm mr-1`} onClick={() => {setQueryRangeDays(days)}}>{display}</button>
+                })
+            }
             <br />
         </div>
     </>

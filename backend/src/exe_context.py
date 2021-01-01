@@ -1,5 +1,6 @@
-from datetime import date
+from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
+from dateutil.rrule import rrulestr
 
 
 class ExecutionParameters():
@@ -37,9 +38,55 @@ class ExecutionRules():
             assert "value" in rule, f"Rule `{rule_id}` is missing the `value` field"
             assert isinstance(rule["value"], (float, int)), f"Rule `{rule_id}`'s `value` must be a number"
             assert "rule" in rule, f"Rule `{rule_id}` is missing the `rule` field"
+    
+    def latest_one_time_date(self):
+        one_time_dates = []
+        for _rule_id, rule in self.rules_map.items():
+            rrule = iter(rrulestr(rule["rule"]))
+            d = None
+            try:
+                d = next(rrule)
+                next(rrule)
+            except StopIteration:
+                if d:
+                    one_time_dates.append(d.date())
+
+        if not one_time_dates:
+            return None
+        
+        # adding an extra day so charts can see day after
+        return max(one_time_dates) + timedelta(days=1)
 
 
 class ExecutionContext():
     def __init__(self, parameters: ExecutionParameters, rules: ExecutionRules):
         self.parameters: ExecutionParameters = parameters
         self.rules: ExecutionRules = rules
+
+        minimum_end_date = self.get_minimum_end_date()
+        if minimum_end_date:
+            self.parameters.end = max(
+                self.parameters.end,
+                minimum_end_date
+            )
+    
+    def get_minimum_end_date(self):
+        return self.rules.latest_one_time_date()
+    
+    def assert_valid(self):
+        self.parameters.assert_valid()
+        self.rules.assert_valid()
+
+    def serialize(self):
+        serialization = {
+            "startDate": self.parameters.start.strftime("%Y-%m-%d"),
+            "endDate": self.parameters.end.strftime("%Y-%m-%d"),
+            "currentBalance": self.parameters.current,
+            "setAside": self.parameters.set_aside,
+        }
+
+        minimum_end_date = self.get_minimum_end_date()
+        if minimum_end_date:
+            serialization["minimumEndDate"] = minimum_end_date.strftime("%Y-%m-%d")
+
+        return  serialization

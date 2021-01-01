@@ -49,6 +49,7 @@ services:
       context: ./ui
     healthcheck:
       interval: 5s
+      retries: 36
 
   mysql:
     image: mysql:5.7
