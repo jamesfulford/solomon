@@ -75,7 +75,7 @@ REST_FRAMEWORK = {
 JWT_AUTH = {
     'JWT_ALGORITHM': 'RS256',
     'JWT_AUDIENCE': 'https://solomon.money/api',
-    'JWT_ISSUER': 'https://cashflow-projection.us.auth0.com/',
+    'JWT_ISSUER': 'https://solomon-money.us.auth0.com/',
     'JWT_AUTH_HEADER_PREFIX': 'Bearer',
 }
 

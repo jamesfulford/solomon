@@ -35,7 +35,7 @@ export const TransactionsContainer = ({ currentTime, currentBalance, setAside }:
         link.download = "Solomon Export.csv";
         link.click();
         link.remove();
-    }, [])
+    }, [downloadQueryEnd, start])
     
     if (loading) {
         return <div className="spinner-border" role="status">
