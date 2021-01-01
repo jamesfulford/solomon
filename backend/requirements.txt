@@ -13,5 +13,5 @@ requests==2.25.0
 unittest-xml-reporting==3.0.4
 requests==2.25.0
 cryptography==3.2
-drf-jwt==1.13.3
+drf-jwt==1.15.1
 pyjwt==1.7.1
