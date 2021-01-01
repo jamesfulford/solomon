@@ -54,7 +54,8 @@ class ExecutionRules():
         if not one_time_dates:
             return None
         
-        return max(one_time_dates)
+        # adding an extra day so charts can see day after
+        return max(one_time_dates) + timedelta(days=1)
 
 
 class ExecutionContext():
@@ -62,14 +63,30 @@ class ExecutionContext():
         self.parameters: ExecutionParameters = parameters
         self.rules: ExecutionRules = rules
 
-        latest_one_time_rule_date = self.rules.latest_one_time_date()
-        if latest_one_time_rule_date:
+        minimum_end_date = self.get_minimum_end_date()
+        if minimum_end_date:
             self.parameters.end = max(
                 self.parameters.end,
-                # adding an extra day so charts can see day after
-                latest_one_time_rule_date + timedelta(days=1)
+                minimum_end_date
             )
+    
+    def get_minimum_end_date(self):
+        return self.rules.latest_one_time_date()
     
     def assert_valid(self):
         self.parameters.assert_valid()
         self.rules.assert_valid()
+
+    def serialize(self):
+        serialization = {
+            "startDate": self.parameters.start.strftime("%Y-%m-%d"),
+            "endDate": self.parameters.end.strftime("%Y-%m-%d"),
+            "currentBalance": self.parameters.current,
+            "setAside": self.parameters.set_aside,
+        }
+
+        minimum_end_date = self.get_minimum_end_date()
+        if minimum_end_date:
+            serialization["minimumEndDate"] = minimum_end_date.strftime("%Y-%m-%d")
+
+        return  serialization

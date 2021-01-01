@@ -249,9 +249,7 @@ def process_transactions(request, decoded):
 
     return Response({
         "transactions": results,
-        "params": {
-            "end": parameters.end.strftime("%Y-%m-%d"),
-        },
+        "params": context.serialize(),
     })
 
 
@@ -272,9 +270,7 @@ def process_daybydays(request, decoded):
 
     return Response({
         "daybydays": daybydays,
-        "params": {
-            "end": parameters.end.strftime("%Y-%m-%d"),
-        },
+        "params": context.serialize(),
     })
 
 
