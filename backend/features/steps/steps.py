@@ -8,9 +8,7 @@ import json
 
 @given('{userId} has rules in the database')
 def step_database_rules(context, userId):
-
-    context.userIdUniqueSuffix =  datetime.now().strftime("%Y%m%d%H%M%S")
-    context.url = 'http://localhost:8000/api/rules?userid=' + userId #+ context.userIdUniqueSuffix
+    context.url = 'http://localhost:8000/api/rules'
     context.headers = {'content-type': 'application/json'}
     context.body = {
         "name": "Coffee",
@@ -27,8 +25,7 @@ def step_export_transactions(context, userId):
 
     context.startDate = date.today()
     context.endDate = context.startDate + relativedelta(days=1)
-    context.url = 'http://localhost:8000/api/export_transactions?userid=' + userId + '&currentBalance=0&startDate=' + context.startDate.strftime("%Y-%m-%d") + '&endDate=' + context.endDate.strftime("%Y-%m-%d")
-    # context.url = 'http://localhost:8000/api/export_transactions?userid=' + userId + context.userIdUniqueSuffix + '&currentBalance=0&startDate=' + context.startDate.strftime("%Y-%m-%d") + '&endDate=' + context.endDate.strftime("%Y-%m-%d")
+    context.url = 'http://localhost:8000/api/export_transactions?currentBalance=0&startDate=' + context.startDate.strftime("%Y-%m-%d") + '&endDate=' + context.endDate.strftime("%Y-%m-%d")
     context.res = requests.get(context.url)
     assert context.res.status_code == 200
 

@@ -22,13 +22,10 @@ if os.environ.get("DEBUG", ""):
 class RuleTestCase(APITestCase):
     def setUp(self):
         self.client = RequestsClient()
+        self.client.headers.update({ "Authorization": "Bearer testuser" })
 
     def test_framework_works(self):
         self.assertEqual(1, 1)
-    
-    def test_list_api_needs_userid(self):
-        response = self.client.get("http://testserver/api/rules")
-        self.assertEqual(response.status_code, 400)
     
     def test_can_get_after_create(self):
         body = {
@@ -36,12 +33,12 @@ class RuleTestCase(APITestCase):
             "rrule": str(rrule(freq=MONTHLY, byweekday=1)),
             "value": -1000
         }
-        response = self.client.post("http://testserver/api/rules", params={"userid": "testuser"}, json=body)
+        response = self.client.post("http://testserver/api/rules", json=body)
         self.assertEqual(response.status_code, 201)
 
         rule_id = response.json()['id']
 
-        response = self.client.get(f"http://testserver/api/rules/{rule_id}", params={"userid": "testuser"})
+        response = self.client.get(f"http://testserver/api/rules/{rule_id}")
         self.assertEqual(response.status_code, 200)
 
         res_json = response.json()
@@ -53,7 +50,7 @@ class RuleTestCase(APITestCase):
         self.assertEqual(res_json["userid"], "testuser")
 
         # Is rule_id in list of rules?
-        response = self.client.get("http://testserver/api/rules", params={"userid": "testuser"})
+        response = self.client.get("http://testserver/api/rules")
         res_json = response.json()
         rule_ids = list(map(lambda r: r["id"], res_json["data"]))
         self.assertEqual(response.status_code, 200)
@@ -65,25 +62,25 @@ class RuleTestCase(APITestCase):
             "rrule": str(rrule(freq=MONTHLY, byweekday=1)),
             "value": -1000
         }
-        response = self.client.post("http://testserver/api/rules", params={"userid": "testuser"}, json=body)
+        response = self.client.post("http://testserver/api/rules", json=body)
         self.assertEqual(response.status_code, 201)
 
         rule_id = response.json()['id']
 
         # Ensure it's there
-        response = self.client.get(f"http://testserver/api/rules/{rule_id}", params={"userid": "testuser"})
+        response = self.client.get(f"http://testserver/api/rules/{rule_id}")
         self.assertEqual(response.status_code, 200)
 
         # Remove it
-        response = self.client.delete(f"http://testserver/api/rules/{rule_id}", params={"userid": "testuser"})
+        response = self.client.delete(f"http://testserver/api/rules/{rule_id}")
         self.assertEqual(response.status_code, 204)
 
         # Ensure it is removed
-        response = self.client.get(f"http://testserver/api/rules/{rule_id}", params={"userid": "testuser"})
+        response = self.client.get(f"http://testserver/api/rules/{rule_id}")
         self.assertEqual(response.status_code, 404)
 
         # Assert non-existing rules give 404 when delete attempted
-        response = self.client.delete(f"http://testserver/api/rules/{rule_id}", params={"userid": "testuser"})
+        response = self.client.delete(f"http://testserver/api/rules/{rule_id}")
         self.assertEqual(response.status_code, 404)
     
     def test_update(self):
@@ -92,7 +89,7 @@ class RuleTestCase(APITestCase):
             "rrule": str(rrule(freq=MONTHLY, byweekday=1)),
             "value": -1000
         }
-        response = self.client.post("http://testserver/api/rules", params={"userid": "testuser"}, json=body)
+        response = self.client.post("http://testserver/api/rules", json=body)
         self.assertEqual(response.status_code, 201)
 
         rule_id = response.json()['id']
@@ -103,11 +100,11 @@ class RuleTestCase(APITestCase):
             "rrule": str(rrule(freq=MONTHLY, byweekday=1)),
             "value": -1200
         }
-        response = self.client.put(f"http://testserver/api/rules/{rule_id}", params={"userid": "testuser"}, json=body)
+        response = self.client.put(f"http://testserver/api/rules/{rule_id}", json=body)
         self.assertEqual(response.status_code, 200)
 
         # Ensure change is saved
-        response = self.client.get(f"http://testserver/api/rules/{rule_id}", params={"userid": "testuser"})
+        response = self.client.get(f"http://testserver/api/rules/{rule_id}")
         self.assertEqual(response.status_code, 200)
 
         res_json = response.json()
@@ -125,7 +122,7 @@ class RuleTestCase(APITestCase):
             "rrule": str(rrule(freq=MONTHLY, byweekday=1)),
             "value": -1000
         }
-        response = self.client.post("http://testserver/api/rules", params={"userid": "testuser"}, json=body)
+        response = self.client.post("http://testserver/api/rules", json=body)
         self.assertEqual(response.status_code, 201)
 
         rule_id = response.json()['id']
@@ -133,7 +130,7 @@ class RuleTestCase(APITestCase):
         body = {
             "name": "Rent"
         }
-        response = self.client.put(f"http://testserver/api/rules/{rule_id}", params={"userid": "testuser"}, json=body)
+        response = self.client.put(f"http://testserver/api/rules/{rule_id}", json=body)
         self.assertEqual(response.status_code, 400)
 
     def test_400_when_ridiculously_large_value_is_used(self):
@@ -142,7 +139,7 @@ class RuleTestCase(APITestCase):
             "rrule": str(rrule(freq=WEEKLY, byweekday=1)),
             "value": 99999999999999999999999999999999999
         }
-        response = self.client.post("http://testserver/api/rules", params={"userid": "testuser"}, json=body)
+        response = self.client.post("http://testserver/api/rules", json=body)
         self.assertEqual(response.status_code, 400)
 
     def test_400_when_ridiculously_large_name_is_used(self):
@@ -153,7 +150,8 @@ class RuleTestCase(APITestCase):
             "rrule": str(rrule(freq=WEEKLY, byweekday=1)),
             "value": 100
         }
-        response = self.client.post("http://testserver/api/rules", params={"userid": "testuser"}, json=body)
+        response = self.client.post("http://testserver/api/rules", json=body)
+
         self.assertEqual(response.status_code, 400)
 
     def test_rrule_validation_failure(self):
@@ -162,40 +160,34 @@ class RuleTestCase(APITestCase):
             "rrule": 'invalid rrule',
             "value": 2000
         }
-        response = self.client.post("http://testserver/api/rules", params={"userid": "testuser"}, json=body)
-        self.assertEqual(response.status_code, 400)
-
-    def test_missing_userid_parm(self):
-        now = date.today()
-        endDate = now + relativedelta(days=1)
-        response = self.client.get("http://testserver/api/transactions", params={"currentBalance": "0", "endDate": endDate.strftime("%Y-%m-%d")})
+        response = self.client.post("http://testserver/api/rules", json=body)
         self.assertEqual(response.status_code, 400)
 
     def test_valid_start_date(self):
-        response = self.client.get("http://testserver/api/transactions", params={"userid": "testuser", "currentBalance": "0", "startDate": "2020-13-1", "endDate": "2021-1-1"})
+        response = self.client.get("http://testserver/api/transactions", params={"currentBalance": "0", "startDate": "2020-13-1", "endDate": "2021-1-1"})
         self.assertEqual(response.status_code, 400)
 
     def test_valid_end_date(self):
-        response = self.client.get("http://testserver/api/transactions", params={"userid": "testuser", "currentBalance": "0", "startDate": "2020-1-1", "endDate": "2021-13-1"})
+        response = self.client.get("http://testserver/api/transactions", params={"currentBalance": "0", "startDate": "2020-1-1", "endDate": "2021-13-1"})
         self.assertEqual(response.status_code, 400)  
 
     def test_start_date_preceeds_end_date(self):
         now = date.today()
         endDate = now - relativedelta(days=1)      
-        response = self.client.get("http://testserver/api/transactions", params={"userid": "testuser", "currentBalance": "0", "startDate": now.strftime("%Y-%m-%d"), "endDate": endDate.strftime("%Y-%m-%d")})
+        response = self.client.get("http://testserver/api/transactions", params={"currentBalance": "0", "startDate": now.strftime("%Y-%m-%d"), "endDate": endDate.strftime("%Y-%m-%d")})
         self.assertEqual(response.status_code, 400)
 
     def test_max_span(self):
         now = date.today()
         startDate = now
         endDate = now + relativedelta(years=30, days=2)        
-        response = self.client.get("http://testserver/api/transactions", params={"userid": "testuser", "currentBalance": "0", "startDate": startDate.strftime("%Y-%m-%d"), "endDate": endDate.strftime("%Y-%m-%d")})
+        response = self.client.get("http://testserver/api/transactions", params={"currentBalance": "0", "startDate": startDate.strftime("%Y-%m-%d"), "endDate": endDate.strftime("%Y-%m-%d")})
         self.assertEqual(response.status_code, 400)
 
     def test_up_to_max_span(self):
         now = date.today()
         endDate = now + relativedelta(years=30, days=1)
-        response = self.client.get("http://testserver/api/transactions", params={"userid": "testuser", "currentBalance": "0", "startDate": now.strftime("%Y-%m-%d"), "endDate": endDate.strftime("%Y-%m-%d")})
+        response = self.client.get("http://testserver/api/transactions", params={"currentBalance": "0", "startDate": now.strftime("%Y-%m-%d"), "endDate": endDate.strftime("%Y-%m-%d")})
         self.assertEqual(response.status_code, 200)
 
     def test_no_transactions_when_no_rules_exist_for_user(self):
@@ -212,13 +204,13 @@ class RuleTestCase(APITestCase):
             "rrule": str(rrule(freq=MONTHLY, byweekday=1)),
             "value": -1000
         }
-        response = self.client.post("http://testserver/api/rules", params={"userid": "testuser"}, json=body)
+        response = self.client.post("http://testserver/api/rules", json=body)
         self.assertEqual(response.status_code, 201)
 
         # Check transactions
         now = date.today()
         endDate = now + relativedelta(years=3)
-        response = self.client.get("http://testserver/api/transactions", params={"userid": "testuser", "currentBalance": "0", "startDate": now.strftime("%Y-%m-%d"), "endDate": endDate.strftime("%Y-%m-%d")})
+        response = self.client.get("http://testserver/api/transactions", params={"currentBalance": "0", "startDate": now.strftime("%Y-%m-%d"), "endDate": endDate.strftime("%Y-%m-%d")})
         self.assertEqual(response.status_code, 200)
         self.assertGreater(len(response.json()["transactions"]), 0)
 00

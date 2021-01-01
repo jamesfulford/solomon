@@ -13,7 +13,7 @@ const baseUrl = process.env.REACT_APP_BASE_URL || '';
 
 export const RulesContainer = ({ userid, onRefresh = () => {} }: { userid: string, onRefresh?: () => void }) => {
     const [{ data, loading, error }, refetch] = useAxios(
-        `${baseUrl}/api/rules?userid=${userid}`
+        `${baseUrl}/api/rules`
     );
 
     const [selectedRuleId, setSelectedRuleId] = useState<string | undefined>();
@@ -24,15 +24,15 @@ export const RulesContainer = ({ userid, onRefresh = () => {} }: { userid: strin
     }, [refetch, onRefresh])
 
     const createNewRule = useCallback((rule: IApiRuleMutate) => {
-        return axios.post(`${baseUrl}/api/rules?userid=${userid}`, rule)
+        return axios.post(`${baseUrl}/api/rules`, rule)
             .then((response) => {
                 console.log('Created rule', response.data);
                 triggerRefresh();
             });
-    }, [triggerRefresh, userid]);
+    }, [triggerRefresh]);
 
     const deleteHandler = useCallback((id: string) => {
-        return axios.delete(`${baseUrl}/api/rules/${id}?userid=${userid}`)
+        return axios.delete(`${baseUrl}/api/rules/${id}`)
             .then(() => {
                 triggerRefresh();
             })
@@ -40,10 +40,10 @@ export const RulesContainer = ({ userid, onRefresh = () => {} }: { userid: strin
                 // TODO: toast an error
                 console.error('UHOH', e);
             })
-    }, [triggerRefresh, userid]);
+    }, [triggerRefresh]);
 
     const updateExistingRule = useCallback((id: string, rule: IApiRuleMutate) => {
-        return axios.put(`${baseUrl}/api/rules/${id}?userid=${userid}`, rule)
+        return axios.put(`${baseUrl}/api/rules/${id}`, rule)
             .then((response) => {
                 console.log('Updated rule', response.data);
                 triggerRefresh();
@@ -52,7 +52,7 @@ export const RulesContainer = ({ userid, onRefresh = () => {} }: { userid: strin
                 // TODO: toast an error
                 console.error('UHOH', e);
             })
-    }, [triggerRefresh, userid]);
+    }, [triggerRefresh]);
 
 
     const onCreate = useCallback(async (rule: IApiRuleMutate) => {

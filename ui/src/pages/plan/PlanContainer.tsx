@@ -68,7 +68,7 @@ export const PlanContainer = () => {
                     <DayByDayContainer userid={userid} currentTime={currentTime} currentBalance={Number(currentBalance)} setAside={Number(setAside)} />
                 </div>
                 <hr />
-                <TransactionsContainer userid={userid} currentTime={currentTime} currentBalance={Number(currentBalance)} setAside={Number(setAside)} />
+                <TransactionsContainer currentTime={currentTime} currentBalance={Number(currentBalance)} setAside={Number(setAside)} />
             </Col>
         </Row>
     </Container>
