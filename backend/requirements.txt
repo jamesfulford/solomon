@@ -12,6 +12,6 @@ django-cors-headers==3.3.0
 requests==2.25.0
 unittest-xml-reporting==3.0.4
 requests==2.25.0
-cryptography==2.8
+cryptography==3.2
 drf-jwt==1.13.3
 pyjwt==1.7.1
