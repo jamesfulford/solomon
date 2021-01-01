@@ -323,6 +323,25 @@ class HandlerTests(TestCase):
         }]
 
         self.assertEqual(expected, actual)
+    
+
+    def test_use_latest_rrule_for_end_date(self):
+        actual = get_daybyday(
+            ExecutionParameters(
+                date(2018, 6, 20),
+                date(2018, 6, 22),
+                0,
+                0
+            ),
+            ExecutionRules({
+                'rule-1': {
+                    "rule": str(rrule(freq=YEARLY, count=1, dtstart=date(2018, 7, 21))),
+                    "value": 100
+                }
+            })
+        )
+
+        self.assertEqual(date(2018, 7, 22), actual[-1]["date"])
 
 
     def test_get_daybyday_from_rules_multipleRules(self):
