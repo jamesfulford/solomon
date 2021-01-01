@@ -23,7 +23,7 @@ const LoginSection = () => {
 
     if (isAuthenticated) {
         return <>
-            <span className="ml-auto">Hello, {user.given_name}</span>
+            <span className="ml-auto">Hello, {user.name}</span>
             <button className="btn btn-outline-primary ml-3" onClick={() => logout({ returnTo: window.location.origin })}>Logout</button> 
         </>
     }
