@@ -1,21 +1,25 @@
 import { useAuth0 } from "@auth0/auth0-react";
-import React, { useState } from "react";
 import axios from 'axios';
+import React, { useState } from "react";
+
 
 export const useToken = () => {
-    const { isAuthenticated, getIdTokenClaims } = useAuth0();
+    const { getAccessTokenSilently } = useAuth0();
+
     const [token, setToken] = useState('');
+
     React.useEffect(() => {
-        if (!isAuthenticated) {
-            return;
-        }
-        getIdTokenClaims()
-            .then(claim => {
-                const token = claim.__raw;
-                setToken(token);
-                axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-            })
-            .catch(console.error)
-    }, [getIdTokenClaims, setToken, isAuthenticated]);
+        const getUserMetadata = async () => {      
+          try {
+            const accessToken = await getAccessTokenSilently();
+            setToken(accessToken);
+            axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}1`;
+          } catch (e) {
+            console.error(e.message);
+          }
+        };
+      
+        getUserMetadata();
+      }, [getAccessTokenSilently]);
     return token;
 }

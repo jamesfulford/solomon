@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { IApiTransaction} from './ITransaction';
 import { Transaction } from './Transaction'
 import useAxios from 'axios-hooks'
-
+import axios from 'axios'
 
 const baseUrl = process.env.REACT_APP_BASE_URL || '';
 
@@ -15,7 +15,7 @@ export function limitShownTransactions(transactions: IApiTransaction[], showEnd:
         .slice(0, 50);
 }
 
-export const TransactionsContainer = ({ userid, currentTime, currentBalance, setAside }: { userid: string, currentTime: number, currentBalance: number, setAside: number }) => {
+export const TransactionsContainer = ({ currentTime, currentBalance, setAside }: { currentTime: number, currentBalance: number, setAside: number }) => {
     const now = new Date(currentTime)
     const start = now;
     const queryEnd = new Date(now.getTime() + (120 * 24 * 60 * 60 * 1000)); // add 120 days
@@ -24,8 +24,18 @@ export const TransactionsContainer = ({ userid, currentTime, currentBalance, set
     const downloadQueryEnd = new Date(now.getTime() + (400 * 24 * 60 * 60 * 1000)); // add 400 days (13 months plus some buffer)
 
     const [{ data, loading, error }] = useAxios(
-        `${baseUrl}/api/transactions?userid=${userid}&startDate=${start.toISOString()}&endDate=${queryEnd.toISOString()}&currentBalance=${currentBalance}&setAside=${setAside}`
+        `${baseUrl}/api/transactions?startDate=${start.toISOString()}&endDate=${queryEnd.toISOString()}&currentBalance=${currentBalance}&setAside=${setAside}`
     )
+
+    const downloadCsv = useCallback(async () => {
+        const response = await axios.get(`${baseUrl}/api/export_transactions?startDate=${start.toISOString()}&endDate=${downloadQueryEnd.toISOString()}`);
+        const file = new Blob([response.data], {type: response.headers["Content-Type"]});
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(file);
+        link.download = "Solomon Export.csv";
+        link.click();
+        link.remove();
+    }, [])
     
     if (loading) {
         return <div className="spinner-border" role="status">
@@ -45,7 +55,7 @@ export const TransactionsContainer = ({ userid, currentTime, currentBalance, set
 
 
     return <div data-testid="transactions-showing" className="table-responsive">
-        <div className="text-right mb-1"><a href={`${baseUrl}/api/export_transactions?userid=${userid}&startDate=${start.toISOString()}&endDate=${downloadQueryEnd.toISOString()}`}>Download CSV</a></div>
+        <div className="text-right mb-1"><button className="btn btn-link" onClick={downloadCsv}>Download CSV</button></div>
         <table className="table table-sm table-hover">
             <thead>
                 <tr>

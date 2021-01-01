@@ -21,56 +21,89 @@ from rest_framework.exceptions import APIException
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.serializers.json import DjangoJSONEncoder
+from django.http import JsonResponse
 
 from django.shortcuts import render
 from django.http import HttpResponse
 import csv
 
-def _get_userid(request):
-    # TODO: get from auth, not from query param
-    userid = request.query_params.get('userid')
-    return userid
+from .auth_utils import requires_scope
 
+
+def use_global_exception_handler(f):
+    def handler(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except ObjectDoesNotExist as e:
+            response_message = {
+                "message": "Not Found"
+            }
+            logging.warn(response_message)
+
+            response = JsonResponse(response_message)
+            response.status_code = 404
+            return response
+        except ValueError as e:
+            response_message = {
+                "message": str(e)
+            }
+            logging.warn(response_message)
+
+            response = JsonResponse(response_message)
+            response.status_code = 400
+            return response
+        except AssertionError as e:
+            response_message = {
+                "message": str(e)
+            }
+            logging.warn(response_message)
+
+            response = JsonResponse(response_message)
+            response.status_code = 400
+            return response
+        except Exception as e:
+            response_message = {
+                "message": "Internal Server Error: " + str(e)
+            }
+            logging.warn(response_message)
+
+            response = JsonResponse(response_message)
+            response.status_code = 500
+            return response
+
+    return handler
+
+
+#
+# Rules API
+#
+
+
+@use_global_exception_handler
 @api_view(['GET', 'POST'])
-def rules_handler(request):
-    userid = _get_userid(request)
-    if not userid:
-        return Response({ "message": "`userid` query param is required" }, status=status.HTTP_400_BAD_REQUEST)
+def rules_handler(*args, **kwargs):
+    request = args[0]
+    if request.method == 'GET': 
+        return get_rule_list(*args, **kwargs)
+    if request.method == "POST":
+        return create_rule(*args, **kwargs)
 
-    try:
-        if request.method == 'GET': 
-            return(get_rule_list(request, userid))
-        if request.method == "POST":
-            return(create_rule(request, userid))
-    except Exception as e:
-        # TODO: global exception handler
-        response_message = {'message': "Apologies, we had a small hiccup. Please try again (just in case!) or contact support."}
-        logging.error(f"Unexpected error: {e}")
-        return Response(response_message, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+@use_global_exception_handler
 @api_view(['GET', 'DELETE', 'PUT'])
-def rules_by_id_handler(request, rule_id):
-    userid = _get_userid(request)
-    if not userid:
-        return Response({ "message": "`userid` query param is required" }, status=status.HTTP_400_BAD_REQUEST)
+def rules_by_id_handler(*args, **kwargs):
+    request = args[0]
+    if request.method == 'GET': 
+        return get_rule(*args, **kwargs)
+    elif request.method == 'DELETE':
+        return delete_rule(*args, **kwargs)
+    elif request.method == 'PUT':
+        return update_rule(*args, **kwargs)
 
-    try:
-        if request.method == 'GET': 
-            return(get_rule(request, rule_id, userid))
-        elif request.method == 'DELETE':
-            return(delete_rule(request, rule_id, userid))
-        elif request.method == 'PUT':
-            return(update_rule(request, rule_id, userid))
-    except ObjectDoesNotExist as e:
-        response_message = { "message": f"Rule `{rule_id}` does not exist for userid `{userid}`" }
-        logging.warn(response_message)
-        return Response(response_message, status=status.HTTP_404_NOT_FOUND)
-    except Exception as e:
-        response_message = {'message': "Apologies, we had a small hiccup. Please try again (just in case!) or contact support."}
-        logging.error(f"Unexpected error: {e}")
-        return Response(response_message, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-def update_rule(request, rule_id, userid):
+@requires_scope("transactions:write")
+def update_rule(request, rule_id, decoded):
+    userid = decoded['sub']
     rule = Rule.objects.get(id=rule_id, userid=userid)
     rule_data = JSONParser().parse(request)
     rule_data["userid"] = userid
@@ -79,18 +112,24 @@ def update_rule(request, rule_id, userid):
         rule_serializer.save()
         return Response(rule_serializer.data)
     return Response(rule_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-def get_rule_list(request, userid):
+
+@requires_scope("transactions:read")
+def get_rule_list(request, decoded):
+    userid = decoded['sub']
     rules = Rule.objects.filter(userid=userid)
     rule_serializer = RuleSerializer(rules, many=True)
     return Response({ "data": rule_serializer.data })
 
-def get_rule(request, rule_id, userid):
+@requires_scope("transactions:read")
+def get_rule(request, rule_id, decoded):
+    userid = decoded['sub']
     rule = Rule.objects.get(id=rule_id, userid=userid)
     rule_serializer = RuleSerializer(rule) 
     return Response(rule_serializer.data)     
 
-def create_rule(request, userid):
+@requires_scope("transactions:write")
+def create_rule(request, decoded):
+    userid = decoded['sub']
     rule_data = JSONParser().parse(request)
     rule_data['userid'] = userid
     rule_serializer = RuleSerializer(data=rule_data)
@@ -100,14 +139,28 @@ def create_rule(request, userid):
         return j
     return Response(rule_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-def delete_rule(request, rule_id, userid):
+@requires_scope("transactions:write")
+def delete_rule(request, rule_id, decoded):
+    userid = decoded['sub']
     rule = Rule.objects.get(id=rule_id, userid=userid)
     rule.delete()
     return Response(None, status=status.HTTP_204_NO_CONTENT)
 
+
+#
+# Ping
+#
+
+
+@use_global_exception_handler
 @api_view(['GET'])
 def hello_world(request):
     return Response({ "status": "UP" })
+
+
+#
+# Execute
+#
 
 
 def make_execution_parameters(request) -> ExecutionParameters:
@@ -177,30 +230,15 @@ def get_rules_from_database(userid: str) -> ExecutionRules:
     serialized_rules = RuleSerializer(database_rules, many=True).data
     return make_execution_rules(serialized_rules)
 
+
+@use_global_exception_handler
 @api_view(['GET'])
-def process_transactions(request):
-    userid = _get_userid(request)
-    if not userid:
-        return Response({ "message": "`userid` query param is required" }, status=status.HTTP_400_BAD_REQUEST)
-    
-    # Pull out parameters
-    parameters = None
-    try:
-        parameters = make_execution_parameters(request)
-    except ValueError as e:
-        return Response({ "error": str(e) }, status=status.HTTP_400_BAD_REQUEST)
-    except AssertionError as e:
-        return Response({ "error": str(e) }, status=status.HTTP_400_BAD_REQUEST)
-    except Exception as e:
-        print(e)
-    
-    
-    rules = None
-    try:
-        rules = get_rules_from_database(userid)
-    except Exception as e:
-        logging.error(f"Error while getting rules from database", e)
-        return Response({ "message": "Internal Server Error" }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+@requires_scope("transactions:read")
+def process_transactions(request, decoded):
+    userid = decoded["sub"]
+
+    parameters = make_execution_parameters(request)
+    rules = get_rules_from_database(userid)
 
     # Calculate transactions
     transactions = get_transactions_up_to(ExecutionContext(parameters, rules))
@@ -209,30 +247,15 @@ def process_transactions(request):
     return Response({ "transactions": results })
 
 
+@use_global_exception_handler
 @api_view(['GET'])
-def process_daybydays(request):
-    userid = _get_userid(request)
-    if not userid:
-        return Response({ "message": "`userid` query param is required" }, status=status.HTTP_400_BAD_REQUEST)
-    
+@requires_scope("transactions:read")
+def process_daybydays(request, decoded):
+    userid = decoded["sub"]
+
     # Pull out parameters
-    parameters = None
-    try:
-        parameters = make_execution_parameters(request)
-    except ValueError as e:
-        return Response({ "error": str(e) }, status=status.HTTP_400_BAD_REQUEST)
-    except AssertionError as e:
-        return Response({ "error": str(e) }, status=status.HTTP_400_BAD_REQUEST)
-    except Exception as e:
-        print(e)
-    
-    
-    rules = None
-    try:
-        rules = get_rules_from_database(userid)
-    except Exception as e:
-        logging.error(f"Error while getting rules from database", e)
-        return Response({ "message": "Internal Server Error" }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    parameters = make_execution_parameters(request)
+    rules = get_rules_from_database(userid)
 
     # Calculate daybydays
     daybydays = generate_daybydays(ExecutionContext(parameters, rules))
@@ -240,30 +263,14 @@ def process_daybydays(request):
     return Response({ "daybydays": daybydays })
 
 
+@use_global_exception_handler
 @api_view(['GET'])
-def export_transactions(request):
-    userid = _get_userid(request)
-    if not userid:
-        return Response({ "message": "`userid` query param is required" }, status=status.HTTP_400_BAD_REQUEST)
-
-    # Pull out parameters
-    parameters = None
-    try:
-        parameters = make_execution_parameters(request)
-    except ValueError as e:
-        return Response({ "error": str(e) }, status=status.HTTP_400_BAD_REQUEST)
-    except AssertionError as e:
-        return Response({ "error": str(e) }, status=status.HTTP_400_BAD_REQUEST)
-    except Exception as e:
-        print(e)
-
-    rules = None
-    try:
-        rules = get_rules_from_database(userid)
-    except Exception as e:
-        logging.error(f"Error while getting rules from database", e)
-        return Response({ "message": "Internal Server Error" }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+@requires_scope("transactions:read")
+def export_transactions(request, decoded):
+    userid = decoded["sub"]
+    parameters = make_execution_parameters(request)
+    rules = get_rules_from_database(userid)
+    
     transactions = get_transactions_up_to(ExecutionContext(parameters, rules))
     results = list(map(lambda i: i.serialize(), transactions))
 

@@ -18,6 +18,8 @@ ReactDOM.render(
       returnTo={window.location.origin}
       cacheLocation="localstorage"
       useRefreshTokens
+      audience="https://solomon.money/api"
+      scope="read:current_user update:current_user_metadata transactions:read transactions:write"
     >
       <BrowserRouter>
         <App />

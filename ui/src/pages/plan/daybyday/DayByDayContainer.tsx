@@ -134,7 +134,7 @@ export const DayByDayContainer = ({ userid, currentTime, currentBalance, setAsid
     const end = new Date(currentTime + (queryRangeDays * 24 * 60 * 60 * 1000))
     
     const [{ data, loading, error }] = useAxios(
-        `${baseUrl}/api/daybydays?${highLowEnabled ? 'highLow&' : ''}userid=${userid}&startDate=${start.toISOString()}&endDate=${end.toISOString()}&currentBalance=${currentBalance}&setAside=${setAside}`
+        `${baseUrl}/api/daybydays?${highLowEnabled ? 'highLow&' : ''}startDate=${start.toISOString()}&endDate=${end.toISOString()}&currentBalance=${currentBalance}&setAside=${setAside}`
     );
 
     if (loading) {
