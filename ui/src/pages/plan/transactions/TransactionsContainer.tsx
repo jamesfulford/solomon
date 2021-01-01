@@ -6,12 +6,8 @@ import axios from 'axios'
 
 const baseUrl = process.env.REACT_APP_BASE_URL || '';
 
-export function limitShownTransactions(transactions: IApiTransaction[], showEnd: Date): IApiTransaction[] {
+export function limitShownTransactions(transactions: IApiTransaction[]): IApiTransaction[] {
     return transactions
-        .filter(t => {
-            const d = new Date(t.day)
-            return d <= showEnd;
-        })
         .slice(0, 50);
 }
 
@@ -19,7 +15,6 @@ export const TransactionsContainer = ({ currentTime, currentBalance, setAside }:
     const now = new Date(currentTime)
     const start = now;
     const queryEnd = new Date(now.getTime() + (120 * 24 * 60 * 60 * 1000)); // add 120 days
-    const showEnd = new Date(now.getTime() + (90 * 24 * 60 * 60 * 1000)); // add 90 days
 
     const downloadQueryEnd = new Date(now.getTime() + (400 * 24 * 60 * 60 * 1000)); // add 400 days (13 months plus some buffer)
 
@@ -47,7 +42,7 @@ export const TransactionsContainer = ({ currentTime, currentBalance, setAside }:
         return <p data-testid="transactions-error">Error occurred while fetching transactions! Try refreshing the page.</p>
     }
     
-    const tableData = limitShownTransactions(data.transactions as IApiTransaction[], showEnd);
+    const tableData = limitShownTransactions(data.transactions as IApiTransaction[]);
 
     if (tableData.length === 0) {
         return <p data-testid="transactions-empty">Sorry, it looks like you don't have any transactions. Try setting up a new rule.</p>

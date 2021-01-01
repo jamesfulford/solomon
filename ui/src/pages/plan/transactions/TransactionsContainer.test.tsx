@@ -112,31 +112,6 @@ describe('transactions container', () => {
             expect(transactionElements[1].textContent).toContain('Paycheck');
         });
 
-        it('should not list transactions over 3 months', () => {
-            setUp([{
-                rule_id: 'Rent',
-                id: 'rent-1',
-                value: -2000,
-                day: '1970-04-02', // 1 day more than 3 months later
-                calculations: {
-                    balance: 1337,
-                    working_capital: 1000,
-                }
-            }, {
-                rule_id: 'Paycheck',
-                id: 'paycheck-1',
-                value: 2000,
-                day: '1970-04-02',
-                calculations: {
-                    balance: 3337,
-                    working_capital: 1000,
-                }
-            }]);
-            expect(transactionsEmpty()).toBeDefined();
-            expect(transactionsLoading()).not.toBeDefined();
-            expect(transactionsError()).not.toBeDefined();
-        });
-
         it('should not list over 50 transactions at once', () => {
             // Create 60 transactions (more than 50)
             const transactions: IApiTransaction[] = Array.from([ ...Array(60) ]).map((_, i) => i)
