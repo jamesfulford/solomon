@@ -69,12 +69,6 @@ enum ChartTab {
 // - less coloring overlaps
 // - should not be a line chart, should be "steppy" like _| instead of / between points (still same as before)
 const DayByDayChart = ({ daybyday, chartType, setAside }: { daybyday: IDayByDayApi, chartType: ChartTab, setAside: number }) => {
-    if (!daybyday.daybydays.length) {
-        return <Container className="text-center">
-            <p data-testid="daybyday-empty">Nothing's here...</p>
-        </Container>
-    }
-
     switch(chartType) {
         case ChartTab.DISPOSABLE_INCOME:
             const disposableIncomeData = [
@@ -152,6 +146,12 @@ export const DayByDayContainer = ({ userid, currentTime, currentBalance, setAsid
     }
 
     const daybyday = data;
+
+    if (!daybyday.daybydays.length) {
+        return <Container className="text-center">
+            <p data-testid="daybyday-empty">Nothing's here...</p>
+        </Container>
+    }
 
     const tabs = [
         ChartTab.DISPOSABLE_INCOME
