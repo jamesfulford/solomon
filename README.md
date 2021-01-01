@@ -8,7 +8,10 @@
 
 ```bash
 # Start
-DEBUG= docker-compose up -d
+docker-compose up -d
+
+# Run solomon with debug
+DEBUG=1 docker-compose up --no-deps --force-recreate solomon
 
 # Running unit tests
 DEBUG= docker-compose run -p 3001:3001 --rm --no-deps solomon python manage.py test
