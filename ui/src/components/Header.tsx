@@ -30,6 +30,5 @@ const LoginSection = () => {
 
     return <>
         <button className="btn btn-outline-primary ml-auto" onClick={() => loginWithRedirect()}>Login</button>
-        <button className="btn btn-primary ml-3" onClick={() => loginWithRedirect()}>Sign Up</button>
     </>
 }
