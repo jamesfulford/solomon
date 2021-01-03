@@ -6,6 +6,7 @@ import { WorkingState, ONCE, YEARLY_HEBREW } from './types';
 import { IApiRuleMutate } from '../IRule';
 import { convertWorkingStateToApiRuleMutate, ruleToWorkingState } from './translation';
 import { RulePreview } from './RulePreview';
+import { hebrewMonthToDisplayNameMap } from './hebrew';
 
 
 function frequencyIsIn(freq: WorkingState['rrule']['freq'], freqs: WorkingState['rrule']['freq'][]): boolean {
@@ -151,7 +152,7 @@ export const AddEditRule = ({
                                     </optgroup>
                                     
                                     <optgroup label="Hebrew Calendar">
-                                        <option value={YEARLY_HEBREW}>Year</option>
+                                        <option value={YEARLY_HEBREW}>Hebrew Year</option>
                                     </optgroup>
                                 </select>
                             </>}
@@ -176,6 +177,37 @@ export const AddEditRule = ({
                             <label htmlFor="bymonthday" className="sr-only">Day of month</label>
                             <input className="form-control form-control-sm" id="bymonthday" placeholder="Day" style={{ width: 64 }}
                                 type="number" min="1" max="31" required
+                                {...field}
+                                />
+                        </>}
+                    </Field>}
+
+
+                    {/* YEARLY_HEBREW */}
+                    {frequencyIsIn(freq, [YEARLY_HEBREW]) && <Field name="rrule.byhebrewmonth">
+                        {({
+                            field,
+                        }: FieldProps) => <>
+                            <label htmlFor="byhebrewmonth" className="sr-only">Month</label>
+                            <select className="form-control form-control-sm" id="byhebrewmonth" placeholder="Month" required
+                                {...field}
+                                >
+                                    {Array.from(hebrewMonthToDisplayNameMap.entries())
+                                        .map(([value, display]: [number, string]) => {
+                                            return <option value={value}>{display}</option>
+                                        })}
+                            </select>
+                        </>}
+                    </Field>}
+
+                    {/* YEARLY_HEBREW */}
+                    {frequencyIsIn(freq, [YEARLY_HEBREW]) && <Field name="rrule.byhebrewday">
+                        {({
+                            field,
+                        }: FieldProps) => <>
+                            <label htmlFor="byhebrewday" className="sr-only">Day</label>
+                            <input className="form-control form-control-sm" id="byhebrewday" placeholder="Day" style={{ width: 64 }}
+                                type="number" min="1" max="30" required
                                 {...field}
                                 />
                         </>}

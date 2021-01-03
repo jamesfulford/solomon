@@ -1,13 +1,23 @@
 from rest_framework import serializers 
 from .models import Rule, USERID_MAX_LENGTH, NAME_MAX_LENGTH, VALUE_MAX_DIGITS, VALUE_MAX_DECIMAL_DIGITS
+from .hebrew import extract_hebrew
 import logging
-from dateutil.rrule import rrulestr
+from dateutil.rrule import rrulestr, YEARLY, MONTHLY, WEEKLY
 
 
-def rrule_validation(rrule: str) -> str:
+def rrule_validation(rrulestring: str) -> str:
     try:
-        rrulestr(rrule)
-        return rrule
+        hebrew = extract_hebrew(rrulestring)
+        if hebrew:
+            return rrulestring
+        
+        # Not hebrew
+
+        rrule = rrulestr(rrulestring)
+
+        assert rrule._freq in (YEARLY, MONTHLY, WEEKLY), "Unsupported frequency"
+
+        return rrulestring
     except Exception:
         raise serializers.ValidationError("Invalid recurrence rule")
 

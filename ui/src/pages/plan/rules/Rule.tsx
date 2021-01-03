@@ -1,16 +1,17 @@
 import React, { useCallback } from 'react';
 import { IApiRule } from './IRule';
-import { RRule } from 'rrule';
 import './Rule.css';
 import { Currency } from '../../../components/currency/Currency';
+import { getPreviewDetails } from './AddEditRule/RulePreview';
+
 
 function getRRuleDisplayString(rruleString: string): string {
     try {
-        const rrule = RRule.fromString(rruleString);
-        if (rrule.origOptions.count === 1) {
-            return 'once';
+        const { message } = getPreviewDetails(rruleString);
+        if (!message) {
+            throw new Error(message);
         }
-        return rrule.toText();
+        return message;
     } catch (e) {
         return "(Oops, looks like an invalid recurrence rule)"
     }

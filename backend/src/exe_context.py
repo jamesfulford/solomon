@@ -1,6 +1,7 @@
 from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
 from dateutil.rrule import rrulestr
+from .hebrew import extract_hebrew
 
 
 class ExecutionParameters():
@@ -42,6 +43,11 @@ class ExecutionRules():
     def latest_one_time_date(self):
         one_time_dates = []
         for _rule_id, rule in self.rules_map.items():
+
+            hebrew = extract_hebrew(rule["rule"])
+            if hebrew:
+                continue
+
             rrule = iter(rrulestr(rule["rule"]))
             d = None
             try:

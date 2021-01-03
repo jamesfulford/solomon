@@ -5,7 +5,7 @@ import RRule, { Options } from 'rrule';
 export const ONCE = 'ONCE';
 export const YEARLY_HEBREW = 'YEARLY-HEBREW';
 
-type SupportedFrequency = typeof RRule.YEARLY |
+export type SupportedFrequency = typeof RRule.YEARLY |
     typeof RRule.MONTHLY |
     typeof RRule.WEEKLY |
     typeof ONCE |
@@ -30,6 +30,9 @@ export type WorkingState = Omit<
 
         dtstart?: string;
         until?: string;
+
+        byhebrewmonth?: number;
+        byhebrewday?: number;
     }>,
     value: string,
 

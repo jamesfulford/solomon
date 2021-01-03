@@ -66,6 +66,12 @@ const rules = [
             category: 'school'
         },
     },
+    {
+        name: 'Hebrew Firstfruits',
+        value: -2600,
+        rrule: 'X-YEARLY-HEBREW: 1, 16',
+        labels: {},
+    },
 ];
 
 const rulesWithUncertainty = [
@@ -125,11 +131,13 @@ describe('editing translation', () => {
         });
 
         rulesWithUncertainty.forEach(rule => {
-            it(`should keep uncertainty labels if editless ${rule.name}`, () => {
-                const workingState = ruleToWorkingState(rule);
-                const outputRule = convertWorkingStateToApiRuleMutate(workingState, { isHighLowEnabled: true });
-        
-                expect(outputRule).toEqual(rule);
+            describe(rule.name, () => {
+                it(`should keep uncertainty labels if editless`, () => {
+                    const workingState = ruleToWorkingState(rule);
+                    const outputRule = convertWorkingStateToApiRuleMutate(workingState, { isHighLowEnabled: true });
+            
+                    expect(outputRule).toEqual(rule);
+                });
             });
         });
     });

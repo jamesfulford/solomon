@@ -1,14 +1,16 @@
 import RRule, { Options } from "rrule";
 import { IApiRuleMutate } from "../IRule";
-import { ONCE, WorkingState } from "./types";
+import { extractHebrew } from "./hebrew";
+import { ONCE, SupportedFrequency, WorkingState, YEARLY_HEBREW } from "./types";
 
 
 function workingStateRRuleToString(rrule: WorkingState['rrule']): string {
-    // normally goes to RRule package, but:
-    // - freq === "ONCE"
-    // - dtstart and until translate
+    // serializing rrule for sending from UI to API.
+    // inverse of stringToWorkingStateRRule
 
-    // - TODO: yearly hebrew
+    if (rrule.freq === YEARLY_HEBREW) {
+        return `X-YEARLY-HEBREW: ${rrule.byhebrewmonth || 1}, ${rrule.byhebrewday || 1}`;
+    }
 
     if (rrule.freq === ONCE) {
         return new RRule({
@@ -19,9 +21,9 @@ function workingStateRRuleToString(rrule: WorkingState['rrule']): string {
     }
     
     // at this point it isn't "ONCE"
-    const freq = Number(rrule.freq) as Options["freq"];
+    const freq = rrule.freq as Options["freq"];
 
-    const rruleOptions = {
+    let rruleOptions = {
         ...rrule,
         freq,
         dtstart: rrule.dtstart ? new Date(rrule.dtstart) : undefined,
@@ -38,31 +40,46 @@ function workingStateRRuleToString(rrule: WorkingState['rrule']): string {
         byweekno: undefined,
         byeaster: undefined,
     };
+    
+    // Override what might be in `rrule`
+    delete rruleOptions['byhebrewmonth']
+    delete rruleOptions['byhebrewday']
 
     return new RRule(rruleOptions).toString();
 }
 
 function stringToWorkingStateRRule(rrulestring: string): WorkingState['rrule'] {
     // inverse of workingStateRRuleToString, for editing
+
+    const hebrewExtraction = extractHebrew(rrulestring);
+    if (hebrewExtraction) {
+        return {
+            freq: YEARLY_HEBREW,
+            ...hebrewExtraction,
+        }
+    }
     
     const rrule = RRule.fromString(rrulestring);
     const libraryInferredOptions = rrule.options;
     const parsedOptions = rrule.origOptions;
-
+    parsedOptions.freq = Number(parsedOptions.freq);
 
     if (![
         RRule.YEARLY,
         RRule.MONTHLY,
         RRule.WEEKLY,
-    ].includes(Number(parsedOptions.freq))) {
+        undefined,
+    ].includes(parsedOptions.freq)) {
         throw new Error("Unsupported frequency specified in rule: " + rrulestring);
     }
+
+    const freq = parsedOptions.freq as SupportedFrequency;
 
     const dtstart = parsedOptions.dtstart?.toISOString().split("T")[0];
     const until = parsedOptions.until?.toISOString().split("T")[0];
     return {
         ...parsedOptions,
-        freq: libraryInferredOptions.count === 1 ? ONCE : parsedOptions.freq,
+        freq: libraryInferredOptions.count === 1 ? ONCE : freq,
 
         dtstart,
         until,
@@ -98,6 +115,9 @@ const defaultValues: WorkingState = {
         interval: 1,
         dtstart: '',
         until: '',
+
+        // byhebrewmonth: 1,
+        // byhebrewday: 1,
     },
 
     lowvalue: '',
