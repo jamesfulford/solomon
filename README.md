@@ -19,3 +19,9 @@ DEBUG= docker-compose run -p 3001:3001 --rm --no-deps solomon python manage.py t
 # Shut down
 docker-compose down
 ```
+
+## Prod
+
+```
+docker run -e "PMA_HOST=`cat secrets/db-host`" -p 8091:80 phpmyadmin/phpmyadmin
+```

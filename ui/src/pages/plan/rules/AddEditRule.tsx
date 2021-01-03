@@ -186,7 +186,12 @@ export const AddEditRule = ({
             
             const interval = props.getFieldMeta('rrule.interval').value as WorkingState["rrule"]["interval"] || 1;
 
-            const currentRRule = new RRule(RRule.parseString(workingStateRRuleToString(props.getFieldMeta("rrule").value as WorkingState["rrule"])));
+            let currentRRule: RRule | undefined;
+            try {
+                currentRRule = new RRule(RRule.parseString(workingStateRRuleToString(props.getFieldMeta("rrule").value as WorkingState["rrule"])));
+            } catch {
+                console.warn('Was not able to parse rrule', props.getFieldMeta("rrule").value);
+            }
 
             return <Form>
                 <div className="form-inline d-flex justify-content-between">
@@ -358,17 +363,30 @@ export const AddEditRule = ({
                     {(() => {
                         const _value = props.getFieldMeta("value").value as WorkingState["value"];
                         const value = Number(_value) || 0;
+
+                        let message = '';
+                        if (isOnce) {
+                            message = 'once'
+                            if (currentRRule) {
+                                message = `once on ${currentRRule.all()[0].toISOString().split('T')[0]}`;
+                            }
+                        } else {
+                            if (currentRRule) {
+                                message = currentRRule.toText();
+                            }
+                        }
+
                         return <p className="m-0">
-                            {(value && Number.isFinite(value)) ? <Currency value={value} /> : 'Occurs'} {isOnce ? `once on ${currentRRule.all()[0].toISOString().split('T')[0]}` : currentRRule.toText()}
+                            {(value && Number.isFinite(value)) ? <Currency value={value} /> : 'Occurs'} {message}
                         </p>
                     })()}
                     
-                    {!isOnce && (() => {
+                    {(!isOnce && currentRRule)&& (() => {
                         // Next 2 days
                         const [next, oneAfter] = currentRRule.all((d, index) => index <= 1)
                             .map(d => d.toISOString().split("T")[0]);
                         
-                        return <p className="m-0">Next is {next}, then {oneAfter}.</p>
+                        return <p className="m-0">Next is {next}{oneAfter && `, then ${oneAfter}`}</p>
                     })()}
                 </div>
             
