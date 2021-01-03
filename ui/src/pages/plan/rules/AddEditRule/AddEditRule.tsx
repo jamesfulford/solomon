@@ -1,137 +1,19 @@
 import React, { useState } from 'react';
-import RRule, { ByWeekday, Options } from 'rrule';
-import { IApiRuleMutate } from './IRule';
+import RRule, { ByWeekday } from 'rrule';
 import './AddEditRule.css'
 import { Field, FieldArray, FieldProps, Form, Formik } from 'formik';
-import { Currency } from '../../../components/currency/Currency';
+import { Currency } from '../../../../components/currency/Currency';
+import { WorkingState, ONCE, YEARLY_HEBREW } from './types';
+import { IApiRuleMutate } from '../IRule';
+import { convertWorkingStateToApiRuleMutate, ruleToWorkingState, workingStateRRuleToString } from './translation';
 
 
-type WorkingState = Omit<
-    Omit<
-        IApiRuleMutate,
-        'rrule'
-    >, 
-    'value'
-> & {
-    // omit overrides
-    rrule: Partial<
-        Omit<Omit<Omit<
-            Options,
-            'freq'>,
-            'dtstart'>,
-            'until'> 
-        & {
-        freq: Options['freq'] | 'ONCE';
-
-        dtstart?: string;
-        until?: string;
-    }>,
-    value: string,
-
-    // working state needed in submission
-    lowvalue: string,
-    highvalue: string,
-};
-
-function workingStateRRuleToString(rrule: WorkingState['rrule']): string {
-    // normally goes to RRule package, but:
-    // - freq === "ONCE"
-    // - dtstart and until translate
-
-    // - TODO: yearly hebrew
-
-    if (rrule.freq === "ONCE") {
-        return new RRule({
-            freq: RRule.YEARLY,
-            count: 1,
-            dtstart: rrule.dtstart ? new Date(rrule.dtstart) : undefined,
-        }).toString();
-    }
-    
-    // at this point it isn't "ONCE"
-    const freq = Number(rrule.freq) as Options["freq"];
-
-    const rruleOptions = {
-        ...rrule,
-        freq,
-        dtstart: rrule.dtstart ? new Date(rrule.dtstart) : undefined,
-        until: rrule.until ? new Date(rrule.until) : undefined,
-        bymonthday: freq === RRule.MONTHLY ? rrule.bymonthday : undefined,
-        byweekday: freq === RRule.WEEKLY ? rrule.byweekday : undefined,
-        count: undefined,
-    };
-
-    return new RRule(rruleOptions).toString();
+function frequencyIsIn(freq: WorkingState['rrule']['freq'], freqs: WorkingState['rrule']['freq'][]): boolean {
+    return freqs.includes(freq);
 }
 
-function stringToWorkingStateRRule(rrulestring: string): WorkingState['rrule'] {
-    // inverse of workingStateRRuleToString, for editing
-    
-    const parsedOptions = RRule.fromString(rrulestring).options;
-    const dtstart = parsedOptions.dtstart?.toISOString().split("T")[0];
-    const until = parsedOptions.until?.toISOString().split("T")[0];
-    return {
-        ...parsedOptions,
-        freq: parsedOptions.count === 1 ? 'ONCE' : parsedOptions.freq,
-
-        dtstart,
-        until,
-    };
-}
-
-
-function convertWorkingStateToApiRuleMutate(fields: WorkingState, flags: any): IApiRuleMutate {
-
-    return {
-        name: fields.name,
-        value: Number(fields.value),
-
-        rrule: workingStateRRuleToString(fields.rrule),
-
-        labels: flags.isHighLowEnabled ? {
-            ...fields.labels,
-            'uncertainty': fields.lowvalue || fields.highvalue,
-            'highUncertainty': fields.highvalue ? Number(fields.highvalue) : Number(fields.value),
-            'lowUncertainty': fields.lowvalue ? Number(fields.lowvalue) : Number(fields.value),
-        }: fields.labels,
-    };
-}
-
-const defaultValues: WorkingState = {
-    rrule: {
-        freq: RRule.MONTHLY,
-        bymonthday: 1,
-        interval: 1,
-        dtstart: '',
-        until: '',
-    },
-
-    lowvalue: '',
-    value: '', // input=number is a pain for users
-    highvalue: '',
-
-    name: '',
-    labels: {},
-};
-
-function ruleToWorkingState(rule?: IApiRuleMutate) {
-    if (!rule) {
-        return defaultValues;
-    }
-
-    return {
-        rrule: stringToWorkingStateRRule(rule.rrule),
-        name: rule.name,
-        labels: rule.labels,
-        value: String(rule.value),
-
-        lowvalue: String(rule?.labels?.lowUncertainty || ''),
-        highvalue: String(rule?.labels?.highUncertainty || ''),
-    }
-}
-
-
-function RulePreview({ isOnce, currentRRule, value }: { isOnce: boolean, currentRRule: RRule | undefined, value: number }) {
+function RulePreview({ currentRRule, value }: { currentRRule: RRule | undefined, value: number }) {
+    const isOnce = currentRRule?.origOptions.count === 1;
     let message = '';
     if (isOnce) {
         message = 'once'
@@ -141,20 +23,24 @@ function RulePreview({ isOnce, currentRRule, value }: { isOnce: boolean, current
     } else {
         if (currentRRule) {
             message = currentRRule.toText();
+        } else {
+            message = '...';
         }
     }
 
-    return <p className="m-0">
-        {(value && Number.isFinite(value)) ? <Currency value={value} /> : 'Occurs'} {message}
+    return <div>
+        <p className="m-0">
+            {(value && Number.isFinite(value)) ? <Currency value={value} /> : 'Occurs'} {message}
+        </p>
 
-        {(!isOnce && currentRRule)&& (() => {
+        {(!isOnce && currentRRule) && (() => {
             // Next 2 days
             const [next, oneAfter] = currentRRule.all((d, index) => index <= 1)
                 .map(d => d.toISOString().split("T")[0]);
             
             return <p className="m-0">Next is {next}{oneAfter && `, then ${oneAfter}`}</p>
         })()}
-    </p>
+    </div>
 }
 
 
@@ -205,9 +91,8 @@ export const AddEditRule = ({
     return <Formik initialValues={initialValues} onSubmit={submit}>
         {(props) => {
             const _freq = props.getFieldMeta('rrule.freq').value as WorkingState["rrule"]["freq"];
-            const isOnce = _freq === "ONCE";
-            // Sometimes its a string, sometimes its a number
-            const freq = isOnce ? _freq : Number(_freq);
+            // Sometimes its a string, sometimes its a number (bad library types)
+            const freq = frequencyIsIn(_freq, [ONCE, YEARLY_HEBREW]) ? _freq : Number(_freq);
 
             const byweekday = (
                 props.getFieldMeta('rrule.byweekday').value as WorkingState["rrule"]["byweekday"]
@@ -292,15 +177,21 @@ export const AddEditRule = ({
                             }: FieldProps) => <>
                                 <label htmlFor="Frequency" className="sr-only">Frequency</label>   
                                 <select className="form-control form-control-sm pl-1 pr-1" id="Frequency" {...field}>
-                                    <option value={RRule.WEEKLY}>Week{interval > 1 && 's'}</option>
-                                    <option value={RRule.MONTHLY}>Month</option>
-                                    <option value={RRule.YEARLY}>Year</option>
-                                    <option value={'ONCE'}>Once</option>
+                                    <option value={ONCE}>Once</option>
+                                    <optgroup label="Recurring">
+                                        <option value={RRule.WEEKLY}>Week{interval > 1 && 's'}</option>
+                                        <option value={RRule.MONTHLY}>Month{interval > 1 && 's'}</option>
+                                        <option value={RRule.YEARLY}>Year{interval > 1 && 's'}</option>
+                                    </optgroup>
+                                    
+                                    <optgroup label="Hebrew Calendar">
+                                        <option value={YEARLY_HEBREW}>Year</option>
+                                    </optgroup>
                                 </select>
                             </>}
                         </Field>
 
-                        {!isOnce && <Field name="rrule.interval">
+                        {frequencyIsIn(freq, [RRule.YEARLY, RRule.MONTHLY, RRule.WEEKLY]) && <Field name="rrule.interval">
                             {({
                                 field,
                             }: FieldProps) => <>
@@ -312,7 +203,7 @@ export const AddEditRule = ({
                     </div>
                     
                     {/* Monthly day-of-month selector */}
-                    {freq === RRule.MONTHLY && <Field name="rrule.bymonthday">
+                    {frequencyIsIn(freq, [RRule.MONTHLY]) && <Field name="rrule.bymonthday">
                         {({
                             field,
                         }: FieldProps) => <>
@@ -325,7 +216,7 @@ export const AddEditRule = ({
                     </Field>}
 
 
-                    {(freq === RRule.WEEKLY) && <div role="group" className="btn-group" aria-label="Days of Week" data-testid="dayofweekcontrol">
+                    {frequencyIsIn(freq, [RRule.WEEKLY]) && <div role="group" className="btn-group" aria-label="Days of Week" data-testid="dayofweekcontrol">
                         <FieldArray name="rrule.byweekday">
                             {(arrayHelpers) => {
                                 const days = [
@@ -360,7 +251,7 @@ export const AddEditRule = ({
                     </div>}
                 </div>
 
-                <div className="form-inline mt-2 d-flex justify-content-between">
+                {frequencyIsIn(freq, [RRule.YEARLY, RRule.MONTHLY, RRule.WEEKLY, ONCE]) && <div className="form-inline mt-2 d-flex justify-content-between">
                     {/* Start Date */}
                     <Field name="rrule.dtstart">
                         {({
@@ -370,7 +261,7 @@ export const AddEditRule = ({
                             <input
                                 className="form-control form-control-sm" placeholder="Start Date" id="Start"
                                 type="date" required={
-                                    (interval > 1) || isOnce || freq === RRule.YEARLY
+                                    (interval > 1) || frequencyIsIn(freq, [ONCE, RRule.YEARLY])
                                 }
                                 style={{ width: 150 }}
                                 {...field} />
@@ -378,7 +269,7 @@ export const AddEditRule = ({
                     </Field>
 
                     {/* End Date */}
-                    {!isOnce && <Field name="rrule.until">
+                    {frequencyIsIn(freq, [RRule.YEARLY, RRule.MONTHLY, RRule.WEEKLY]) && <Field name="rrule.until">
                         {({ field }: FieldProps) => <>
                             <label htmlFor="End" className="sr-only">End:</label>
                             <input
@@ -387,11 +278,11 @@ export const AddEditRule = ({
                                 type="date" {...field} />
                         </>}
                     </Field>}
-                </div>
+                </div>}
 
                 {/* Explaining input */}
                 <div className="alert alert-light p-0 m-0 mt-1 text-center">
-                    <RulePreview isOnce={isOnce} value={value} currentRRule={currentRRule} />
+                    <RulePreview value={value} currentRRule={currentRRule} />
                 </div>
             
                 {/* Submission / Actions */}
