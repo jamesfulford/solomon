@@ -130,6 +130,34 @@ function ruleToWorkingState(rule?: IApiRuleMutate) {
     }
 }
 
+
+function RulePreview({ isOnce, currentRRule, value }: { isOnce: boolean, currentRRule: RRule | undefined, value: number }) {
+    let message = '';
+    if (isOnce) {
+        message = 'once'
+        if (currentRRule) {
+            message = `once on ${currentRRule.all()[0].toISOString().split('T')[0]}`;
+        }
+    } else {
+        if (currentRRule) {
+            message = currentRRule.toText();
+        }
+    }
+
+    return <p className="m-0">
+        {(value && Number.isFinite(value)) ? <Currency value={value} /> : 'Occurs'} {message}
+
+        {(!isOnce && currentRRule)&& (() => {
+            // Next 2 days
+            const [next, oneAfter] = currentRRule.all((d, index) => index <= 1)
+                .map(d => d.toISOString().split("T")[0]);
+            
+            return <p className="m-0">Next is {next}{oneAfter && `, then ${oneAfter}`}</p>
+        })()}
+    </p>
+}
+
+
 export const AddEditRule = ({
     onCreate,
     onUpdate,
@@ -193,6 +221,8 @@ export const AddEditRule = ({
             } catch {
                 console.warn('Was not able to parse rrule', props.getFieldMeta("rrule").value);
             }
+
+            const value = Number(props.getFieldMeta("value").value as WorkingState["value"]) || 0;
 
             return <Form>
                 <div className="form-inline d-flex justify-content-between">
@@ -361,34 +391,7 @@ export const AddEditRule = ({
 
                 {/* Explaining input */}
                 <div className="alert alert-light p-0 m-0 mt-1 text-center">
-                    {(() => {
-                        const _value = props.getFieldMeta("value").value as WorkingState["value"];
-                        const value = Number(_value) || 0;
-
-                        let message = '';
-                        if (isOnce) {
-                            message = 'once'
-                            if (currentRRule) {
-                                message = `once on ${currentRRule.all()[0].toISOString().split('T')[0]}`;
-                            }
-                        } else {
-                            if (currentRRule) {
-                                message = currentRRule.toText();
-                            }
-                        }
-
-                        return <p className="m-0">
-                            {(value && Number.isFinite(value)) ? <Currency value={value} /> : 'Occurs'} {message}
-                        </p>
-                    })()}
-                    
-                    {(!isOnce && currentRRule)&& (() => {
-                        // Next 2 days
-                        const [next, oneAfter] = currentRRule.all((d, index) => index <= 1)
-                            .map(d => d.toISOString().split("T")[0]);
-                        
-                        return <p className="m-0">Next is {next}{oneAfter && `, then ${oneAfter}`}</p>
-                    })()}
+                    <RulePreview isOnce={isOnce} value={value} currentRRule={currentRRule} />
                 </div>
             
                 {/* Submission / Actions */}
