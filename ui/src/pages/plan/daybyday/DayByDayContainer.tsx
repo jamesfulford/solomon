@@ -34,7 +34,10 @@ interface IDayByDayApi {
             high: number;
             close: number;
         };
-    }[]
+    }[];
+    params: {
+        minimumEndDate: string;
+    }
 }
 
 const options = {
@@ -119,6 +122,14 @@ const DayByDayChart = ({ daybyday, chartType, setAside }: { daybyday: IDayByDayA
     }
 }
 
+
+function getComputedDurationDays(start: Date, minimumEndDate: string): number | undefined {
+    if (minimumEndDate) {
+        const computedEndDate = new Date(minimumEndDate);
+        return Math.round((computedEndDate.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
+    }
+}
+
 export const DayByDayContainer = ({ userid, currentTime, currentBalance, setAside }: { userid: string, currentTime: number, currentBalance: number, setAside: number }) => {
     const highLowEnabled = isHighLowEnabled(userid);
     const [chartType, setChartType] = useState<ChartTab>(ChartTab.DISPOSABLE_INCOME);
@@ -145,7 +156,7 @@ export const DayByDayContainer = ({ userid, currentTime, currentBalance, setAsid
         </div>
     }
 
-    const daybyday = data;
+    const daybyday = data as IDayByDayApi;
 
     if (!daybyday.daybydays.length) {
         return <Container className="text-center">
@@ -160,8 +171,7 @@ export const DayByDayContainer = ({ userid, currentTime, currentBalance, setAsid
         tabs.push(ChartTab.UNCERTAINTY);
     }
 
-    const computedEndDate = new Date(daybyday.params.minimumEndDate);
-    const computedDurationDays = Math.round((computedEndDate.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
+    const computedDurationDays = getComputedDurationDays(start, daybyday.params.minimumEndDate);
 
     return <>
         <ul className="nav nav-tabs">
@@ -177,7 +187,7 @@ export const DayByDayContainer = ({ userid, currentTime, currentBalance, setAsid
         </ul>
         <DayByDayChart chartType={chartType} daybyday={daybyday} setAside={setAside} /> 
         <div className="text-center">
-            <button className="btn btn-outline-primary btn-sm mr-1" onClick={() => {setQueryRangeDays(Math.min(90, computedDurationDays))}}>Default</button>
+            <button className="btn btn-outline-primary btn-sm mr-1" onClick={() => {setQueryRangeDays(Math.min(90, computedDurationDays || 90))}}>Default</button>
             {[
                 { days: 365, display: '1y', danger: false },
                 { days: 365 * 2, display: '2y', danger: false },
@@ -186,7 +196,12 @@ export const DayByDayContainer = ({ userid, currentTime, currentBalance, setAsid
                 { days: 365 * 20, display: '20y', danger: true },
                 { days: 365 * 30, display: '30y', danger: true },
             ]
-                .filter(({ days }) => days > computedDurationDays)
+                .filter(({ days }) => {
+                    if (!computedDurationDays) {
+                        return true;
+                    }
+                    return days > computedDurationDays;
+                })
                 .map(({ days, display, danger }) => {
                     return <button key={days} className={`btn ${danger ? 'btn-outline-danger' : 'btn-outline-primary'} btn-sm mr-1`} onClick={() => {setQueryRangeDays(days)}}>{display}</button>
                 })
