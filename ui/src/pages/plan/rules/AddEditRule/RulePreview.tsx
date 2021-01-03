@@ -3,6 +3,7 @@ import RRule from 'rrule';
 import { Currency } from '../../../../components/currency/Currency';
 import { IApiRuleMutate } from '../IRule';
 
+
 export function RulePreview({ rule }: { rule: IApiRuleMutate | undefined }) {
     let rrule: RRule | undefined;
     try {

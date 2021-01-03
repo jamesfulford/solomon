@@ -7,6 +7,7 @@ const rules = [
         value: -30,
         rrule: new RRule({
             freq: RRule.WEEKLY,
+            // multiple days are preserved
             byweekday: [RRule.MO, RRule.TH],
         }).toString(),
         labels: {},
@@ -60,6 +61,7 @@ const rules = [
             count: 1,
         }).toString(),
         labels: {
+            // assorted labels are preserved
             category: 'school'
         },
     },
@@ -77,9 +79,9 @@ const rulesWithUncertainty = [
 ]
 
 
-describe('add/edit translation', () => {
+describe('editing translation', () => {
     rules.forEach(rule => {
-        it(`editing should have no impact if editless ${rule.name}`, () => {
+        it(`should have no impact if editless ${rule.name}`, () => {
             const workingState = ruleToWorkingState(rule);
             const outputRule = convertWorkingStateToApiRuleMutate(workingState, {});
     
@@ -87,7 +89,7 @@ describe('add/edit translation', () => {
         });
     });
 
-    describe('isHighEnabled', () => {
+    describe('with isHighLowEnabled', () => {
         rules.forEach(rule => {
             it(`editing should add uncertainty if editless ${rule.name}`, () => {
                 const workingState = ruleToWorkingState(rule);
@@ -104,7 +106,7 @@ describe('add/edit translation', () => {
         });
 
         rulesWithUncertainty.forEach(rule => {
-            it(`editing should keep uncertainty labels if editless ${rule.name}`, () => {
+            it(`should keep uncertainty labels if editless ${rule.name}`, () => {
                 const workingState = ruleToWorkingState(rule);
                 const outputRule = convertWorkingStateToApiRuleMutate(workingState, { isHighLowEnabled: true });
         
