@@ -3,8 +3,7 @@ import { IApiRuleMutate } from "../IRule";
 import { ONCE, WorkingState } from "./types";
 
 
-// TODO: no export
-export function workingStateRRuleToString(rrule: WorkingState['rrule']): string {
+function workingStateRRuleToString(rrule: WorkingState['rrule']): string {
     // normally goes to RRule package, but:
     // - freq === "ONCE"
     // - dtstart and until translate

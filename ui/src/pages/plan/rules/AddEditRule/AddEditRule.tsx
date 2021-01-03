@@ -2,47 +2,15 @@ import React, { useState } from 'react';
 import RRule, { ByWeekday } from 'rrule';
 import './AddEditRule.css'
 import { Field, FieldArray, FieldProps, Form, Formik } from 'formik';
-import { Currency } from '../../../../components/currency/Currency';
 import { WorkingState, ONCE, YEARLY_HEBREW } from './types';
 import { IApiRuleMutate } from '../IRule';
-import { convertWorkingStateToApiRuleMutate, ruleToWorkingState, workingStateRRuleToString } from './translation';
+import { convertWorkingStateToApiRuleMutate, ruleToWorkingState } from './translation';
+import { RulePreview } from './RulePreview';
 
 
 function frequencyIsIn(freq: WorkingState['rrule']['freq'], freqs: WorkingState['rrule']['freq'][]): boolean {
     return freqs.includes(freq);
 }
-
-function RulePreview({ currentRRule, value }: { currentRRule: RRule | undefined, value: number }) {
-    const isOnce = currentRRule?.origOptions.count === 1;
-    let message = '';
-    if (isOnce) {
-        message = 'once'
-        if (currentRRule) {
-            message = `once on ${currentRRule.all()[0].toISOString().split('T')[0]}`;
-        }
-    } else {
-        if (currentRRule) {
-            message = currentRRule.toText();
-        } else {
-            message = '...';
-        }
-    }
-
-    return <div>
-        <p className="m-0">
-            {(value && Number.isFinite(value)) ? <Currency value={value} /> : 'Occurs'} {message}
-        </p>
-
-        {(!isOnce && currentRRule) && (() => {
-            // Next 2 days
-            const [next, oneAfter] = currentRRule.all((d, index) => index <= 1)
-                .map(d => d.toISOString().split("T")[0]);
-            
-            return <p className="m-0">Next is {next}{oneAfter && `, then ${oneAfter}`}</p>
-        })()}
-    </div>
-}
-
 
 export const AddEditRule = ({
     onCreate,
@@ -100,14 +68,12 @@ export const AddEditRule = ({
             
             const interval = props.getFieldMeta('rrule.interval').value as WorkingState["rrule"]["interval"] || 1;
 
-            let currentRRule: RRule | undefined;
+            let currentRule: IApiRuleMutate | undefined;
             try {
-                currentRRule = new RRule(RRule.parseString(workingStateRRuleToString(props.getFieldMeta("rrule").value as WorkingState["rrule"])));
+                currentRule = convertWorkingStateToApiRuleMutate(props.getFieldMeta("").value as WorkingState, flags);
             } catch {
-                console.warn('Was not able to parse rrule', props.getFieldMeta("rrule").value);
+                console.warn('Was not able to convert to rule', props.getFieldMeta("").value);
             }
-
-            const value = Number(props.getFieldMeta("value").value as WorkingState["value"]) || 0;
 
             return <Form>
                 <div className="form-inline d-flex justify-content-between">
@@ -282,7 +248,7 @@ export const AddEditRule = ({
 
                 {/* Explaining input */}
                 <div className="alert alert-light p-0 m-0 mt-1 text-center">
-                    <RulePreview value={value} currentRRule={currentRRule} />
+                    <RulePreview rule={currentRule} />
                 </div>
             
                 {/* Submission / Actions */}
