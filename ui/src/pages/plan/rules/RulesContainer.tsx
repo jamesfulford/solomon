@@ -64,7 +64,8 @@ export const RulesContainer = ({ userid, onRefresh = () => {} }: { userid: strin
             console.warn("Attempted to update rule without rule selected. Ignoring. (this should never happen)");
             return;
         }
-        return updateExistingRule(selectedRuleId, rule);
+        return updateExistingRule(selectedRuleId, rule)
+            .then(() => setSelectedRuleId(undefined));
     }, [selectedRuleId, updateExistingRule]);
 
     const onDelete = useCallback(async () => {

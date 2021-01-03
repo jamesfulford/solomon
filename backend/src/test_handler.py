@@ -259,6 +259,38 @@ class HandlerTests(TestCase):
 
         self.assertEqual(expected, actual)
 
+    
+    def test_get_instances_from_rules_hebrew(self):
+        actual = get_transactions(
+            ExecutionParameters(
+                date(2021, 9, 1),
+                date(2021, 9, 30),
+                0,
+                0
+            ),
+            ExecutionRules({
+                'rule-1': {
+                    # Yom Kippur
+                    "rule": "X-YEARLY-HEBREW: 7, 10",
+                    "value": -100
+                }
+            })
+        )
+
+        expected = [{
+            "rule_id": "rule-1",
+            "id": "rule-1::2021-09-16",
+            "value": -100,
+            "day": date(2021, 9, 16),
+            "calculations": {
+                "balance": -100.0,
+                "working_capital": -100.0
+            },
+            "labels": {},
+        }]
+
+        self.assertEqual(expected, actual)
+
     def test_get_daybyday_from_rules_once(self):
         actual = get_daybyday(
             ExecutionParameters(

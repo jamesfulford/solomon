@@ -9,6 +9,7 @@ from convertdate import hebrew
 
 from .instance import Instance
 from .aggregators import calculate_balance, calculate_working_capital
+from .hebrew import extract_hebrew
 
 
 #
@@ -19,8 +20,6 @@ def to_heb_year_month_day(d):
 
 
 def hebrew_days(start, stop, holiday):
-    holiday = tuple(map(int, map(str.strip, holiday.split(","))))
-
     dates = []
 
     today = start
@@ -40,8 +39,10 @@ def hebrew_days(start, stop, holiday):
 def get_dates(rule, parameters):
     start = parameters.start
     end = parameters.end
-    if "X-YEARLY-HEBREW:" in rule["rule"]:
-        return hebrew_days(start, end, rule["rule"].replace("X-YEARLY-HEBREW:", ""))
+
+    hebrew = extract_hebrew(rule["rule"])
+    if hebrew:
+        return hebrew_days(start, end, hebrew)
     
     dates = []
     rule_generator = iter(rrulestr(rule["rule"], dtstart=start))
