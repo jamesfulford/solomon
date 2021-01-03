@@ -126,7 +126,7 @@ describe('rules container', () => {
                 id: 'test-id-rent',
                 name: 'Rent',
                 userid: 'test',
-                rrule: 'FREQ=DAILY;INTERVAL=2;COUNT=4',
+                rrule: 'FREQ=WEEKLY;INTERVAL=1;COUNT=4',
                 value: -1000
             }]);
             // https://jestjs.io/docs/en/mock-function-api
@@ -205,7 +205,7 @@ describe('rules container', () => {
                 id: 'test-id-rent',
                 name: 'Rent',
                 userid: 'test',
-                rrule: 'FREQ=DAILY;INTERVAL=2;COUNT=4',
+                rrule: 'FREQ=WEEKLY;INTERVAL=2;COUNT=4',
                 value: -1000
             }]);
 

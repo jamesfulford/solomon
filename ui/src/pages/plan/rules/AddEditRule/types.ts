@@ -1,9 +1,15 @@
 import { IApiRuleMutate } from '../IRule';
-import { Options } from 'rrule';
+import RRule, { Options } from 'rrule';
 
 
 export const ONCE = 'ONCE';
 export const YEARLY_HEBREW = 'YEARLY-HEBREW';
+
+type SupportedFrequency = typeof RRule.YEARLY |
+    typeof RRule.MONTHLY |
+    typeof RRule.WEEKLY |
+    typeof ONCE |
+    typeof YEARLY_HEBREW;
 
 export type WorkingState = Omit<
     Omit<
@@ -20,7 +26,7 @@ export type WorkingState = Omit<
             'dtstart'>,
             'until'> 
         & {
-        freq: Options['freq'] | typeof ONCE | typeof YEARLY_HEBREW;
+        freq: SupportedFrequency;
 
         dtstart?: string;
         until?: string;

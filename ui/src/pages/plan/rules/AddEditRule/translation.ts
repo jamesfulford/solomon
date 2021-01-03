@@ -35,6 +35,8 @@ function workingStateRRuleToString(rrule: WorkingState['rrule']): string {
         byhour: undefined,
         byminute: undefined,
         bysecond: undefined,
+        byweekno: undefined,
+        byeaster: undefined,
     };
 
     return new RRule(rruleOptions).toString();
@@ -46,6 +48,15 @@ function stringToWorkingStateRRule(rrulestring: string): WorkingState['rrule'] {
     const rrule = RRule.fromString(rrulestring);
     const libraryInferredOptions = rrule.options;
     const parsedOptions = rrule.origOptions;
+
+
+    if (![
+        RRule.YEARLY,
+        RRule.MONTHLY,
+        RRule.WEEKLY,
+    ].includes(Number(parsedOptions.freq))) {
+        throw new Error("Unsupported frequency specified in rule: " + rrulestring);
+    }
 
     const dtstart = parsedOptions.dtstart?.toISOString().split("T")[0];
     const until = parsedOptions.until?.toISOString().split("T")[0];

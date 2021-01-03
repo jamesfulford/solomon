@@ -18,6 +18,7 @@ const rules = [
         rrule: new RRule({
             freq: RRule.WEEKLY,
             byweekday: [RRule.SU],
+            interval: 1,
         }).toString(),
         labels: {},
     },
@@ -76,6 +77,24 @@ const rulesWithUncertainty = [
             highUncertainty: rules[0].value + 20,
         }
     }
+];
+
+const invalidRules = [
+    {
+        ...rules[0],
+        rrule: 'asdfwqerqw',
+    },
+    ...[
+        RRule.DAILY,
+        RRule.HOURLY,
+        RRule.MINUTELY,
+        RRule.SECONDLY,
+    ].map(freq => ({
+        ...rules[0],
+        rrule: new RRule({
+            freq,
+        }).toString(),
+    })),
 ]
 
 
@@ -111,6 +130,42 @@ describe('editing translation', () => {
                 const outputRule = convertWorkingStateToApiRuleMutate(workingState, { isHighLowEnabled: true });
         
                 expect(outputRule).toEqual(rule);
+            });
+        });
+    });
+
+    describe('canonicalization', () => {
+      it(`should canonicalize byhour byminute bysecond byweekno byeaster wkst count!=1`, () => {
+            const rule = {
+                ...rules[0],
+                rrule: new RRule({
+                    freq: RRule.WEEKLY,
+                    byhour: 2,
+                    byminute: 4,
+                    bysecond: 21,
+                    byweekno: 1,
+                    byeaster: 1,
+                    wkst: RRule.WE,
+                    count: 4,
+                }).toString(),
+            };
+            const workingState = ruleToWorkingState(rule);
+            const outputRule = convertWorkingStateToApiRuleMutate(workingState, {});
+    
+            expect(outputRule).toEqual({
+                ...rule,
+                rrule: new RRule({
+                    freq: RRule.WEEKLY,
+                }).toString(),
+            });
+        });
+    });
+
+
+    describe('unsupported rules', () => {
+        invalidRules.forEach(rule => {
+            it(`should throw error for ${rule.rrule}`, () => {
+                expect(() => ruleToWorkingState(rule)).toThrowError();
             });
         });
     });
