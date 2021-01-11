@@ -1,5 +1,6 @@
 import { IApiTransaction } from "../../../pages/plan/transactions/ITransaction";
 import TransactionsService from "../../../services/TransactionsService";
+import { IParameters } from "../parameters";
 
 export enum TransactionsType {
     SET = "transactions/set",
@@ -40,20 +41,10 @@ export type TransactionAction =
     | SetTransactionsStatusAction;
 
 
-export function fetchTransactions(
-    start: string,
-    end: string,
-    currentBalance: number,
-    setAside: number,
-) {
+export function fetchTransactions(params: IParameters) {
     return (dispatch: any) => {
         dispatch(setTransactionsStatus(RequestStatus.LOADING));
-        return TransactionsService.fetchTransactions(
-            start,
-            end,
-            currentBalance,
-            setAside
-        )
+        return TransactionsService.fetchTransactions(params)
             .then(transactions => {
                 dispatch(setTransactions(transactions));
                 dispatch(setTransactionsStatus(RequestStatus.STABLE));

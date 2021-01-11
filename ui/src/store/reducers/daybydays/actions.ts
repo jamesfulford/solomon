@@ -1,5 +1,6 @@
 import { IApiDayByDay } from "../../../pages/plan/daybyday/DayByDayContainer";
 import DayByDayService from "../../../services/DayByDayService";
+import { IParameters } from "../parameters";
 
 export enum DayByDayType {
     SET = "daybyday/set",
@@ -41,19 +42,13 @@ export type DayByDayAction =
 
 
 export function fetchDayByDays(
-    start: string,
-    end: string,
-    currentBalance: number,
-    setAside: number,
+    params: IParameters,
     highLowEnabled: boolean,
 ) {
     return (dispatch: any) => {
         dispatch(setDayByDaysStatus(RequestStatus.LOADING));
         return DayByDayService.fetchDayByDays(
-            start,
-            end,
-            currentBalance,
-            setAside,
+            params,
             highLowEnabled,
         )
             .then(dayByDays => {

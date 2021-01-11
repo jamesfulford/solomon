@@ -12,7 +12,7 @@ const initialState = {
         setAside: 0,
         startDate: currentDate.toISOString().split("T")[0],
         // 90 days later
-        endDate: new Date(currentDate.getTime() + (1000 + 60 * 60 * 24 * 90)).toISOString().split("T")[0],
+        endDate: new Date(currentDate.getTime() + (1000 * 60 * 60 * 24 * 90)).toISOString().split("T")[0],
     },
     status: RequestStatus.STABLE,
 };

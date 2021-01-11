@@ -8,7 +8,7 @@ export interface DayByDaysState {
 
 const initialState = {
     response: undefined,
-    status: RequestStatus.STABLE,
+    status: RequestStatus.LOADING,
 };
 
 export default (

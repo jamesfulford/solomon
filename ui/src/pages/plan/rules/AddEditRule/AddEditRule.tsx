@@ -7,6 +7,7 @@ import { IApiRuleMutate } from '../IRule';
 import { convertWorkingStateToApiRuleMutate, ruleToWorkingState } from './translation';
 import { RulePreview } from './RulePreview';
 import { hebrewMonthToDisplayNameMap } from './hebrew';
+import { IFlags } from '../../../../store/reducers/flags';
 
 
 function frequencyIsIn(freq: WorkingState['rrule']['freq'], freqs: WorkingState['rrule']['freq'][]): boolean {
@@ -17,13 +18,13 @@ export const AddEditRule = ({
     onCreate,
     onUpdate,
     onDelete,
-    flags = {},
+    flags,
     rule
 }: {
     onCreate: (rule: IApiRuleMutate) => Promise<void>,
     onUpdate: (rule: IApiRuleMutate) => Promise<void>,
     onDelete: () => Promise<void>,
-    flags?: { isHighLowEnabled?: boolean },
+    flags?: IFlags,
     rule?: IApiRuleMutate,
 }) => {
     const [intentionToCopy, setIntentionToCopy] = useState(false);
@@ -97,7 +98,7 @@ export const AddEditRule = ({
                         </>}
                     </Field>}
 
-                    { flags.isHighLowEnabled && <div>
+                    { flags?.highLowEnabled && <div>
                         <button type="button" className="btn btn-link" onClick={() => setValueInputMode(x => {
                             // Toggle
                             return x === ValueInputMode.VALUE ? ValueInputMode.HIGH_MID_LOW : ValueInputMode.VALUE;

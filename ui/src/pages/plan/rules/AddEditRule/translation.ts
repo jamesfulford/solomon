@@ -1,4 +1,5 @@
 import RRule, { Options } from "rrule";
+import { IFlags } from "../../../../store/reducers/flags";
 import { IApiRuleMutate } from "../IRule";
 import { extractHebrew } from "./hebrew";
 import { ONCE, SupportedFrequency, WorkingState, YEARLY_HEBREW } from "./types";
@@ -87,10 +88,10 @@ function stringToWorkingStateRRule(rrulestring: string): WorkingState['rrule'] {
 }
 
 
-export function convertWorkingStateToApiRuleMutate(fields: WorkingState, flags: { isHighLowEnabled?: boolean }): IApiRuleMutate {
+export function convertWorkingStateToApiRuleMutate(fields: WorkingState, flags?: IFlags): IApiRuleMutate {
 
     const labels = { ...fields.labels };
-    if (flags.isHighLowEnabled) {
+    if (flags?.highLowEnabled) {
         labels.uncertainty = Boolean(fields.lowvalue || fields.highvalue);
         if (labels.uncertainty) {
             labels.highUncertainty = fields.highvalue ? Number(fields.highvalue) : Number(fields.value);

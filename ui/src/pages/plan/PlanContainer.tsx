@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import Container from 'react-bootstrap/Container';
 import { RulesContainer } from './rules/RulesContainer';
 import { TransactionsContainer } from './transactions/TransactionsContainer';
@@ -12,11 +12,6 @@ import { useToken } from './getTokenHook';
 
 
 export const PlanContainer = () => {
-    const [currentTime, setCurrentTime] = useState(Date.now());
-    const onRefresh = useCallback(() => {
-        setCurrentTime(Date.now());
-    }, [])
-
     const { isAuthenticated, isLoading, loginWithRedirect, user } = useAuth0();
     const token = useToken();
     const [currentBalance, setCurrentBalance] = useState('');
@@ -58,17 +53,17 @@ export const PlanContainer = () => {
                 <Container className="text-center">
                     <h4>Rules</h4>
                 </Container>
-                <RulesContainer userid={userid} onRefresh={onRefresh} />
+                <RulesContainer />
             </Col>
             <Col lg={9}>
                 <Container className="text-center">
                     <h4 data-testid="transactions">Upcoming Transactions</h4>
                 </Container>
                 <div style={{ minHeight: 450 }}>
-                    <DayByDayContainer userid={userid} currentTime={currentTime} currentBalance={Number(currentBalance)} setAside={Number(setAside)} />
+                    <DayByDayContainer userid={userid} currentTime={Date.now()} currentBalance={Number(currentBalance)} setAside={Number(setAside)} />
                 </div>
                 <hr />
-                <TransactionsContainer currentTime={currentTime} currentBalance={Number(currentBalance)} setAside={Number(setAside)} />
+                <TransactionsContainer />
             </Col>
         </Row>
     </Container>

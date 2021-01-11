@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import Chart from "react-google-charts";
-import useAxios from 'axios-hooks'
 import Container from 'react-bootstrap/Container';
-import { isHighLowEnabled } from '../../../flags';
+import { getFlags } from '../../../store/reducers/flags/getters';
+import { useSelector } from 'react-redux';
+import { getDayByDay } from '../../../store/reducers/daybydays/getters';
+import { getParameters } from '../../../store/reducers/parameters/getters';
+import { useThunkDispatch } from '../../../useDispatch';
+import { setParameters } from '../../../store/reducers/parameters';
 
-
-const baseUrl = process.env.REACT_APP_BASE_URL || '';
 
 export interface IApiDayByDay {
     daybydays: {
@@ -123,24 +125,34 @@ const DayByDayChart = ({ daybyday, chartType, setAside }: { daybyday: IApiDayByD
 }
 
 
-function getComputedDurationDays(start: Date, minimumEndDate: string): number | undefined {
+function getComputedDurationDays(startDate: string, minimumEndDate: string): number | undefined {
     if (minimumEndDate) {
+        const start = new Date(startDate);
         const computedEndDate = new Date(minimumEndDate);
         return Math.round((computedEndDate.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
     }
 }
 
 export const DayByDayContainer = ({ userid, currentTime, currentBalance, setAside }: { userid: string, currentTime: number, currentBalance: number, setAside: number }) => {
-    const highLowEnabled = isHighLowEnabled(userid);
-    const [chartType, setChartType] = useState<ChartTab>(ChartTab.DISPOSABLE_INCOME);
-    const [queryRangeDays, setQueryRangeDays] = useState(90);
+    const {
+        flags: { highLowEnabled },
+        daybydays: { data, loading, error },
+        startDate
+    } = useSelector(state => ({
+        flags: getFlags(state as any),
+        daybydays: getDayByDay(state as any),
+        startDate: getParameters(state as any).data.startDate,
+    }));
 
-    const start = new Date(currentTime);
-    const end = new Date(currentTime + (queryRangeDays * 24 * 60 * 60 * 1000))
-    
-    const [{ data, loading, error }] = useAxios(
-        `${baseUrl}/api/daybydays?${highLowEnabled ? 'highLow&' : ''}startDate=${start.toISOString()}&endDate=${end.toISOString()}&currentBalance=${currentBalance}&setAside=${setAside}`
-    );
+    const dispatch = useThunkDispatch();
+
+    const setQueryRangeDays = useCallback((computedDurationDays: number) => {
+        const start = new Date(startDate);
+        const durationMs = 1000 * 60 * 60 * 24 * computedDurationDays;
+        dispatch(setParameters({ endDate: new Date(start.getTime() + durationMs).toISOString().split('T')[0] }));
+    }, [startDate, dispatch])
+
+    const [chartType, setChartType] = useState<ChartTab>(ChartTab.DISPOSABLE_INCOME);
 
     if (loading) {
         return <div style={{ minHeight: '100%', width: '100%' }} className="text-center">
@@ -156,9 +168,9 @@ export const DayByDayContainer = ({ userid, currentTime, currentBalance, setAsid
         </div>
     }
 
-    const daybyday = data as IApiDayByDay;
+    const daybyday = data;
 
-    if (!daybyday.daybydays.length) {
+    if (!daybyday?.daybydays.length) {
         return <Container className="text-center">
             <p data-testid="daybyday-empty">Nothing's here...</p>
         </Container>
@@ -167,11 +179,11 @@ export const DayByDayContainer = ({ userid, currentTime, currentBalance, setAsid
     const tabs = [
         ChartTab.DISPOSABLE_INCOME
     ];
-    if (isHighLowEnabled(userid)) {
+    if (highLowEnabled) {
         tabs.push(ChartTab.UNCERTAINTY);
     }
 
-    const computedDurationDays = getComputedDurationDays(start, daybyday.params.minimumEndDate);
+    const computedDurationDays = getComputedDurationDays(startDate, daybyday.params.minimumEndDate);
 
     return <>
         <ul className="nav nav-tabs">
