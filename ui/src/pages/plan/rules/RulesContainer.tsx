@@ -2,11 +2,11 @@ import React, { useCallback, useState } from 'react'
 import { IApiRule, IApiRuleMutate } from './IRule';
 import { Rule } from './Rule';
 import useAxios from 'axios-hooks'
-import axios from 'axios';
 import sortBy from 'lodash/sortBy';
 import Container from 'react-bootstrap/Container';
 import { isHighLowEnabled } from '../../../flags';
 import { AddEditRule } from './AddEditRule';
+import RulesService from '../../../services/RulesService';
 
 
 const baseUrl = process.env.REACT_APP_BASE_URL || '';
@@ -24,15 +24,15 @@ export const RulesContainer = ({ userid, onRefresh = () => {} }: { userid: strin
     }, [refetch, onRefresh])
 
     const createNewRule = useCallback((rule: IApiRuleMutate) => {
-        return axios.post(`${baseUrl}/api/rules`, rule)
-            .then((response) => {
-                console.log('Created rule', response.data);
+        RulesService.createRule(rule)
+            .then((rule) => {
+                console.log('Created rule', rule);
                 triggerRefresh();
             });
     }, [triggerRefresh]);
 
     const deleteHandler = useCallback((id: string) => {
-        return axios.delete(`${baseUrl}/api/rules/${id}`)
+        return RulesService.deleteRule(id)
             .then(() => {
                 triggerRefresh();
             })
@@ -43,9 +43,9 @@ export const RulesContainer = ({ userid, onRefresh = () => {} }: { userid: strin
     }, [triggerRefresh]);
 
     const updateExistingRule = useCallback((id: string, rule: IApiRuleMutate) => {
-        return axios.put(`${baseUrl}/api/rules/${id}`, rule)
-            .then((response) => {
-                console.log('Updated rule', response.data);
+        return RulesService.updateRule(id, rule)
+            .then((rule) => {
+                console.log('Updated rule', rule);
                 triggerRefresh();
             })
             .catch((e) => {

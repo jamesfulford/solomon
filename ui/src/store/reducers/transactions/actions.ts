@@ -1,0 +1,66 @@
+import { IApiTransaction } from "../../../pages/plan/transactions/ITransaction";
+import TransactionsService from "../../../services/TransactionsService";
+
+export enum TransactionsType {
+    SET = "transactions/set",
+    SET_STATUS = "transactions/status",
+}
+
+interface SetTransactionsAction {
+    type: TransactionsType.SET;
+    transactions: IApiTransaction[];
+}
+export function setTransactions(transactions: IApiTransaction[]): SetTransactionsAction {
+    return {
+        type: TransactionsType.SET,
+        transactions,
+    }
+}
+
+
+export enum RequestStatus {
+    STABLE = "STABLE",
+    LOADING = "LOADING",
+    ERROR = "ERROR",
+}
+interface SetTransactionsStatusAction {
+    type: TransactionsType.SET_STATUS;
+    status: RequestStatus;
+}
+export function setTransactionsStatus(status: RequestStatus): SetTransactionsStatusAction {
+    return {
+        type: TransactionsType.SET_STATUS,
+        status
+    }
+}
+
+// Aggregate
+export type TransactionAction =
+    | SetTransactionsAction
+    | SetTransactionsStatusAction;
+
+
+export function fetchTransactions(
+    start: string,
+    end: string,
+    currentBalance: number,
+    setAside: number,
+) {
+    return (dispatch: any) => {
+        dispatch(setTransactionsStatus(RequestStatus.LOADING));
+        return TransactionsService.fetchTransactions(
+            start,
+            end,
+            currentBalance,
+            setAside
+        )
+            .then(transactions => {
+                dispatch(setTransactions(transactions));
+                dispatch(setTransactionsStatus(RequestStatus.STABLE));
+            })
+            .catch(e => {
+                dispatch(setTransactionsStatus(RequestStatus.ERROR));
+                throw e;
+            })
+    }
+}

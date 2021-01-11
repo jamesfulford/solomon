@@ -7,7 +7,7 @@ import { isHighLowEnabled } from '../../../flags';
 
 const baseUrl = process.env.REACT_APP_BASE_URL || '';
 
-interface IDayByDayApi {
+export interface IApiDayByDay {
     daybydays: {
         date: string;
         balance: {
@@ -71,7 +71,7 @@ enum ChartTab {
 // - better x axis markers
 // - less coloring overlaps
 // - should not be a line chart, should be "steppy" like _| instead of / between points (still same as before)
-const DayByDayChart = ({ daybyday, chartType, setAside }: { daybyday: IDayByDayApi, chartType: ChartTab, setAside: number }) => {
+const DayByDayChart = ({ daybyday, chartType, setAside }: { daybyday: IApiDayByDay, chartType: ChartTab, setAside: number }) => {
     switch(chartType) {
         case ChartTab.DISPOSABLE_INCOME:
             const disposableIncomeData = [
@@ -156,7 +156,7 @@ export const DayByDayContainer = ({ userid, currentTime, currentBalance, setAsid
         </div>
     }
 
-    const daybyday = data as IDayByDayApi;
+    const daybyday = data as IApiDayByDay;
 
     if (!daybyday.daybydays.length) {
         return <Container className="text-center">
