@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Container from 'react-bootstrap/Container';
 import { RulesContainer } from './rules/RulesContainer';
 import { TransactionsContainer } from './transactions/TransactionsContainer';
@@ -10,11 +10,24 @@ import { useAuth0 } from '@auth0/auth0-react';
 import Button from 'react-bootstrap/Button';
 import { useToken } from './getTokenHook';
 import { ParametersContainer } from './ParametersContainer';
+import { useThunkDispatch } from '../../useDispatch';
+import { setFlags } from '../../store/reducers/flags';
+import { isHighLowEnabled } from '../../flags';
 
 
 export const PlanContainer = () => {
-    const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
+    const { isAuthenticated, isLoading, loginWithRedirect, user } = useAuth0();
     const token = useToken();
+
+    const dispatch = useThunkDispatch();
+    useEffect(() => {
+        if (user?.sub) {
+            const userid = user.sub;
+            dispatch(setFlags({
+                highLowEnabled: isHighLowEnabled(userid),
+            }));
+        }
+    }, [dispatch, user])
     
     if (!isLoading && !isAuthenticated) {
         return <Container className="justify-content-middle">
@@ -30,7 +43,7 @@ export const PlanContainer = () => {
         <Row>
             <Col className="d-flex align-items-middle flex-column align-items-stretch">
                 <div className="d-flex align-items-end mb-3">
-                    <Container className="text-center">
+                    <Container className="text-center p-0">
                         <h4>Parameters</h4>
                         <ParametersContainer />
                     </Container>
