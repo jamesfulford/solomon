@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Container from 'react-bootstrap/Container';
 import { RulesContainer } from './rules/RulesContainer';
 import { TransactionsContainer } from './transactions/TransactionsContainer';
@@ -9,13 +9,12 @@ import { DayByDayContainer } from './daybyday/DayByDayContainer';
 import { useAuth0 } from '@auth0/auth0-react';
 import Button from 'react-bootstrap/Button';
 import { useToken } from './getTokenHook';
+import { ParametersContainer } from './ParametersContainer';
 
 
 export const PlanContainer = () => {
-    const { isAuthenticated, isLoading, loginWithRedirect, user } = useAuth0();
+    const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
     const token = useToken();
-    const [currentBalance, setCurrentBalance] = useState('');
-    const [setAside, setSetAside] = useState('');
     
     if (!isLoading && !isAuthenticated) {
         return <Container className="justify-content-middle">
@@ -27,27 +26,13 @@ export const PlanContainer = () => {
         return null;
     }
 
-    const userid = user.sub;
-
     return <Container fluid style={{ paddingLeft: '10%', paddingRight: "10%" }}>
         <Row>
             <Col className="d-flex align-items-middle flex-column align-items-stretch">
                 <div className="d-flex align-items-end mb-3">
                     <Container className="text-center">
                         <h4>Parameters</h4>
-                        <label htmlFor="Balance" className="sr-only">Balance</label>
-                        <input className="form-control form-control-sm mb-2" id="Balance" type="text" placeholder="Balance" value={currentBalance} 
-                            maxLength={19} required pattern="-?[1-9][0-9]*\.?[0-9]{0,2}"
-                            onChange={e => {
-                                setCurrentBalance(e.target.value);
-                            }} />
-
-                        <label htmlFor="setAside" className="sr-only">Set Aside</label>
-                        <input className="form-control form-control-sm" id="setAside" type="text" placeholder="Set Aside" step="0.01" value={setAside}
-                            maxLength={19} required pattern="-?[1-9][0-9]*\.?[0-9]{0,2}"
-                            onChange={e => {
-                                setSetAside(e.target.value);
-                            }} />
+                        <ParametersContainer />
                     </Container>
                 </div>
                 <Container className="text-center">
@@ -60,7 +45,7 @@ export const PlanContainer = () => {
                     <h4 data-testid="transactions">Upcoming Transactions</h4>
                 </Container>
                 <div style={{ minHeight: 450 }}>
-                    <DayByDayContainer userid={userid} currentTime={Date.now()} currentBalance={Number(currentBalance)} setAside={Number(setAside)} />
+                    <DayByDayContainer />
                 </div>
                 <hr />
                 <TransactionsContainer />

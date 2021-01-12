@@ -1,3 +1,4 @@
+import { recalculation } from "../rules";
 
 export enum ParametersType {
     SET = "parameters/set",
@@ -15,10 +16,14 @@ interface SetParametersAction {
     type: ParametersType.SET;
     parameters: Partial<IParameters>
 }
-export function setParameters(parameters: Partial<IParameters>): SetParametersAction {
-    return {
-        type: ParametersType.SET,
-        parameters,
+export function setParameters(parameters: Partial<IParameters>) {
+    return (dispatch: any) => {
+        dispatch({
+            type: ParametersType.SET,
+            parameters,
+        });
+
+        dispatch(recalculation() as any)
     }
 }
 

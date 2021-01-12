@@ -133,15 +133,15 @@ function getComputedDurationDays(startDate: string, minimumEndDate: string): num
     }
 }
 
-export const DayByDayContainer = ({ userid, currentTime, currentBalance, setAside }: { userid: string, currentTime: number, currentBalance: number, setAside: number }) => {
+export const DayByDayContainer = () => {
     const {
         flags: { highLowEnabled },
         daybydays: { data, loading, error },
-        startDate
+        parameters: { startDate, setAside, }
     } = useSelector(state => ({
         flags: getFlags(state as any),
         daybydays: getDayByDay(state as any),
-        startDate: getParameters(state as any).data.startDate,
+        parameters: getParameters(state as any).data,
     }));
 
     const dispatch = useThunkDispatch();
@@ -149,7 +149,9 @@ export const DayByDayContainer = ({ userid, currentTime, currentBalance, setAsid
     const setQueryRangeDays = useCallback((computedDurationDays: number) => {
         const start = new Date(startDate);
         const durationMs = 1000 * 60 * 60 * 24 * computedDurationDays;
-        dispatch(setParameters({ endDate: new Date(start.getTime() + durationMs).toISOString().split('T')[0] }));
+        dispatch(setParameters({
+            endDate: new Date(start.getTime() + durationMs).toISOString().split('T')[0]
+        }) as any);
     }, [startDate, dispatch])
 
     const [chartType, setChartType] = useState<ChartTab>(ChartTab.DISPOSABLE_INCOME);

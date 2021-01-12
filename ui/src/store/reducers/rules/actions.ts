@@ -107,24 +107,32 @@ export function updateRule(id: string, rule: IApiRuleMutate) {
     }
 }
 
+export function recalculation() {
+    return (dispatch: any, getState: () => AppState) => {
+        const state = getState();
+
+        dispatch(fetchTransactions(
+            state.parameters.parameters,
+        ));
+        dispatch(fetchDayByDays(
+            state.parameters.parameters,
+            getIsHighLowEnabled(state),
+        ));
+    } 
+}
+
 
 export function fetchRules() {
-    return (dispatch: any, getState: () => AppState) => {
+    return (dispatch: any) => {
         dispatch(setRuleStatus(RequestStatus.LOADING));
+
+        // Calculations are in sync with rules in UI
+        // (can fire requests in parallel)
+        dispatch(recalculation());
+
         return RulesService.fetchRules()
             .then(rules => {
-                const state = getState();
                 dispatch(setRules(rules));
-
-                // Changing rules causes transactions and daybydays to change too
-                dispatch(fetchTransactions(
-                    state.parameters.parameters,
-                ));
-                dispatch(fetchDayByDays(
-                    state.parameters.parameters,
-                    getIsHighLowEnabled(state),
-                ));
-
                 dispatch(setRuleStatus(RequestStatus.STABLE));
             })
             .catch(e => {
