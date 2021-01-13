@@ -1,14 +1,13 @@
-import { RequestStatus, FlagsAction, FlagsType, IFlags } from "./actions";
+import { IFlags } from "../../../services/FlagService";
+import { RequestStatus, FlagsAction, FlagsType } from "./actions";
 
 export interface RuleState {
-    flags: IFlags,
+    flags?: IFlags,
     status: RequestStatus,
 };
 
 const initialState = {
-    flags: {
-        highLowEnabled: false,
-    },
+    flags: undefined,
     status: RequestStatus.STABLE,
 };
 
@@ -20,10 +19,7 @@ export default (
         case FlagsType.SET:
             return { 
                 ...state,
-                flags: {
-                    ...state.flags,
-                    ...action.flags,
-                }
+                flags: action.flags,
             };
         case FlagsType.SET_STATUS:
             return { ...state, status: action.status };

@@ -11,23 +11,30 @@ import Button from 'react-bootstrap/Button';
 import { useToken } from './getTokenHook';
 import { ParametersContainer } from './parameters/ParametersContainer';
 import { useThunkDispatch } from '../../useDispatch';
-import { setFlags } from '../../store/reducers/flags';
-import { isHighLowEnabled } from '../../flags';
+import { fetchFlags } from '../../store/reducers/flags';
+import { useSelector } from 'react-redux';
+import { getFlags } from '../../store/reducers/flags/getters';
 
 
 export const PlanContainer = () => {
-    const { isAuthenticated, isLoading, loginWithRedirect, user } = useAuth0();
+    const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
     const token = useToken();
 
     const dispatch = useThunkDispatch();
+    const {
+        flags
+    } = useSelector(state => ({
+        flags: getFlags(state as any),
+    }))
+
+    // get flags
     useEffect(() => {
-        if (user?.sub) {
-            const userid = user.sub;
-            dispatch(setFlags({
-                highLowEnabled: isHighLowEnabled(userid),
-            }));
+        if (isAuthenticated) {
+            dispatch(fetchFlags() as any);
         }
-    }, [dispatch, user])
+    }, [dispatch, isAuthenticated]);
+
+    // 
     
     if (!isLoading && !isAuthenticated) {
         return <Container className="justify-content-middle">
@@ -35,7 +42,13 @@ export const PlanContainer = () => {
         </Container>
     }
 
-    if (isLoading || !token) {
+
+    // Wait if...
+    if (
+        isLoading // loading user
+        || !token // getting token
+        || !flags // loading flags
+    ) {
         return null;
     }
 

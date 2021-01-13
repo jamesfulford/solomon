@@ -40,3 +40,5 @@ export class RulesApiService {
 }
 
 export const RulesService = new RulesApiService(process.env.REACT_APP_BASE_URL as string);
+
+(global as any).RulesService = RulesService;

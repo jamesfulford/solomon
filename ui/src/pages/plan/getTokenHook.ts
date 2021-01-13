@@ -12,8 +12,8 @@ export const useToken = () => {
         const getUserMetadata = async () => {      
           try {
             const accessToken = await getAccessTokenSilently();
-            setToken(accessToken);
             axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}1`;
+            setToken(accessToken);
           } catch (e) {
             console.error(e.message);
           }

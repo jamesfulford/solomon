@@ -62,6 +62,7 @@ def requires_scope(required_scope):
                     return response
 
             if decoded and decoded.get("scope"):
+                # logging.debug(decoded)
                 token_scopes = decoded["scope"].split()
                 for token_scope in token_scopes:
                     if token_scope == required_scope:

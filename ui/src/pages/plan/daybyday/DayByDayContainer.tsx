@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Chart from "react-google-charts";
 import Container from 'react-bootstrap/Container';
-import { getFlags } from '../../../store/reducers/flags/getters';
+import { getIsHighLowEnabled } from '../../../store/reducers/flags/getters';
 import { useSelector } from 'react-redux';
 import { getDayByDay } from '../../../store/reducers/daybydays/getters';
 import { getParameters } from '../../../store/reducers/parameters/getters';
@@ -94,11 +94,11 @@ const DayByDayChart = ({ daybyday, chartType, setAside }: { daybyday: IApiDayByD
 
 export const DayByDayContainer = () => {
     const {
-        flags: { highLowEnabled },
+        highLowEnabled,
         daybydays: { data, loading, error },
         parameters: { setAside, }
     } = useSelector(state => ({
-        flags: getFlags(state as any),
+        highLowEnabled: getIsHighLowEnabled(state as any),
         daybydays: getDayByDay(state as any),
         parameters: getParameters(state as any).data,
     }));

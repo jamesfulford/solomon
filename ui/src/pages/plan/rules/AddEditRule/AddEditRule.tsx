@@ -6,8 +6,9 @@ import { WorkingState, ONCE, YEARLY_HEBREW } from './types';
 import { convertWorkingStateToApiRuleMutate, ruleToWorkingState } from './translation';
 import { RulePreview } from './RulePreview';
 import { hebrewMonthToDisplayNameMap } from './hebrew';
-import { IFlags } from '../../../../store/reducers/flags';
 import { IApiRuleMutate } from '../../../../services/RulesService';
+import { useSelector } from 'react-redux';
+import { getIsHighLowEnabled } from '../../../../store/reducers/flags/getters';
 
 
 function frequencyIsIn(freq: WorkingState['rrule']['freq'], freqs: WorkingState['rrule']['freq'][]): boolean {
@@ -18,22 +19,24 @@ export const AddEditRule = ({
     onCreate,
     onUpdate,
     onDelete,
-    flags,
     rule
 }: {
     onCreate: (rule: IApiRuleMutate) => Promise<void>,
     onUpdate: (rule: IApiRuleMutate) => Promise<void>,
     onDelete: () => Promise<void>,
-    flags?: IFlags,
     rule?: IApiRuleMutate,
 }) => {
     const [intentionToCopy, setIntentionToCopy] = useState(false);
     const canUpdate = Boolean(rule && "id" in rule);
 
+    const { highLowEnabled } = useSelector(state => ({
+        highLowEnabled: getIsHighLowEnabled(state as any),
+    }));
+
     async function submit(fields: WorkingState, { setSubmitting }: any) {
         let final: IApiRuleMutate;
         try {
-            final = convertWorkingStateToApiRuleMutate(fields, flags);
+            final = convertWorkingStateToApiRuleMutate(fields, { highLowEnabled });
         } catch (e) {
             console.error(e)
             return;
@@ -72,7 +75,7 @@ export const AddEditRule = ({
 
             let currentRule: IApiRuleMutate | undefined;
             try {
-                currentRule = convertWorkingStateToApiRuleMutate(props.getFieldMeta("").value as WorkingState, flags);
+                currentRule = convertWorkingStateToApiRuleMutate(props.getFieldMeta("").value as WorkingState, { highLowEnabled });
             } catch {
                 console.warn('Was not able to convert to rule', props.getFieldMeta("").value);
             }
@@ -98,7 +101,7 @@ export const AddEditRule = ({
                         </>}
                     </Field>}
 
-                    { flags?.highLowEnabled && <div>
+                    { highLowEnabled && <div>
                         <button type="button" className="btn btn-link" onClick={() => setValueInputMode(x => {
                             // Toggle
                             return x === ValueInputMode.VALUE ? ValueInputMode.HIGH_MID_LOW : ValueInputMode.VALUE;

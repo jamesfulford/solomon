@@ -55,3 +55,5 @@ export class DayByDayApiService {
 }
 
 export const DayByDayService = new DayByDayApiService(process.env.REACT_APP_BASE_URL as string);
+
+(global as any).DayByDayService = DayByDayService;

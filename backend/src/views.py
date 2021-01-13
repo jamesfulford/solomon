@@ -159,6 +159,23 @@ def hello_world(request):
 
 
 #
+# Flags
+#
+
+@use_global_exception_handler
+@api_view(['GET'])
+@requires_scope("profile")
+def get_feature_flags(request, decoded):
+    userid = decoded['sub']
+
+    # high_low_enabled = userid == "auth0|5fef85c581637b00685d250c"
+    high_low_enabled = False
+
+    return Response({
+        "highLowEnabled": high_low_enabled,
+    })
+
+#
 # Execute
 #
 

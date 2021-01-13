@@ -1,18 +1,15 @@
+import { FlagService, IFlags } from "../../../services/FlagService";
 
 export enum FlagsType {
     SET = "parameters/set",
     SET_STATUS = "parameters/status",
 }
 
-export interface IFlags {
-    highLowEnabled: boolean;
-}
-
 interface SetFlagAction {
     type: FlagsType.SET;
-    flags: Partial<IFlags>
+    flags: IFlags
 }
-export function setFlags(flags: Partial<IFlags>): SetFlagAction {
+export function setFlags(flags: IFlags): SetFlagAction {
     return {
         type: FlagsType.SET,
         flags,
@@ -40,3 +37,18 @@ export function setFlagStatus(status: RequestStatus): SetFlagStatusAction {
 export type FlagsAction =
     | SetFlagAction
     | SetFlagStatusAction;
+
+
+export function fetchFlags() {
+    return (dispatch: any) => {
+        dispatch(setFlagStatus(RequestStatus.LOADING));
+        FlagService.fetchDayByDays()
+            .then(flags => {
+                dispatch(setFlags(flags));
+                dispatch(setFlagStatus(RequestStatus.STABLE));
+            })
+            .catch(() => {
+                dispatch(setFlagStatus(RequestStatus.ERROR));
+            })
+    }
+}

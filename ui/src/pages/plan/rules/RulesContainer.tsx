@@ -7,7 +7,6 @@ import { useThunkDispatch } from '../../../useDispatch';
 import { createRule, deleteRule, fetchRules, updateRule } from '../../../store/reducers/rules';
 import { useSelector } from 'react-redux';
 import { getRules } from '../../../store/reducers/rules/getters';
-import { getFlags } from '../../../store/reducers/flags/getters';
 import { IApiRule, IApiRuleMutate } from '../../../services/RulesService';
 
 
@@ -21,10 +20,8 @@ export const RulesContainer = () => {
 
     const {
         rules: { data, loading, error },
-        flags,
     } = useSelector(state => ({
         rules: getRules(state as any),
-        flags: getFlags(state as any),
     }))
 
 
@@ -62,7 +59,7 @@ export const RulesContainer = () => {
 
     if (loading) {
         return <>
-            <AddEditRule onCreate={createNewRule} onUpdate={onUpdate} onDelete={onDelete} flags={flags} />
+            <AddEditRule onCreate={createNewRule} onUpdate={onUpdate} onDelete={onDelete} />
             <div className="spinner-border" role="status">
                 <span data-testid="rules-loading" className="visually-hidden"></span>
             </div>
@@ -71,7 +68,7 @@ export const RulesContainer = () => {
     
     if (error) {
         return <>
-            <AddEditRule onCreate={createNewRule} onUpdate={onUpdate} onDelete={onDelete} flags={flags} />
+            <AddEditRule onCreate={createNewRule} onUpdate={onUpdate} onDelete={onDelete} />
             <p data-testid="rules-load-error">Oops! Looks like we can't get your rules right now. Try reloading the page.</p>
         </>
     }
@@ -80,7 +77,7 @@ export const RulesContainer = () => {
 
     if (!rules?.length) { // empty
         return <>
-            <AddEditRule onCreate={createNewRule} onUpdate={onUpdate} onDelete={onDelete} flags={flags} />
+            <AddEditRule onCreate={createNewRule} onUpdate={onUpdate} onDelete={onDelete} />
             <Container className="text-center">
                 <p data-testid="no-rules-found">You have no rules.</p>
             </Container>
@@ -92,7 +89,7 @@ export const RulesContainer = () => {
     const sortedRules = sortBy(rules, (r: IApiRule) => r.value);
     
     return <>
-        <AddEditRule onCreate={createNewRule} onUpdate={onUpdate} onDelete={onDelete} flags={flags} rule={selectedRule} key={selectedRuleId} />
+        <AddEditRule onCreate={createNewRule} onUpdate={onUpdate} onDelete={onDelete} rule={selectedRule} key={selectedRuleId} />
 
         {sortedRules.map(rule => <Rule rule={rule} showModal={(id) => {
             console.log(id);

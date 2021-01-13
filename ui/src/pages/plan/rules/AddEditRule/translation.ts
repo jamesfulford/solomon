@@ -1,6 +1,6 @@
 import RRule, { Options } from "rrule";
+import { IFlags } from "../../../../services/FlagService";
 import { IApiRuleMutate } from "../../../../services/RulesService";
-import { IFlags } from "../../../../store/reducers/flags";
 import { extractHebrew } from "./hebrew";
 import { ONCE, SupportedFrequency, WorkingState, YEARLY_HEBREW } from "./types";
 
@@ -88,7 +88,7 @@ function stringToWorkingStateRRule(rrulestring: string): WorkingState['rrule'] {
 }
 
 
-export function convertWorkingStateToApiRuleMutate(fields: WorkingState, flags?: IFlags): IApiRuleMutate {
+export function convertWorkingStateToApiRuleMutate(fields: WorkingState, flags: IFlags): IApiRuleMutate {
 
     const labels = { ...fields.labels };
     if (flags?.highLowEnabled) {

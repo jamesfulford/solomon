@@ -33,3 +33,5 @@ export class TransactionsApiService {
 }
 
 export const TransactionsService = new TransactionsApiService(process.env.REACT_APP_BASE_URL as string);
+
+(global as any).TransactionsService = TransactionsService;
