@@ -5,7 +5,7 @@ import { getFlags } from '../../../store/reducers/flags/getters';
 import { useSelector } from 'react-redux';
 import { getDayByDay } from '../../../store/reducers/daybydays/getters';
 import { getParameters } from '../../../store/reducers/parameters/getters';
-import { DurationSelector } from '../DurationSelector';
+import { DurationSelector } from '../parameters/DurationSelector';
 import { IApiDayByDay } from '../../../services/DayByDayService';
 
 const options = {

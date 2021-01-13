@@ -1,11 +1,11 @@
 import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
-import { IApiDayByDay } from '../../services/DayByDayService';
-import { getDayByDay } from '../../store/reducers/daybydays/getters';
-import { getFlags } from '../../store/reducers/flags/getters';
-import { setParameters } from '../../store/reducers/parameters';
-import { getParameters } from '../../store/reducers/parameters/getters';
-import { useThunkDispatch } from '../../useDispatch';
+import { IApiDayByDay } from '../../../services/DayByDayService';
+import { getDayByDay } from '../../../store/reducers/daybydays/getters';
+import { getFlags } from '../../../store/reducers/flags/getters';
+import { setParameters } from '../../../store/reducers/parameters';
+import { getParameters } from '../../../store/reducers/parameters/getters';
+import { useThunkDispatch } from '../../../useDispatch';
 
 
 function getComputedDurationDays(startDate: string, minimumEndDate: string): number | undefined {

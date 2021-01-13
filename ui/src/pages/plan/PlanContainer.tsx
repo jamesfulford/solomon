@@ -9,7 +9,7 @@ import { DayByDayContainer } from './daybyday/DayByDayContainer';
 import { useAuth0 } from '@auth0/auth0-react';
 import Button from 'react-bootstrap/Button';
 import { useToken } from './getTokenHook';
-import { ParametersContainer } from './ParametersContainer';
+import { ParametersContainer } from './parameters/ParametersContainer';
 import { useThunkDispatch } from '../../useDispatch';
 import { setFlags } from '../../store/reducers/flags';
 import { isHighLowEnabled } from '../../flags';
