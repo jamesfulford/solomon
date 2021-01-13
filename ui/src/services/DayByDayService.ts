@@ -1,6 +1,39 @@
 import axios from "axios";
-import { IApiDayByDay } from "../pages/plan/daybyday/DayByDayContainer";
 import { IParameters } from "../store/reducers/parameters";
+
+export interface IApiDayByDay {
+    daybydays: {
+        date: string;
+        balance: {
+            open: number;
+            low: number;
+            high: number;
+            close: number;
+        };
+        working_capital: {
+            open: number;
+            low: number;
+            high: number;
+            close: number;
+        };
+        high_prediction: {
+            open: number;
+            low: number;
+            high: number;
+            close: number;
+        };
+        low_prediction: {
+            open: number;
+            low: number;
+            high: number;
+            close: number;
+        };
+    }[];
+    params: {
+        minimumEndDate: string;
+    }
+}
+
 
 export class DayByDayService {
     constructor(private baseUrl: string) {}

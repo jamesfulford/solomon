@@ -1,5 +1,4 @@
-import { IApiDayByDay } from "../../../pages/plan/daybyday/DayByDayContainer";
-import DayByDayService from "../../../services/DayByDayService";
+import DayByDayService, { IApiDayByDay } from "../../../services/DayByDayService";
 import { IParameters } from "../parameters";
 
 export enum DayByDayType {

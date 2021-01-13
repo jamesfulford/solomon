@@ -1,5 +1,5 @@
 import { AppState } from "..";
-import { IApiDayByDay } from "../../../pages/plan/daybyday/DayByDayContainer";
+import { IApiDayByDay } from "../../../services/DayByDayService";
 import { RequestStatus } from "./actions";
 
 export function getDayByDay(state: AppState): {

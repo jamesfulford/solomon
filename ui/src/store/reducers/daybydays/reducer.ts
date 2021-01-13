@@ -1,4 +1,4 @@
-import { IApiDayByDay } from "../../../pages/plan/daybyday/DayByDayContainer";
+import { IApiDayByDay } from "../../../services/DayByDayService";
 import { RequestStatus, DayByDayAction, DayByDayType } from "./actions";
 
 export interface DayByDaysState {
