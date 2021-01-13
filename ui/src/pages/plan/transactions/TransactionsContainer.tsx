@@ -15,7 +15,7 @@ export function limitShownTransactions(transactions: IApiTransaction[]): IApiTra
 export const TransactionsContainer = () => {
     const {
         transactions: { data, loading, error },
-        parameters: { data: parameters }
+        parameters,
     } = useSelector(state => ({
         transactions: getTransactions(state as any),
         parameters: getParameters(state as any),

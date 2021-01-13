@@ -1,8 +1,8 @@
 import { FlagService, IFlags } from "../../../services/FlagService";
 
 export enum FlagsType {
-    SET = "parameters/set",
-    SET_STATUS = "parameters/status",
+    SET = "flags/set",
+    SET_STATUS = "flags/status",
 }
 
 interface SetFlagAction {

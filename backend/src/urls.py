@@ -8,5 +8,6 @@ urlpatterns = [
     path('api/daybydays', views.process_daybydays),     
     path('api/rules', views.rules_handler),
     path('api/flags', views.get_feature_flags),
+    path('api/parameters', views.get_parameters),
     path('api/rules/<str:rule_id>', views.rules_by_id_handler),    
 ]

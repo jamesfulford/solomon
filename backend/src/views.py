@@ -176,6 +176,23 @@ def get_feature_flags(request, decoded):
     })
 
 #
+# Parameters
+#
+
+@use_global_exception_handler
+@api_view(['GET'])
+@requires_scope("profile")
+def get_parameters(request, decoded):
+    userid = decoded['sub']
+
+    return Response({
+        "currentBalance": 0,
+        "setAside": 0,
+        "startDate": "2021-01-09",
+        "endDate": "2021-04-09",
+    })
+
+#
 # Execute
 #
 

@@ -96,11 +96,11 @@ export const DayByDayContainer = () => {
     const {
         highLowEnabled,
         daybydays: { data, loading, error },
-        parameters: { setAside, }
+        parameters: { setAside }
     } = useSelector(state => ({
         highLowEnabled: getIsHighLowEnabled(state as any),
         daybydays: getDayByDay(state as any),
-        parameters: getParameters(state as any).data,
+        parameters: getParameters(state as any),
     }));
 
 

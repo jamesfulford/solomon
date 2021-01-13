@@ -1,3 +1,4 @@
+import { ParameterService } from "../../../services/ParameterService";
 import { recalculation } from "../rules";
 
 export enum ParametersType {
@@ -48,3 +49,18 @@ export function setParametersStatus(status: RequestStatus): SetParametersStatusA
 export type ParametersAction =
     | SetParametersAction
     | SetParametersStatusAction;
+
+
+export function fetchParameters() {
+    return (dispatch: any) => {
+        dispatch(setParametersStatus(RequestStatus.LOADING));
+        ParameterService.fetchParameters()
+            .then(parameters => {
+                dispatch(setParameters(parameters));
+                dispatch(setParametersStatus(RequestStatus.STABLE));
+            })
+            .catch(() => {
+                dispatch(setParametersStatus(RequestStatus.ERROR));
+            });
+    }
+}

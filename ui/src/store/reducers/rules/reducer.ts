@@ -10,7 +10,7 @@ export interface RuleState {
 
 const initialState = {
     rulemap: {},
-    status: RequestStatus.STABLE,
+    status: RequestStatus.LOADING,
 };
 
 export default (

@@ -14,6 +14,8 @@ import { useThunkDispatch } from '../../useDispatch';
 import { fetchFlags } from '../../store/reducers/flags';
 import { useSelector } from 'react-redux';
 import { getFlags } from '../../store/reducers/flags/getters';
+import { getParametersStatuses } from '../../store/reducers/parameters/getters';
+import { fetchParameters } from '../../store/reducers/parameters';
 
 
 export const PlanContainer = () => {
@@ -22,15 +24,18 @@ export const PlanContainer = () => {
 
     const dispatch = useThunkDispatch();
     const {
-        flags
+        flags,
+        parameters: { loading: parametersLoading }
     } = useSelector(state => ({
         flags: getFlags(state as any),
+        parameters: getParametersStatuses(state as any),
     }))
 
     // get flags
     useEffect(() => {
         if (isAuthenticated) {
             dispatch(fetchFlags() as any);
+            dispatch(fetchParameters() as any);
         }
     }, [dispatch, isAuthenticated]);
 
@@ -48,6 +53,7 @@ export const PlanContainer = () => {
         isLoading // loading user
         || !token // getting token
         || !flags // loading flags
+        || parametersLoading // loading parameters
     ) {
         return null;
     }

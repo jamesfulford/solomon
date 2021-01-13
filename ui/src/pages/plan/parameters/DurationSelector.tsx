@@ -21,7 +21,7 @@ export const DurationSelector = () => {
         parameters: { startDate }
     } = useSelector(state => ({
         daybydays: getDayByDay(state as any),
-        parameters: getParameters(state as any).data,
+        parameters: getParameters(state as any),
     }));
 
     const dispatch = useThunkDispatch();
