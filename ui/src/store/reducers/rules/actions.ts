@@ -1,7 +1,6 @@
 import { AxiosError } from "axios";
 import { AppState } from "..";
-import { IApiRule, IApiRuleMutate } from "../../../pages/plan/rules/IRule";
-import RulesService from "../../../services/RulesService";
+import { IApiRule, IApiRuleMutate, RulesService } from "../../../services/RulesService";
 import { fetchDayByDays } from "../daybydays";
 import { getIsHighLowEnabled } from "../flags/getters";
 import { fetchTransactions } from "../transactions";

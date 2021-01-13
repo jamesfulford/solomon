@@ -1,4 +1,4 @@
-import { IApiTransaction } from "../../../pages/plan/transactions/ITransaction";
+import { IApiTransaction } from "../../../services/TransactionsService";
 import { RequestStatus, TransactionAction, TransactionsType } from "./actions";
 
 export interface TransactionsState {

@@ -3,11 +3,11 @@ import RRule, { ByWeekday } from 'rrule';
 import './AddEditRule.css'
 import { Field, FieldArray, FieldProps, Form, Formik } from 'formik';
 import { WorkingState, ONCE, YEARLY_HEBREW } from './types';
-import { IApiRuleMutate } from '../IRule';
 import { convertWorkingStateToApiRuleMutate, ruleToWorkingState } from './translation';
 import { RulePreview } from './RulePreview';
 import { hebrewMonthToDisplayNameMap } from './hebrew';
 import { IFlags } from '../../../../store/reducers/flags';
+import { IApiRuleMutate } from '../../../../services/RulesService';
 
 
 function frequencyIsIn(freq: WorkingState['rrule']['freq'], freqs: WorkingState['rrule']['freq'][]): boolean {

@@ -1,5 +1,5 @@
 import { AppState } from "..";
-import { IApiRule } from "../../../pages/plan/rules/IRule";
+import { IApiRule } from "../../../services/RulesService";
 import { RequestStatus } from "./actions";
 
 export function getRules(state: AppState): {

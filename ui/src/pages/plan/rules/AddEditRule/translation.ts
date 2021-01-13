@@ -1,6 +1,6 @@
 import RRule, { Options } from "rrule";
+import { IApiRuleMutate } from "../../../../services/RulesService";
 import { IFlags } from "../../../../store/reducers/flags";
-import { IApiRuleMutate } from "../IRule";
 import { extractHebrew } from "./hebrew";
 import { ONCE, SupportedFrequency, WorkingState, YEARLY_HEBREW } from "./types";
 

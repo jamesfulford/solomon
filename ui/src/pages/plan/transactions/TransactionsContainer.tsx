@@ -1,11 +1,10 @@
 import React, { useCallback } from 'react';
-import { IApiTransaction} from './ITransaction';
 import { Transaction } from './Transaction'
 import axios from 'axios'
 import { useSelector } from 'react-redux';
 import { getTransactions } from '../../../store/reducers/transactions/getters';
 import { getParameters } from '../../../store/reducers/parameters/getters';
-import TransactionsService from '../../../services/TransactionsService';
+import { TransactionsService, IApiTransaction } from '../../../services/TransactionsService';
 
 
 export function limitShownTransactions(transactions: IApiTransaction[]): IApiTransaction[] {

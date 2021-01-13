@@ -1,6 +1,6 @@
-import { IApiTransaction } from "../../../pages/plan/transactions/ITransaction";
-import TransactionsService from "../../../services/TransactionsService";
+import { TransactionsService, IApiTransaction } from "../../../services/TransactionsService";
 import { IParameters } from "../parameters";
+
 
 export enum TransactionsType {
     SET = "transactions/set",

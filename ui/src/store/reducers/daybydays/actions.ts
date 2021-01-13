@@ -1,5 +1,6 @@
-import DayByDayService, { IApiDayByDay } from "../../../services/DayByDayService";
+import { DayByDayService, IApiDayByDay } from "../../../services/DayByDayService";
 import { IParameters } from "../parameters";
+
 
 export enum DayByDayType {
     SET = "daybyday/set",
@@ -16,7 +17,6 @@ export function setDayByDays(daybydays: IApiDayByDay): SetDayByDaysAction {
         daybydays,
     }
 }
-
 
 export enum RequestStatus {
     STABLE = "STABLE",

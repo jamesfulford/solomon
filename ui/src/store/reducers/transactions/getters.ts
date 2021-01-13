@@ -1,5 +1,5 @@
 import { AppState } from "..";
-import { IApiTransaction } from "../../../pages/plan/transactions/ITransaction";
+import { IApiTransaction } from "../../../services/TransactionsService";
 import { RequestStatus } from "./actions";
 
 export function getTransactions(state: AppState): {

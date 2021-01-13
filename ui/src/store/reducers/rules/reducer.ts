@@ -1,4 +1,4 @@
-import { IApiRule } from "../../../pages/plan/rules/IRule";
+import { IApiRule } from "../../../services/RulesService";
 import { RequestStatus, RuleAction, RuleType } from "./actions";
 
 export interface RuleState {

@@ -1,5 +1,4 @@
 import React, { useCallback, useState } from 'react'
-import { IApiRule, IApiRuleMutate } from './IRule';
 import { Rule } from './Rule';
 import sortBy from 'lodash/sortBy';
 import Container from 'react-bootstrap/Container';
@@ -9,6 +8,7 @@ import { createRule, deleteRule, fetchRules, updateRule } from '../../../store/r
 import { useSelector } from 'react-redux';
 import { getRules } from '../../../store/reducers/rules/getters';
 import { getFlags } from '../../../store/reducers/flags/getters';
+import { IApiRule, IApiRuleMutate } from '../../../services/RulesService';
 
 
 export const RulesContainer = () => {

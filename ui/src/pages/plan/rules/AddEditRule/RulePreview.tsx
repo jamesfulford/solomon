@@ -2,7 +2,7 @@ import React from 'react';
 import { useMemo } from 'react';
 import RRule from 'rrule';
 import { Currency } from '../../../../components/currency/Currency';
-import { IApiRuleMutate } from '../IRule';
+import { IApiRuleMutate } from '../../../../services/RulesService';
 import { convertHebrewMonthToDisplayName, extractHebrew } from './hebrew';
 
 

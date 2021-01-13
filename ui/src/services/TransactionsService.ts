@@ -1,8 +1,19 @@
 import axios from "axios";
-import { IApiTransaction } from "../pages/plan/transactions/ITransaction";
 import { IParameters } from "../store/reducers/parameters";
 
-export class TransactionsService {
+
+export interface IApiTransaction {
+    rule_id: string;
+    id: string;
+    value: number;
+    day: string;
+    calculations: {
+        balance: number;
+        working_capital: number;
+    }
+}
+
+export class TransactionsApiService {
     constructor(private baseUrl: string) {}
 
     public fetchTransactions(params: IParameters): Promise<IApiTransaction[]> {
@@ -21,8 +32,4 @@ export class TransactionsService {
     }
 }
 
-const instance = new TransactionsService(process.env.REACT_APP_BASE_URL as string);
-
-(global as any).TransactionsService = instance;
-
-export default instance;
+export const TransactionsService = new TransactionsApiService(process.env.REACT_APP_BASE_URL as string);

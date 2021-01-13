@@ -8,7 +8,6 @@ import { getParameters } from '../../store/reducers/parameters/getters';
 import { useThunkDispatch } from '../../useDispatch';
 
 
-
 function getComputedDurationDays(startDate: string, minimumEndDate: string): number | undefined {
     if (minimumEndDate) {
         const start = new Date(startDate);

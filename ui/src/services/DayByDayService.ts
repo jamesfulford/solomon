@@ -1,6 +1,7 @@
 import axios from "axios";
 import { IParameters } from "../store/reducers/parameters";
 
+
 export interface IApiDayByDay {
     daybydays: {
         date: string;
@@ -35,7 +36,7 @@ export interface IApiDayByDay {
 }
 
 
-export class DayByDayService {
+export class DayByDayApiService {
     constructor(private baseUrl: string) {}
 
     public fetchDayByDays(
@@ -53,8 +54,4 @@ export class DayByDayService {
     }
 }
 
-const instance = new DayByDayService(process.env.REACT_APP_BASE_URL as string);
-
-(global as any).DayByDayService = instance;
-
-export default instance;
+export const DayByDayService = new DayByDayApiService(process.env.REACT_APP_BASE_URL as string);

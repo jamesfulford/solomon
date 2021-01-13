@@ -1,7 +1,22 @@
 import axios from "axios";
-import { IApiRule, IApiRuleMutate } from "../pages/plan/rules/IRule";
 
-export class RulesService {
+
+// When creating and updating rules
+export interface IApiRuleMutate {
+    name: string;
+    rrule: string;
+    value: number;
+    labels?: { [label: string]: any };
+}
+
+// Extra server-assigned fields which
+export interface IApiRule extends IApiRuleMutate {
+    id: string;
+    userid: string;
+}
+
+
+export class RulesApiService {
     constructor(private baseUrl: string) {}
 
     public fetchRules(): Promise<IApiRule[]> {
@@ -24,8 +39,4 @@ export class RulesService {
     }
 }
 
-const instance = new RulesService(process.env.REACT_APP_BASE_URL as string);
-
-(global as any).RulesService = instance;
-
-export default instance;
+export const RulesService = new RulesApiService(process.env.REACT_APP_BASE_URL as string);

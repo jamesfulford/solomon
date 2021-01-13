@@ -1,6 +1,6 @@
 import React from 'react';
 import { Currency } from '../../../components/currency/Currency';
-import { IApiTransaction } from './ITransaction';
+import { IApiTransaction } from '../../../services/TransactionsService';
 
 export const Transaction = ({
     transaction
