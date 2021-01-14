@@ -5,6 +5,7 @@ import { IParameters } from "../store/reducers/parameters";
 export interface IApiTransaction {
     rule_id: string;
     id: string;
+    name: string;
     value: number;
     day: string;
     calculations: {

@@ -274,8 +274,8 @@ def make_execution_rules(rules) -> ExecutionRules:
     rule_map = {}
 
     for rule in rules:
-        #TODO Switch to 'id' instead of 'name' when the UI is ready for it
-        rule_map[rule['name']] = {
+        rule_map[rule['id']] = {
+            "name": rule["name"],
             "rule": rule['rrule'],
             "value": float(rule['value']),
             "labels": rule['labels']
@@ -293,10 +293,7 @@ def get_rules_from_database(userid: str) -> ExecutionRules:
     return make_execution_rules(serialized_rules)
 
 
-@use_global_exception_handler
-@api_view(['GET'])
-@requires_scope("transactions:read")
-def process_transactions(request, decoded):
+def get_transactions(request, decoded):
     userid = decoded["sub"]
 
     rules = get_rules_from_database(userid)
@@ -306,7 +303,18 @@ def process_transactions(request, decoded):
 
     # Calculate transactions
     transactions = get_transactions_up_to(context)
-    results = list(map(lambda i: i.serialize(), transactions))
+    results = list(map(lambda i: {
+        **i.serialize(),
+        "name": rules.rules_map[i.rule_id]["name"]
+    }, transactions))
+    return results, context
+
+
+@use_global_exception_handler
+@api_view(['GET'])
+@requires_scope("transactions:read")
+def process_transactions(request, decoded):
+    results, context = get_transactions(request, decoded)
 
     return Response({
         "transactions": results,
@@ -339,26 +347,21 @@ def process_daybydays(request, decoded):
 @api_view(['GET'])
 @requires_scope("transactions:read")
 def export_transactions(request, decoded):
-    userid = decoded["sub"]
-    rules = get_rules_from_database(userid)
-    parameters = make_execution_parameters(request, rules)
-    context = ExecutionContext(parameters, rules)
-    context.assert_valid()  # because we might calculate a new end date
-    
-    transactions = get_transactions_up_to(context)
-    results = list(map(lambda i: i.serialize(), transactions))
+    results, context = get_transactions(request, decoded)
 
     response = HttpResponse(content_type='text/csv')
-    fileName = "Transactions." + parameters.start.strftime('%Y-%-m-%-d') + "." + parameters.end.strftime('%Y-%-m-%-d') + ".csv" 
+    fileName = "Transactions." + context.parameters.start.strftime('%Y-%-m-%-d') + "." + context.parameters.end.strftime('%Y-%-m-%-d') + ".csv" 
     response['Content-Disposition'] = 'attachment; filename="' + fileName + '"'
 
-    fieldnames = ['rule_id', 'value', 'day', 'balance', 'disposable_income']
+    fieldnames = ['rule_id', 'name', 'value', 'day', 'balance', 'disposable_income']
     writer = csv.DictWriter(response, fieldnames=fieldnames)
     writer.writeheader()
 
     # Flatten transactions for csv file
     for result in results:
-        transaction_dict_flat = { "rule_id": result["rule_id"], 
+        transaction_dict_flat = {
+            "rule_id": result["rule_id"],
+            "name": result["name"],
             "value":  result["value"],
             "day":  result["day"],    
             "balance": result["calculations"]["balance"],
