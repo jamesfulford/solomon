@@ -161,19 +161,46 @@ def hello_world(request):
 #
 # Flags
 #
+import configcatclient
+from configcatclient.user import User
+
+
+def get_configcat_client():
+    try:
+        with open("/run/secrets/configcat-key") as f:
+            key = f.read()
+            if not key:
+                return
+            return configcatclient.create_client(key)
+    except OSError:
+        return
+
+
+configcat_client = get_configcat_client()
+
+
+def get_flags(request, decoded):
+    if not configcat_client:
+        return {
+            "highLowEnabled": False,
+            "default": True,
+        }
+    
+    userid = decoded["sub"]
+
+    user_object = User(userid)
+
+    return {
+        "highLowEnabled": configcat_client.get_value('highLowEnabled', False, user_object),
+        "default": False,
+    }
+
 
 @use_global_exception_handler
 @api_view(['GET'])
 @requires_scope("profile")
 def get_feature_flags(request, decoded):
-    userid = decoded['sub']
-
-    # high_low_enabled = userid == "auth0|5fef85c581637b00685d250c"
-    high_low_enabled = False
-
-    return Response({
-        "highLowEnabled": high_low_enabled,
-    })
+    return Response(get_flags(request, decoded))
 
 #
 # Parameters

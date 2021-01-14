@@ -24,6 +24,7 @@ services:
       - db-port
       - db-name
       - django-secret-key
+      - configcat-key
   # Migrations need to be applied outside of compose, unfortunately.
   # For continuous uptime, that means our code needs to support records pre- and post- migration.
   
@@ -65,3 +66,7 @@ secrets:
   db-port:
     external: true
     name: "arn:aws:secretsmanager:us-east-1:383314943195:secret:db-port-b2TcyA"
+
+  configcat-key:
+    external: true
+    name: "arn:aws:secretsmanager:us-east-1:383314943195:secret:configcat-key-uESw6H"

@@ -83,25 +83,28 @@ services:
 
 secrets:
   db-name:
-    file: ./local-secrets/db-name.txt
+    file: ./local-secrets/db-name
 
   db-username:
-    file: ./local-secrets/db-username.txt
+    file: ./local-secrets/db-username
   db-password:
-    file: ./local-secrets/db-password.txt
+    file: ./local-secrets/db-password
   
   db-migration-username:
-    file: ./local-secrets/db-migration-username.txt
+    file: ./local-secrets/db-migration-username
   db-migration-password:
-    file: ./local-secrets/db-migration-password.txt
+    file: ./local-secrets/db-migration-password
 
   db-host:
-    file: ./local-secrets/db-host.txt
+    file: ./local-secrets/db-host
   db-port:
-    file: ./local-secrets/db-port.txt
+    file: ./local-secrets/db-port
 
   db-rootpassword:
-    file: ./local-secrets/db-rootpassword.txt
+    file: ./local-secrets/db-rootpassword
 
   django-secret-key:
-    file: ./local-secrets/django-secret-key.txt
+    file: ./local-secrets/django-secret-key
+  
+  configcat-key:
+    file: ./local-secrets/configcat-key
