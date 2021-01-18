@@ -108,7 +108,7 @@ describe('editing translation', () => {
     rules.forEach(rule => {
         it(`should have no impact if editless ${rule.name}`, () => {
             const workingState = ruleToWorkingState(rule);
-            const outputRule = convertWorkingStateToApiRuleMutate(workingState, {});
+            const outputRule = convertWorkingStateToApiRuleMutate(workingState, { highLowEnabled: false });
     
             expect(outputRule).toEqual(rule);
         });
@@ -118,7 +118,7 @@ describe('editing translation', () => {
         rules.forEach(rule => {
             it(`editing should add uncertainty if editless ${rule.name}`, () => {
                 const workingState = ruleToWorkingState(rule);
-                const outputRule = convertWorkingStateToApiRuleMutate(workingState, { isHighLowEnabled: true });
+                const outputRule = convertWorkingStateToApiRuleMutate(workingState, { highLowEnabled: true });
         
                 expect(outputRule).toEqual({
                     ...rule,
@@ -134,7 +134,7 @@ describe('editing translation', () => {
             describe(rule.name, () => {
                 it(`should keep uncertainty labels if editless`, () => {
                     const workingState = ruleToWorkingState(rule);
-                    const outputRule = convertWorkingStateToApiRuleMutate(workingState, { isHighLowEnabled: true });
+                    const outputRule = convertWorkingStateToApiRuleMutate(workingState, { highLowEnabled: true });
             
                     expect(outputRule).toEqual(rule);
                 });

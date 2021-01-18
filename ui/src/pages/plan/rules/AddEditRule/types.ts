@@ -1,5 +1,5 @@
-import { IApiRuleMutate } from '../IRule';
 import RRule, { Options } from 'rrule';
+import { IApiRuleMutate } from '../../../../services/RulesService';
 
 
 export const ONCE = 'ONCE';

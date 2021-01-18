@@ -1,8 +1,8 @@
 import React, { useCallback } from 'react';
-import { IApiRule } from './IRule';
 import './Rule.css';
 import { Currency } from '../../../components/currency/Currency';
 import { getPreviewDetails } from './AddEditRule/RulePreview';
+import { IApiRule } from '../../../services/RulesService';
 
 
 function getRRuleDisplayString(rruleString: string): string {

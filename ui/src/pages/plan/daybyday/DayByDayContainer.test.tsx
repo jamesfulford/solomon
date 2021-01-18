@@ -2,22 +2,33 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react'
 
 import { DayByDayContainer } from './DayByDayContainer';
+import { storeCreator } from '../../../store';
+import { RequestStatus, setDayByDays, setDayByDaysStatus } from '../../../store/reducers/daybydays';
+import { IApiDayByDay } from '../../../services/DayByDayService';
+import { useSelector } from 'react-redux';
+import { AppState } from '../../../store/reducers';
 
-jest.mock('axios-hooks');
+jest.mock('react-redux');
 
-describe('transactions container', () => {
+describe('daybyday container', () => {
     let element: ReturnType<typeof render>;
-    let mockRefetch: jest.MockedFunction<() => void>;
-    let axiosDelete: jest.MockedFunction<() => Promise<void>>;
 
-    function setUp(daybydays?: object, loading: boolean = false, error: boolean = false) {
-        mockRefetch = jest.fn();
-        require('axios-hooks').default.mockReturnValue([
-            { data: { daybydays, params: { minimumEndDate: '1971-01-01' } }, loading, error },
-            mockRefetch
-        ]);
-        element = render(<DayByDayContainer currentTime={1} setAside={0} currentBalance={0} userid={""} />);
-        axiosDelete = require('axios').default.delete
+    function setUp(daybydays?: IApiDayByDay, loading: boolean = false, error: boolean = false) {
+        const store = storeCreator();
+        if (daybydays) {
+            store.dispatch(setDayByDays(daybydays));
+            store.dispatch(setDayByDaysStatus(RequestStatus.STABLE));
+        }
+        if (loading) {
+            store.dispatch(setDayByDaysStatus(RequestStatus.LOADING));
+        }
+        if (error) {
+            store.dispatch(setDayByDaysStatus(RequestStatus.ERROR));
+        }
+
+        (useSelector as jest.MockedFunction<(fn: (state: AppState) => any) => void>).mockImplementation(selector => selector(store.getState()))
+
+        element = render(<DayByDayContainer />);
     }
 
     function dayByDayError() {
@@ -53,13 +64,23 @@ describe('transactions container', () => {
     }
 
     it('should render an empty list', () => {
-        setUp([]);
+        setUp({
+            daybydays: [],
+            params: {
+                minimumEndDate: "2020-04-01"
+            }
+        });
         expect(element).toBeDefined();
     });
 
     describe('render daybydays', () => {
         it('should show no daybydays and a special message if payload is empty', () => {
-            setUp([]);
+            setUp({
+                daybydays: [],
+                params: {
+                    minimumEndDate: "2020-04-01"
+                }
+            });
     
             expect(dayByDayLoading()).not.toBeDefined();
             expect(dayByDayError()).not.toBeDefined();
@@ -81,28 +102,33 @@ describe('transactions container', () => {
         });
 
         it('should not show entries over 2 years from now', () => {
-            setUp([{
-                "date": "1970-01-01",
-                "balance": {
-                    "low": 0.0,
-                    "high": 0.0
+            setUp({ 
+                daybydays: [{
+                    "date": "1970-01-01",
+                    "balance": {
+                        "low": 0.0,
+                        "high": 0.0
+                    },
+                    "working_capital": {
+                        "low": 0.0,
+                        "high": 0.0
+                    }
                 },
-                "working_capital": {
-                    "low": 0.0,
-                    "high": 0.0
-                }
-            },
-            {
-                "date": "1972-01-05",
-                "balance": {
-                    "low": 0.0,
-                    "high": 234.0
+                {
+                    "date": "1972-01-05",
+                    "balance": {
+                        "low": 0.0,
+                        "high": 234.0
+                    },
+                    "working_capital": {
+                        "low": -1766.0,
+                        "high": -1766.0
+                    }
+                }],
+                params: {
+                    minimumEndDate: '2020-04-01',
                 },
-                "working_capital": {
-                    "low": -1766.0,
-                    "high": -1766.0
-                }
-            }]);
+            });
             expect(dayByDayLoading()).not.toBeDefined();
             expect(dayByDayError()).not.toBeDefined();
         });

@@ -1,44 +1,12 @@
 import React, { useState } from 'react';
 import Chart from "react-google-charts";
-import useAxios from 'axios-hooks'
 import Container from 'react-bootstrap/Container';
-import { isHighLowEnabled } from '../../../flags';
-
-
-const baseUrl = process.env.REACT_APP_BASE_URL || '';
-
-interface IDayByDayApi {
-    daybydays: {
-        date: string;
-        balance: {
-            open: number;
-            low: number;
-            high: number;
-            close: number;
-        };
-        working_capital: {
-            open: number;
-            low: number;
-            high: number;
-            close: number;
-        };
-        high_prediction: {
-            open: number;
-            low: number;
-            high: number;
-            close: number;
-        };
-        low_prediction: {
-            open: number;
-            low: number;
-            high: number;
-            close: number;
-        };
-    }[];
-    params: {
-        minimumEndDate: string;
-    }
-}
+import { getIsHighLowEnabled } from '../../../store/reducers/flags/getters';
+import { useSelector } from 'react-redux';
+import { getDayByDay } from '../../../store/reducers/daybydays/getters';
+import { getParameters } from '../../../store/reducers/parameters/getters';
+import { DurationSelector } from '../parameters/DurationSelector';
+import { IApiDayByDay } from '../../../services/DayByDayService';
 
 const options = {
     title: "",
@@ -71,7 +39,7 @@ enum ChartTab {
 // - better x axis markers
 // - less coloring overlaps
 // - should not be a line chart, should be "steppy" like _| instead of / between points (still same as before)
-const DayByDayChart = ({ daybyday, chartType, setAside }: { daybyday: IDayByDayApi, chartType: ChartTab, setAside: number }) => {
+const DayByDayChart = ({ daybyday, chartType, setAside }: { daybyday: IApiDayByDay, chartType: ChartTab, setAside: number }) => {
     switch(chartType) {
         case ChartTab.DISPOSABLE_INCOME:
             const disposableIncomeData = [
@@ -123,24 +91,20 @@ const DayByDayChart = ({ daybyday, chartType, setAside }: { daybyday: IDayByDayA
 }
 
 
-function getComputedDurationDays(start: Date, minimumEndDate: string): number | undefined {
-    if (minimumEndDate) {
-        const computedEndDate = new Date(minimumEndDate);
-        return Math.round((computedEndDate.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
-    }
-}
 
-export const DayByDayContainer = ({ userid, currentTime, currentBalance, setAside }: { userid: string, currentTime: number, currentBalance: number, setAside: number }) => {
-    const highLowEnabled = isHighLowEnabled(userid);
+export const DayByDayContainer = () => {
+    const {
+        highLowEnabled,
+        daybydays: { data, loading, error },
+        parameters: { setAside }
+    } = useSelector(state => ({
+        highLowEnabled: getIsHighLowEnabled(state as any),
+        daybydays: getDayByDay(state as any),
+        parameters: getParameters(state as any),
+    }));
+
+
     const [chartType, setChartType] = useState<ChartTab>(ChartTab.DISPOSABLE_INCOME);
-    const [queryRangeDays, setQueryRangeDays] = useState(90);
-
-    const start = new Date(currentTime);
-    const end = new Date(currentTime + (queryRangeDays * 24 * 60 * 60 * 1000))
-    
-    const [{ data, loading, error }] = useAxios(
-        `${baseUrl}/api/daybydays?${highLowEnabled ? 'highLow&' : ''}startDate=${start.toISOString()}&endDate=${end.toISOString()}&currentBalance=${currentBalance}&setAside=${setAside}`
-    );
 
     if (loading) {
         return <div style={{ minHeight: '100%', width: '100%' }} className="text-center">
@@ -156,9 +120,9 @@ export const DayByDayContainer = ({ userid, currentTime, currentBalance, setAsid
         </div>
     }
 
-    const daybyday = data as IDayByDayApi;
+    const daybyday = data;
 
-    if (!daybyday.daybydays.length) {
+    if (!daybyday?.daybydays.length) {
         return <Container className="text-center">
             <p data-testid="daybyday-empty">Nothing's here...</p>
         </Container>
@@ -167,11 +131,9 @@ export const DayByDayContainer = ({ userid, currentTime, currentBalance, setAsid
     const tabs = [
         ChartTab.DISPOSABLE_INCOME
     ];
-    if (isHighLowEnabled(userid)) {
+    if (highLowEnabled) {
         tabs.push(ChartTab.UNCERTAINTY);
     }
-
-    const computedDurationDays = getComputedDurationDays(start, daybyday.params.minimumEndDate);
 
     return <>
         <ul className="nav nav-tabs">
@@ -185,28 +147,7 @@ export const DayByDayContainer = ({ userid, currentTime, currentBalance, setAsid
                 </button>
             </li>)}
         </ul>
-        <DayByDayChart chartType={chartType} daybyday={daybyday} setAside={setAside} /> 
-        <div className="text-center">
-            <button className="btn btn-outline-primary btn-sm mr-1" onClick={() => {setQueryRangeDays(Math.min(90, computedDurationDays || 90))}}>Default</button>
-            {[
-                { days: 365, display: '1y', danger: false },
-                { days: 365 * 2, display: '2y', danger: false },
-                { days: 365 * 5, display: '5y', danger: true },
-                { days: 365 * 10, display: '10y', danger: true },
-                { days: 365 * 20, display: '20y', danger: true },
-                { days: 365 * 30, display: '30y', danger: true },
-            ]
-                .filter(({ days }) => {
-                    if (!computedDurationDays) {
-                        return true;
-                    }
-                    return days > computedDurationDays;
-                })
-                .map(({ days, display, danger }) => {
-                    return <button key={days} className={`btn ${danger ? 'btn-outline-danger' : 'btn-outline-primary'} btn-sm mr-1`} onClick={() => {setQueryRangeDays(days)}}>{display}</button>
-                })
-            }
-            <br />
-        </div>
+        <DayByDayChart chartType={chartType} daybyday={daybyday} setAside={setAside} />
+        <DurationSelector />
     </>
 }

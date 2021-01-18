@@ -4,7 +4,6 @@ import { act } from 'react-dom/test-utils'
 import { render, fireEvent, waitForDomChange } from '@testing-library/react'
 
 import { RulesContainer } from './RulesContainer';
-import { IApiRule } from './IRule';
 
 import {
     setName,
@@ -13,28 +12,36 @@ import {
     setDayOfMonth
 } from './formUtils.test';
 import RRule from 'rrule';
+import { IApiRule, RulesService } from '../../../services/RulesService';
 
-jest.mock('axios-hooks');
-jest.mock('axios');
+jest.mock('react-redux');
+import { storeCreator } from '../../../store';
+import { RequestStatus, setRules, setRuleStatus } from '../../../store/reducers/rules/actions';
+import { useSelector, useDispatch } from 'react-redux';
+import { AppState } from '../../../store/reducers';
 
 describe('rules container', () => {
     let element: ReturnType<typeof render>;
-    let mockRefetch: jest.MockedFunction<() => Promise<void>>;
-    let axiosDelete: jest.MockedFunction<() => Promise<void>>;
-    let onRefreshProp: jest.MockedFunction<() => void>;
-    let rulesContainer: JSX.Element;
 
+    let dispatch: jest.MockedFunction<ReturnType<typeof storeCreator>['dispatch']>;
     function setUp(rules?: IApiRule[], loading: boolean = false, error: boolean = false) {
-        mockRefetch = jest.fn();
-        onRefreshProp = jest.fn();
-        require('axios-hooks').default.mockReturnValue([
-            { data: { data: rules }, loading, error },
-            mockRefetch
-        ]);
+        const store = storeCreator();
+        if (rules) {
+            store.dispatch(setRules(rules));
+            store.dispatch(setRuleStatus(RequestStatus.STABLE));
+        }
+        if (loading) {
+            store.dispatch(setRuleStatus(RequestStatus.LOADING));
+        }
+        if (error) {
+            store.dispatch(setRuleStatus(RequestStatus.ERROR));
+        }
 
-        rulesContainer = <RulesContainer onRefresh={onRefreshProp} />;
-        element = render(rulesContainer); 
-        axiosDelete = require('axios').default.delete
+        (useSelector as jest.MockedFunction<(fn: (state: AppState) => any) => void>).mockImplementation(selector => selector(store.getState()))
+        dispatch = jest.fn();
+        (useDispatch as jest.MockedFunction<() => typeof store.dispatch>).mockReturnValue(dispatch);
+
+        element = render(<RulesContainer />);
     }
 
     function noRulesFound() {
@@ -129,40 +136,24 @@ describe('rules container', () => {
                 rrule: 'FREQ=WEEKLY;INTERVAL=1;COUNT=4',
                 value: -1000
             }]);
-            // https://jestjs.io/docs/en/mock-function-api
-    
-            const promise = Promise.resolve();
-            axiosDelete.mockReturnValue(promise);
 
-            // Delete button is on modal
             const listItem = element.getByText(/Rent/i);
             fireEvent.click(listItem);
-
-            element = render(rulesContainer);
             
             waitForDomChange({ element });
     
-            // Clicking the del
+            dispatch.mockClear();
+
+            // Ensure delete button calls dispatch
             const deleteButton = element.getByText(/Delete/i);
             expect(deleteButton).toBeInTheDocument();
             fireEvent.click(deleteButton);
-    
-            expect(axiosDelete).toHaveBeenCalledTimes(1);
-    
-            await promise; // let delete call finish and trigger all the `.then`s
 
-            expect(mockRefetch).toHaveBeenCalledTimes(1);
-            expect(onRefreshProp).toHaveBeenCalledTimes(1);
+            expect(dispatch).toHaveBeenCalledTimes(1);
         });
     });
 
     describe('create rules', () => {
-
-        let axiosPost: jest.MockedFunction<() => Promise<{ data: any }>>;
-        beforeEach(() => {
-            axiosPost = require('axios').default.post;
-        })
-
         it.skip('should post new rule to backend and refetch when form is submitted', async () => {
             setUp([]);
 
@@ -172,35 +163,16 @@ describe('rules container', () => {
             selectFrequency(element, RRule.MONTHLY);
             setDayOfMonth(element, 15);
 
-            const promise = Promise.resolve({ data: 'hello' });
-            axiosPost.mockReturnValue(promise);
-
+            dispatch.mockClear();
             const submitButton = element.getByText(/Create/i);
+            expect(submitButton).toBeInTheDocument();
             fireEvent.click(submitButton);
-
-            await promise;
-            expect(axiosPost).toHaveBeenCalledTimes(1);
-            expect(require('axios').default.post).toHaveBeenCalledWith(
-                expect.stringContaining("api/rules"), 
-                expect.objectContaining({ // the rule we're trying to create
-                    name: 'Rent',
-                    value: -1000.10
-                }
-            ));
-            expect(mockRefetch).toHaveBeenCalledTimes(1);
-            expect(onRefreshProp).toHaveBeenCalledTimes(1);
+            expect(dispatch).toHaveBeenCalledTimes(1);
         });
     });
 
     describe('modify existing rule', () => {
-
-        let axiosPut: jest.MockedFunction<() => Promise<{ data: any }>>;
-        
-        beforeEach(() => {
-            axiosPut = require('axios').default.put;
-        })
-
-        it.skip('should put a rule with an existing id to backend and refetch when form is submitted', async () => {
+        it('should put a rule with an existing id to backend and refetch when form is submitted', async () => {
             setUp([{
                 id: 'test-id-rent',
                 name: 'Rent',
@@ -211,34 +183,16 @@ describe('rules container', () => {
 
             const listItem = element.getByText(/Rent/i);
             fireEvent.click(listItem);
-
-            element = render(rulesContainer);
             
             waitForDomChange({ element });
+            setName(element, "Rent 1");
 
-            // I am not modifying the values because I have not found how to capture the inputs of the modal form (it modifies the underlying creation form instead.) 
-            // I've tried getAllByLabelText and getAllByText. and I cannot capture the modify form input with either one. 
-            // Note the input value functionality is still tested with the ModifyRuleForm tests so it's still technically covered. 
-            
-            const promise = Promise.resolve({ data: 'hello' });
-            axiosPut.mockReturnValue(promise);
-
-            // const values = element.getAllByLabelText(/Value/i);
+            dispatch.mockResolvedValue();
 
             const updateButton = element.getByText(/Update/i);
             fireEvent.click(updateButton);
 
-            await promise;
-            expect(axiosPut).toHaveBeenCalledTimes(1);
-            expect(require('axios').default.put).toHaveBeenCalledWith(
-                expect.stringContaining("api/rules"), 
-                expect.objectContaining({ // the rule we're trying to modify
-                    name: 'Rent',
-                    value: -1000
-                }
-            ));
-            expect(mockRefetch).toHaveBeenCalledTimes(3); // Once for the initial render, Once for the opening of the modal, Once for the closing and update of the modal (Notice I call render in the method)
-            expect(onRefreshProp).toHaveBeenCalledTimes(3); // Once for the initial render, Once for the opening of the modal, Once for the closing and update of the modal (Notice I call render in the method)
+            expect(dispatch).toHaveBeenCalledTimes(1);
         });
     });
 });

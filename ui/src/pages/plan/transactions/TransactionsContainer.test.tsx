@@ -1,24 +1,33 @@
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react'
+import { render } from '@testing-library/react'
 
 import { TransactionsContainer } from './TransactionsContainer';
-import { IApiTransaction } from './ITransaction';
 
-jest.mock('axios-hooks');
+import { useSelector } from 'react-redux';
+import { storeCreator } from '../../../store';
+import { RequestStatus, setTransactions, setTransactionsStatus } from '../../../store/reducers/transactions';
+import { IApiTransaction } from '../../../services/TransactionsService';
+import { AppState } from '../../../store/reducers';
+
+jest.mock('react-redux');
 
 describe('transactions container', () => {
     let element: ReturnType<typeof render>;
-    let mockRefetch: jest.MockedFunction<() => void>;
-    let axiosDelete: jest.MockedFunction<() => Promise<void>>;
 
     function setUp(transactions?: IApiTransaction[], loading: boolean = false, error: boolean = false) {
-        mockRefetch = jest.fn();
-        require('axios-hooks').default.mockReturnValue([
-            { data: { transactions }, loading, error },
-            mockRefetch
-        ]);
-        element = render(<TransactionsContainer currentTime={1} />);
-        axiosDelete = require('axios').default.delete
+        const store = storeCreator();
+        if (transactions) {
+            store.dispatch(setTransactions(transactions));
+            store.dispatch(setTransactionsStatus(RequestStatus.STABLE));
+        }
+        if (loading) {
+            store.dispatch(setTransactionsStatus(RequestStatus.LOADING));
+        }
+        if (error) {
+            store.dispatch(setTransactionsStatus(RequestStatus.ERROR));
+        }
+        (useSelector as jest.MockedFunction<(fn: (state: AppState) => any) => void>).mockImplementation(selector => selector(store.getState()))
+        element = render(<TransactionsContainer />);
     }
 
     function transactionsEmpty() {
@@ -85,6 +94,7 @@ describe('transactions container', () => {
         it('should list all transactions', () => {
             setUp([{
                 rule_id: 'Rent',
+                name: 'Rent',
                 id: 'rent-1',
                 value: -2000,
                 day: '1970-01-01',
@@ -94,6 +104,7 @@ describe('transactions container', () => {
                 }
             }, {
                 rule_id: 'Paycheck',
+                name: 'Paycheck',
                 id: 'paycheck-1',
                 value: 2000,
                 day: '1970-01-05',
@@ -117,6 +128,7 @@ describe('transactions container', () => {
             const transactions: IApiTransaction[] = Array.from([ ...Array(60) ]).map((_, i) => i)
                 .map(i => ({
                     rule_id: `Rule #${i}`,
+                    name: `Rule #${i}`,
                     id: `Rule id #${i}`,
                     value: 1000,
                     day: '1970-01-02',

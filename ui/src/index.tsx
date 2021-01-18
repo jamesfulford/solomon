@@ -5,6 +5,8 @@ import App from './App';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { BrowserRouter } from 'react-router-dom';
 import { Auth0Provider } from '@auth0/auth0-react';
+import { Provider } from 'react-redux';
+import { store } from './store';
 
 const domain = "solomon-money.us.auth0.com";
 const clientId = "qhExE7PTD7R480PaCbfbByB5oWbs5n8Y";
@@ -21,9 +23,11 @@ ReactDOM.render(
       audience="https://solomon.money/api"
       scope="read:current_user update:current_user_metadata transactions:read transactions:write"
     >
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <Provider store={store}>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </Provider>
     </Auth0Provider>
   </React.StrictMode>,
   document.getElementById('root')

@@ -1,7 +1,8 @@
 import React from 'react';
+import { useMemo } from 'react';
 import RRule from 'rrule';
 import { Currency } from '../../../../components/currency/Currency';
-import { IApiRuleMutate } from '../IRule';
+import { IApiRuleMutate } from '../../../../services/RulesService';
 import { convertHebrewMonthToDisplayName, extractHebrew } from './hebrew';
 
 
@@ -53,19 +54,21 @@ export function RulePreview({ rule }: { rule: IApiRuleMutate | undefined }) {
     
     const value = rule?.value;
 
-    const { message = '...', isOnce, rrule } = getPreviewDetails(rule?.rrule);
+    const { message = '...', isOnce, rrule } = useMemo(() => getPreviewDetails(rule?.rrule), [rule]);
+    const [next, oneAfter] = useMemo(() => {
+        if (isOnce || !rrule) {
+            return [undefined, undefined];
+        }
+
+        return rrule.all((d, index) => index <= 1)
+                .map(d => d.toISOString().split("T")[0]);
+    }, [isOnce, rrule]);
 
     return <div>
         <p className="m-0">
             {(value && Number.isFinite(value)) ? <Currency value={value} /> : 'Occurs'} {message}
         </p>
 
-        {(!isOnce && rrule) && (() => {
-            // Next 2 days
-            const [next, oneAfter] = rrule.all((d, index) => index <= 1)
-                .map(d => d.toISOString().split("T")[0]);
-            
-            return <p className="m-0">Next is {next}{oneAfter && `, then ${oneAfter}`}</p>
-        })()}
+        {next && <p className="m-0">Next is {next}{oneAfter && `, then ${oneAfter}`}</p>}
     </div>
 }
