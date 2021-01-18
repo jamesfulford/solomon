@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { setParameters } from '../../../store/reducers/parameters';
+import { setParametersAndRecalculate } from '../../../store/reducers/parameters';
 import { useThunkDispatch } from '../../../useDispatch';
 
 
@@ -22,7 +22,7 @@ export const ParametersContainer = () => {
 
                     const value = Number(stringValue);
                     if (!Number.isNaN(value)) {
-                        dispatch(setParameters({
+                        dispatch(setParametersAndRecalculate({
                             currentBalance: value,
                         }) as any);
                     }
@@ -38,7 +38,7 @@ export const ParametersContainer = () => {
 
                     const value = Number(stringValue);
                     if (!Number.isNaN(value)) {
-                        dispatch(setParameters({
+                        dispatch(setParametersAndRecalculate({
                             setAside: value,
                         }) as any);
                     }
@@ -56,7 +56,7 @@ export const ParametersContainer = () => {
                     const year = Number(e.target.value.split("-")[0]);
                     if (year < 2000) return;
                     setStartDate(e.target.value);
-                    dispatch(setParameters({
+                    dispatch(setParametersAndRecalculate({
                         startDate: e.target.value,
                     }) as any);
                 }} />

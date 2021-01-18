@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { IApiDayByDay } from '../../../services/DayByDayService';
 import { getDayByDay } from '../../../store/reducers/daybydays/getters';
-import { setParameters } from '../../../store/reducers/parameters';
+import { setParametersAndRecalculate } from '../../../store/reducers/parameters';
 import { getParameters } from '../../../store/reducers/parameters/getters';
 import { useThunkDispatch } from '../../../useDispatch';
 
@@ -29,7 +29,7 @@ export const DurationSelector = () => {
     const setQueryRangeDays = useCallback((computedDurationDays: number) => {
         const start = new Date(startDate);
         const durationMs = 1000 * 60 * 60 * 24 * computedDurationDays;
-        dispatch(setParameters({
+        dispatch(setParametersAndRecalculate({
             endDate: new Date(start.getTime() + durationMs).toISOString().split('T')[0]
         }) as any);
     }, [startDate, dispatch])

@@ -17,15 +17,19 @@ interface SetParametersAction {
     type: ParametersType.SET;
     parameters: Partial<IParameters>
 }
-export function setParameters(parameters: Partial<IParameters>) {
+export function setParametersAndRecalculate(parameters: Partial<IParameters>) {
     return (dispatch: any) => {
-        dispatch({
-            type: ParametersType.SET,
-            parameters,
-        });
+        dispatch(setParameters(parameters));
 
         dispatch(recalculation() as any)
     }
+}
+
+export function setParameters(parameters: Partial<IParameters>): SetParametersAction {
+    return {
+        type: ParametersType.SET,
+        parameters,
+    };
 }
 
 
@@ -56,7 +60,7 @@ export function fetchParameters() {
         dispatch(setParametersStatus(RequestStatus.LOADING));
         ParameterService.fetchParameters()
             .then(parameters => {
-                dispatch(setParameters(parameters));
+                dispatch(setParametersAndRecalculate(parameters));
                 dispatch(setParametersStatus(RequestStatus.STABLE));
             })
             .catch(() => {
