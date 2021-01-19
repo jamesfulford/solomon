@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { setParametersAndRecalculate } from '../../../store/reducers/parameters';
 import { getParameters } from '../../../store/reducers/parameters/getters';
 import { useThunkDispatch } from '../../../useDispatch';
+import { Reconciler } from './Reconciler';
 
 
 export const ParametersContainer = () => {
@@ -85,5 +86,6 @@ export const ParametersContainer = () => {
             </div>
         </div>
         {errorMessage && <span className="text-danger mt-2">{errorMessage}</span>}
+        <Reconciler />
     </form>;
 }
