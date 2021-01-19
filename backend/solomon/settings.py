@@ -25,7 +25,9 @@ SECRET_KEY = open("/run/secrets/django-secret-key").read().strip()
 
 DEBUG = False
 
-if os.environ.get("DEBUG", ""):
+WANT_TO_DEBUG = False
+
+if os.environ.get("DEBUG", "") and WANT_TO_DEBUG:
     print("SECURITY WARNING: don't run with debug turned on in production!")
     DEBUG = True
 
