@@ -1,14 +1,15 @@
 import logging
 
 from datetime import date
+from datetime import datetime
 from dateutil.rrule import rrule, MONTHLY, YEARLY, WEEKLY
 from dateutil.relativedelta import relativedelta
 from dateutil.parser._parser import ParserError
 import dateutil.parser
 import json
 
-from .models import Rule
-from .serializers import RuleSerializer
+from .models import Rule, Parameters
+from .serializers import RuleSerializer, ParametersSerializer
 from .exe_context import ExecutionParameters, ExecutionRules, ExecutionContext
 from .generate_instances import get_transactions_up_to
 from .daybydays import generate_daybydays
@@ -21,6 +22,7 @@ from rest_framework.exceptions import APIException
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.serializers.json import DjangoJSONEncoder
+from django.db import IntegrityError
 from django.http import JsonResponse
 
 from django.shortcuts import render
@@ -212,11 +214,67 @@ def get_feature_flags(request, decoded):
 def get_parameters(request, decoded):
     userid = decoded['sub']
 
+    parameters = None
+    try:
+        parameters = Parameters.objects.filter(userid=userid).latest("date")
+    except ObjectDoesNotExist:
+        parameters_serializer = ParametersSerializer(data={
+            "userid": userid,
+            "date": date.today().strftime("%Y-%m-%d"),
+            "balance": 0,
+            "set_aside": 0,
+        })
+        if not parameters_serializer.is_valid():
+            logging.error(f"Unable to create initial parameters for new user {userid}")
+            return Response(parameters_serializer.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        parameters = parameters_serializer.save()
+
     return Response({
-        "currentBalance": 0,
-        "setAside": 0,
-        "startDate": "2021-01-09",
-        "endDate": "2021-04-09",
+        "currentBalance": parameters.balance,
+        "setAside": parameters.set_aside,
+        "startDate": parameters.date,
+        "endDate": parameters.date + relativedelta(months=3),
+    })
+
+
+def parameters_handler(request):
+    if request.method == "GET":
+        return get_parameters(request)
+    elif request.method == "PUT":
+        return put_parameters(request)
+
+
+@use_global_exception_handler
+@api_view(['PUT'])
+@requires_scope("profile")
+def put_parameters(request, decoded):
+    userid = decoded['sub']
+
+    body = JSONParser().parse(request)
+
+    parameters_serializer = ParametersSerializer(data={
+        "userid": userid,
+        "date": body.get('startDate', date.today().strftime("%Y-%m-%d")),
+        "balance": body['currentBalance'],
+        "set_aside": body["setAside"],
+    })
+    if not parameters_serializer.is_valid():
+        logging.error(f"Unable to create parameters for user {userid}")
+        return Response(parameters_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    start_date = datetime.strptime(parameters_serializer.validated_data["date"], "%Y-%m-%d").date()
+
+    try:
+        parameters = Parameters.objects.get(userid=userid, date=start_date)
+        parameters = parameters_serializer.update(parameters, parameters_serializer.validated_data)
+    except ObjectDoesNotExist:
+        parameters = parameters_serializer.save()
+
+    return Response({
+        "currentBalance": parameters.balance,
+        "setAside": parameters.set_aside,
+        "startDate": parameters.date,
+        "endDate": parameters.date + relativedelta(months=3),
     })
 
 #
