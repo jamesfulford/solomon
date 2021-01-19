@@ -42,50 +42,45 @@ export const ParametersContainer = () => {
         }) as any);
         setErrorMessage(undefined);
     }}>
-        <div className="d-flex justify-content-between">
-            {/* Column 1 */}
-            <div className="d-flex flex-column justify-content-between">
-                <div className="form-inline d-flex justify-content-end">
-                    <label htmlFor="Balance">Balance</label>
-                    <input className="form-control form-control-sm ml-2" id="Balance" type="text" value={currentBalance} 
-                        maxLength={19} required pattern="-?[1-9][0-9]*\.?[0-9]{0,2}"
-                        style={{ width: 75 }}
-                        onChange={e => {
-                            const stringValue: string = e.target.value;
-                            setCurrentBalance(stringValue);
-                        }} />
-                </div>
-                <div className="form-inline d-flex justify-content-end">
-                    <label htmlFor="setAside">Set Aside</label>
-                    <input className="form-control form-control-sm ml-2" id="setAside" type="text" step="0.01" value={setAside}
-                        maxLength={19} required pattern="-?[1-9][0-9]*\.?[0-9]{0,2}"
-                        style={{ width: 75 }}
-                        onChange={e => {
-                            const stringValue: string = e.target.value;
-                            setSetAside(stringValue);
-                        }} />
-                </div>
+        <div className="d-flex justify-content-between flex-column">
+            <div className="form-inline d-flex justify-content-end">
+                <label htmlFor="Balance">Balance</label>
+                <input className="form-control form-control-sm ml-2" id="Balance" type="text" value={currentBalance} 
+                    maxLength={19} required pattern="-?[1-9][0-9]*\.?[0-9]{0,2}"
+                    style={{ width: 150 }}
+                    onChange={e => {
+                        const stringValue: string = e.target.value;
+                        setCurrentBalance(stringValue);
+                    }} />
+            </div>
+            <div className="form-inline d-flex justify-content-end">
+                <label htmlFor="setAside">Set Aside</label>
+                <input className="form-control form-control-sm ml-2" id="setAside" type="text" step="0.01" value={setAside}
+                    maxLength={19} required pattern="-?[1-9][0-9]*\.?[0-9]{0,2}"
+                    style={{ width: 150 }}
+                    onChange={e => {
+                        const stringValue: string = e.target.value;
+                        setSetAside(stringValue);
+                    }} />
             </div>
 
-            {/* Column 2 */}
-            <div className="d-flex flex-column justify-content-between">
-                <div className="form-inline d-flex justify-content-between mb-2">
-                    <label htmlFor="Start">Start</label>
-                    <input
-                        className="form-control form-control-sm ml-2" placeholder="Start Date" id="Start"
-                        type="date"
-                        style={{ width: 150 }}
-                        value={startDate}
-                        min="2000-01-01"
-                        max={now.toISOString().split("T")[0]}
-                        onChange={e => {
-                            setStartDate(e.target.value);
-                        }} />
-                </div>
-                <button className="btn btn-outline-primary btn-sm" disabled={isPristine}>Update</button>
+            <div className="form-inline d-flex justify-content-end mb-2">
+                <label htmlFor="Start">Today</label>
+                <input
+                    className="form-control form-control-sm ml-2" placeholder="Start Date" id="Start"
+                    type="date"
+                    style={{ width: 150 }}
+                    value={startDate}
+                    readOnly
+                    min="2000-01-01"
+                    max={now.toISOString().split("T")[0]}
+                    onChange={e => {
+                        setStartDate(e.target.value);
+                    }} />
             </div>
+            <button className="btn btn-outline-primary btn-sm" disabled={isPristine}>Update</button>
+            {errorMessage && <span className="text-danger mt-2">{errorMessage}</span>}
+            <Reconciler />
         </div>
-        {errorMessage && <span className="text-danger mt-2">{errorMessage}</span>}
-        <Reconciler />
     </form>;
 }
