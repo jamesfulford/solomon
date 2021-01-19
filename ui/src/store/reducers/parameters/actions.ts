@@ -18,10 +18,10 @@ interface SetParametersAction {
     parameters: Partial<IParameters>
 }
 export function setParametersAndRecalculate(parameters: Partial<IParameters>) {
-    return (dispatch: any) => {
-        dispatch(setParameters(parameters));
-
-        dispatch(recalculation() as any)
+    return async (dispatch: any) => {
+        const newParameters = await ParameterService.setParameters(parameters);
+        dispatch(setParameters(newParameters));
+        dispatch(recalculation() as any);
     }
 }
 
@@ -60,8 +60,9 @@ export function fetchParameters() {
         dispatch(setParametersStatus(RequestStatus.LOADING));
         ParameterService.fetchParameters()
             .then(parameters => {
-                dispatch(setParametersAndRecalculate(parameters));
+                dispatch(setParameters(parameters));
                 dispatch(setParametersStatus(RequestStatus.STABLE));
+                dispatch(recalculation() as any);
             })
             .catch(() => {
                 dispatch(setParametersStatus(RequestStatus.ERROR));
