@@ -17,4 +17,4 @@ jobs:
         uses: satackey/action-docker-layer-caching@v0.0.11
 
       - name: Backend unit tests
-        run: docker-compose run --rm --no-deps solomon python manage.py test
+        run: docker-compose run --rm --no-deps -e "DEBUG=" solomon python manage.py test
