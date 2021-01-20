@@ -43,12 +43,12 @@ export const Reconciler = () => {
                 e.preventDefault();
                 e.stopPropagation();
                 updateTodayAndBalance();
-            }}>No, I'll set my balance.</button>
+            }}>No, I'll set my balance manually.</button>
             <button className="btn btn-outline-success btn-sm" onClick={e => {
                 e.preventDefault();
                 e.stopPropagation();
                 updateTodayAndBalance(daybyday.balance.close);
-            }}>Yes, update.</button>
+            }}>Yes</button>
         </div>
     </div>;
 }
