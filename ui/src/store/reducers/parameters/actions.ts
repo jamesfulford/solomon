@@ -1,3 +1,4 @@
+import { AppState } from "..";
 import { ParameterService } from "../../../services/ParameterService";
 import { recalculation } from "../rules";
 
@@ -20,7 +21,10 @@ interface SetParametersAction {
 export function setParametersAndRecalculate(parameters: Partial<IParameters>) {
     return async (dispatch: any) => {
         const newParameters = await ParameterService.setParameters(parameters);
-        dispatch(setParameters(newParameters));
+        dispatch(setParameters({
+            ...parameters,
+            ...newParameters,
+        }));
         dispatch(recalculation() as any);
     }
 }
@@ -56,11 +60,17 @@ export type ParametersAction =
 
 
 export function fetchParameters() {
-    return (dispatch: any) => {
+    return (dispatch: any, getState: () => AppState) => {
         dispatch(setParametersStatus(RequestStatus.LOADING));
         ParameterService.fetchParameters()
             .then(parameters => {
-                dispatch(setParameters(parameters));
+                const state = getState();
+                dispatch(setParameters({
+                    ...parameters,
+                    endDate: state.parameters.parameters.endDate 
+                        // if end date isn't available in state, use 90 days.
+                        || new Date(new Date(parameters.startDate).getTime() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+                }));
                 dispatch(setParametersStatus(RequestStatus.STABLE));
                 dispatch(recalculation() as any);
             })

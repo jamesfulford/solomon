@@ -208,32 +208,35 @@ def get_feature_flags(request, decoded):
 # Parameters
 #
 
-@use_global_exception_handler
-@api_view(['GET'])
-@requires_scope("profile")
-def get_parameters(request, decoded):
-    userid = decoded['sub']
-
-    parameters = None
+def get_latest_parameters_or_create_default(userid, date_string):
     try:
-        parameters = Parameters.objects.filter(userid=userid).latest("date")
+        return Parameters.objects.filter(userid=userid).latest("date")
     except ObjectDoesNotExist:
         parameters_serializer = ParametersSerializer(data={
             "userid": userid,
-            "date": date.today().strftime("%Y-%m-%d"),
+            "date": date_string,
             "balance": 0,
             "set_aside": 0,
         })
         if not parameters_serializer.is_valid():
             logging.error(f"Unable to create initial parameters for new user {userid}")
-            return Response(parameters_serializer.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        parameters = parameters_serializer.save()
+            raise Exception(f"Unable to create initial parameters for new user {userid}")
+        return parameters_serializer.save()
 
+
+@use_global_exception_handler
+@api_view(['GET'])
+@requires_scope("profile")
+def get_parameters(request, decoded):
+    userid = decoded['sub']
+    date_string = date.today().strftime("%Y-%m-%d")
+
+    parameters = get_latest_parameters_or_create_default(userid, date_string)
+    
     return Response({
         "currentBalance": parameters.balance,
         "setAside": parameters.set_aside,
         "startDate": parameters.date,
-        "endDate": parameters.date + relativedelta(months=3),
     })
 
 
@@ -249,32 +252,36 @@ def parameters_handler(request):
 @requires_scope("profile")
 def put_parameters(request, decoded):
     userid = decoded['sub']
+    start_date = date.today()
+    date_string = start_date.strftime("%Y-%m-%d")
+
+    latest_parameters = get_latest_parameters_or_create_default(userid, date_string)
 
     body = JSONParser().parse(request)
 
     parameters_serializer = ParametersSerializer(data={
         "userid": userid,
-        "date": body.get('startDate', date.today().strftime("%Y-%m-%d")),
-        "balance": body['currentBalance'],
-        "set_aside": body["setAside"],
+        "date": date_string,
+        "balance": body.get("currentBalance", latest_parameters.balance),
+        "set_aside": body.get("setAside", latest_parameters.set_aside),
     })
+
     if not parameters_serializer.is_valid():
-        logging.error(f"Unable to create parameters for user {userid}")
+        logging.warn(f"Unable to create parameters for user {userid}")
         return Response(parameters_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    start_date = datetime.strptime(parameters_serializer.validated_data["date"], "%Y-%m-%d").date()
-
     try:
-        parameters = Parameters.objects.get(userid=userid, date=start_date)
-        parameters = parameters_serializer.update(parameters, parameters_serializer.validated_data)
-    except ObjectDoesNotExist:
         parameters = parameters_serializer.save()
+    except IntegrityError:
+        # There must already be an entry for today
+        # then it must (probably) be the latest
+        # so we'll update those
+        parameters = parameters_serializer.update(latest_parameters, parameters_serializer.validated_data)
 
     return Response({
         "currentBalance": parameters.balance,
         "setAside": parameters.set_aside,
         "startDate": parameters.date,
-        "endDate": parameters.date + relativedelta(months=3),
     })
 
 #
