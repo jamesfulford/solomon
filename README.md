@@ -14,7 +14,7 @@ docker-compose up -d
 DEBUG=1 docker-compose up --no-deps --force-recreate solomon
 
 # Running unit tests
-DEBUG= docker-compose run -p 3001:3001 --rm --no-deps solomon python manage.py test
+docker-compose run -p 3001:3001 --rm --no-deps -e "DEBUG=" solomon python manage.py test
 
 # Shut down
 docker-compose down
