@@ -1,65 +1,88 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { setParametersAndRecalculate } from '../../../store/reducers/parameters';
+import { getParameters } from '../../../store/reducers/parameters/getters';
 import { useThunkDispatch } from '../../../useDispatch';
+import { Reconciler } from './Reconciler';
 
 
 export const ParametersContainer = () => {
+    const {
+        parameters,
+    } = useSelector(state => ({
+        parameters: getParameters(state as any),
+    }))
 
     const dispatch = useThunkDispatch();
+
     const [currentBalance, setCurrentBalance] = useState('');
     const [setAside, setSetAside] = useState('');
     const [startDate, setStartDate] = useState('');
 
-    return <>
-        <div className="form-inline d-flex justify-content-between mb-2">
-            <label htmlFor="Balance" className="sr-only">Balance</label>
-            <input className="form-control form-control-sm" id="Balance" type="text" placeholder="Balance" value={currentBalance} 
-                maxLength={19} required pattern="-?[1-9][0-9]*\.?[0-9]{0,2}"
-                style={{ width: 150 }}
-                onChange={e => {
-                    const stringValue: string = e.target.value;
-                    setCurrentBalance(stringValue);
+    const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
 
-                    const value = Number(stringValue);
-                    if (!Number.isNaN(value)) {
-                        dispatch(setParametersAndRecalculate({
-                            currentBalance: value,
-                        }) as any);
-                    }
-                }} />
+    const now = new Date();
 
-            <label htmlFor="setAside" className="sr-only">Set Aside</label>
-            <input className="form-control form-control-sm" id="setAside" type="text" placeholder="Set Aside" step="0.01" value={setAside}
-                maxLength={19} required pattern="-?[1-9][0-9]*\.?[0-9]{0,2}"
-                style={{ width: 150 }}
-                onChange={e => {
-                    const stringValue: string = e.target.value;
-                    setSetAside(stringValue);
+    useEffect(() => {
+        setCurrentBalance(String(parameters.currentBalance));
+        setSetAside(String(parameters.setAside));
+        setStartDate(parameters.startDate);
+    }, [parameters.currentBalance, parameters.setAside, parameters.startDate])
 
-                    const value = Number(stringValue);
-                    if (!Number.isNaN(value)) {
-                        dispatch(setParametersAndRecalculate({
-                            setAside: value,
-                        }) as any);
-                    }
-                }} />
+    const isPristine = String(parameters.currentBalance) === currentBalance && String(parameters.setAside) === setAside && parameters.startDate === startDate;
+
+    return <form onSubmit={e => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        dispatch(setParametersAndRecalculate({
+            startDate,
+            setAside: Number(setAside),
+            currentBalance: Number(currentBalance),
+        }) as any);
+        setErrorMessage(undefined);
+    }}>
+        <div className="d-flex justify-content-between flex-column">
+            <div className="form-inline d-flex justify-content-end mb-2">
+                <label htmlFor="Start">Today</label>
+                <input
+                    className="form-control form-control-sm ml-2" placeholder="Start Date" id="Start"
+                    type="date"
+                    style={{ width: 150 }}
+                    value={startDate}
+                    readOnly
+                    min="2000-01-01"
+                    max={now.toISOString().split("T")[0]}
+                    onChange={e => {
+                        setStartDate(e.target.value);
+                    }} />
+            </div>
+            <div className="form-inline d-flex justify-content-end mb-2">
+                <label htmlFor="Balance">Balance</label>
+                <input className="form-control form-control-sm ml-2" id="Balance" type="text" value={currentBalance} 
+                    maxLength={19} required pattern="-?[1-9][0-9]*\.?[0-9]{0,2}"
+                    style={{ width: 150 }}
+                    onChange={e => {
+                        const stringValue: string = e.target.value;
+                        setCurrentBalance(stringValue);
+                    }} />
+            </div>
+            <div className="form-inline d-flex justify-content-end mb-2">
+                <label htmlFor="setAside">Set Aside</label>
+                <input className="form-control form-control-sm ml-2" id="setAside" type="text" step="0.01" value={setAside}
+                    maxLength={19} required pattern="-?[1-9][0-9]*\.?[0-9]{0,2}"
+                    style={{ width: 150 }}
+                    onChange={e => {
+                        const stringValue: string = e.target.value;
+                        setSetAside(stringValue);
+                    }} />
+            </div>
+
+            <button className="btn btn-outline-primary btn-sm" disabled={isPristine}>Update</button>
+            {errorMessage && <span className="text-danger mt-2">{errorMessage}</span>}
+            <div className="mt-2">
+                <Reconciler />
+            </div>
         </div>
-        
-        <div className="form-inline d-flex justify-content-between mb-2">
-            <label htmlFor="Start" className="sr-only">Start</label>
-            <input
-                className="form-control form-control-sm" placeholder="Start Date" id="Start"
-                type="date"
-                style={{ width: 150 }}
-                value={startDate}
-                onChange={e => {
-                    const year = Number(e.target.value.split("-")[0]);
-                    if (year < 2000) return;
-                    setStartDate(e.target.value);
-                    dispatch(setParametersAndRecalculate({
-                        startDate: e.target.value,
-                    }) as any);
-                }} />
-        </div>
-    </>;
+    </form>;
 }

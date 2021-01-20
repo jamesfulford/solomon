@@ -15,7 +15,7 @@ services:
     ports:
       - 3000:3000
     environment:
-      - DEBUG=${DEBUG}
+      - DEBUG=1
       - CORS_ORIGIN_WHITELIST=https://localhost:8080
     depends_on:
       migrations:
