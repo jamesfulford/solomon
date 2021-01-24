@@ -8,15 +8,10 @@ services:
   solomon:
     build:
       context: ./backend
-      args:
-        REACT_APP_BASE_URL: /
-    volumes:
-      - ./backend:/app
     ports:
       - 3000:3000
     environment:
-      - DEBUG=1
-      - CORS_ORIGIN_WHITELIST=https://localhost:8080
+      - CORS_ORIGIN_WHITELIST=https://solomon.money
     depends_on:
       migrations:
         condition: service_started
@@ -45,19 +40,17 @@ services:
   
   # extending
   solomon-ui:
-    build:
-      context: ./ui
     healthcheck:
       interval: 5s
-      retries: 36
+      retries: 12
 
+  # prod mysql (switch to managed service when costs are warranted)
   mysql:
     image: mysql:5.7
     networks:
       - solomon
-    command: --init-file /tmp/seed-database.sql
     volumes:
-      - .:/tmp
+      - ./mysql:/var/lib/mysql
     restart: always
     healthcheck:
       test: mysqladmin ping -uroot -p`cat /run/secrets/db-rootpassword`
@@ -78,32 +71,32 @@ services:
     ports:
       - 8090:80
     environment:
-      PMA_HOST: ${DB_HOST:-mysql}
+      PMA_HOST: mysql
 
 secrets:
   db-name:
-    file: ./local-secrets/db-name
+    file: ./secrets/db-name
 
   db-username:
-    file: ./local-secrets/db-username
+    file: ./secrets/db-username
   db-password:
-    file: ./local-secrets/db-password
+    file: ./secrets/db-password
   
   db-migration-username:
-    file: ./local-secrets/db-migration-username
+    file: ./secrets/db-migration-username
   db-migration-password:
-    file: ./local-secrets/db-migration-password
+    file: ./secrets/db-migration-password
 
   db-host:
-    file: ./local-secrets/db-host
+    file: ./secrets/db-host
   db-port:
-    file: ./local-secrets/db-port
+    file: ./secrets/db-port
 
   db-rootpassword:
-    file: ./local-secrets/db-rootpassword
+    file: ./secrets/db-rootpassword
 
   django-secret-key:
-    file: ./local-secrets/django-secret-key
+    file: ./secrets/django-secret-key
   
   configcat-key:
-    file: ./local-secrets/configcat-key
+    file: ./secrets/configcat-key
