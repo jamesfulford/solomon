@@ -1,6 +1,6 @@
 on:
-   push:
-     branches: [ main ]
+#    push:
+#      branches: [ main ]
    workflow_dispatch:
 
 
@@ -22,37 +22,23 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
         
-    - name: Add solomon context
+    - name: Build images
       run: |
-        curl -L https://raw.githubusercontent.com/docker/compose-cli/main/scripts/install/install_linux.sh | sh
-        docker context create ecs --from-env solomon
+         export TAG=`git rev-parse HEAD`
+         docker-compose build solomon-ui solomon
+         aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 383314943195.dkr.ecr.us-east-1.amazonaws.com
+         docker-compose push
 
-    - name: Writing secrets
+    - name: Connect to droplet and update
       run: |
-        mkdir -p secrets || true
-        echo "$DB_NAME" > ./secrets/db-name
-        echo "$DB_USERNAME" > ./secrets/db-username
-        echo "$DB_PASSWORD" > ./secrets/db-password
-        echo "$DB_MIGRATION_USERNAME" > ./secrets/db-migration-username
-        echo "$DB_MIGRATION_PASSWORD" > ./secrets/db-migration-password
-        echo "$DB_ROOTPASSWORD" > ./secrets/db-rootpassword
-        echo "$DB_HOST" > ./secrets/db-host
-        echo "$DB_PORT" > ./secrets/db-port
-        echo "$DJANGO_SECRET_KEY" > ./secrets/django-secret-key
+         
+         echo "$DROPLET_SSH_KEY" > droplet_key
+         
+         echo "$SSH_KEY_GIT" > github_key
+         ssh-agent | bash
+         ssh-add github_key
+         
+         ssh -A -i droplet_key root@167.71.186.2 "cd solomon && git fetch && git checkout main && git pull && ./update-droplet.sh"
       env:
-        DB_NAME: ${{secrets.DB_NAME}}
-        DB_USERNAME: ${{secrets.DB_USERNAME}}
-        DB_PASSWORD: ${{secrets.DB_PASSWORD}}
-        DB_MIGRATION_USERNAME: ${{secrets.DB_MIGRATION_USERNAME}}
-        DB_MIGRATION_PASSWORD: ${{secrets.DB_MIGRATION_PASSWORD}}
-        DB_ROOTPASSWORD: ${{secrets.DB_ROOTPASSWORD}}
-        DB_HOST: ${{secrets.DB_HOST}}
-        DB_PORT: ${{secrets.DB_PORT}}
-        DJANGO_SECRET_KEY: ${{secrets.DJANGO_SECRET_KEY}}
-
-    - name: Docker Layer Caching
-      uses: satackey/action-docker-layer-caching@v0.0.11
-
-    - name: Run update script
-      run: |
-        ./update.sh
+         SSH_KEY_GIT: ${{secrets.SSH_KEY_GIT}}
+         DROPLET_SSH_KEY: ${{secrets.DROPLET_SSH_KEY}}
