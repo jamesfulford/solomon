@@ -12,9 +12,6 @@ services:
       - 3000:3000
     environment:
       - CORS_ORIGIN_WHITELIST=https://solomon.money
-    depends_on:
-      migrations:
-        condition: service_started
     healthcheck:
       interval: 5s
   
@@ -61,11 +58,6 @@ secrets:
     file: ./secrets/db-username
   db-password:
     file: ./secrets/db-password
-  
-  db-migration-username:
-    file: ./secrets/db-migration-username
-  db-migration-password:
-    file: ./secrets/db-migration-password
 
   db-host:
     file: ./secrets/db-host

@@ -13,10 +13,10 @@ pip3 install --upgrade --user awscli
 ~/.local/bin/aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 383314943195.dkr.ecr.us-east-1.amazonaws.com
 
 # a push should have been done earlier
-docker-compose -f docker-compose.yml -f docker-compose.prod-yml pull
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml pull
 
 # ensure mysql is running so we can run stuff
-docker-compose -f docker-compose.yml -f docker-compose.prod-yml up --no-deps mysql
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up --no-deps mysql
 
 # run migrations (might be no-op)
 ./update-db.sh
