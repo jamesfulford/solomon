@@ -17,7 +17,7 @@ sed -i'.bak' "s/db_migration_username/$db_migration_username/g" $script_path
 sed -i'.bak' "s/db_migration_password/$db_migration_password/g" $script_path
 
 echo "Initializing database..."
-mysql -uadmin -p`cat secrets/db-rootpassword` -h `cat secrets/db-host` < $script_path
+mysql -uroot -p`cat secrets/db-rootpassword` -h `cat secrets/db-host` < $script_path
 
 ./prod-sql.sh "select * from information_schema.USER_PRIVILEGES;"
 
