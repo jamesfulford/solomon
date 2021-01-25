@@ -23,7 +23,7 @@ docker-compose -f docker-compose.yml -f docker-compose.prod.yml up --no-deps -d 
 ./update-db.sh
 
 # update containers
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml up
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 
 # cleanup
 docker system prune --force --all --volumes
