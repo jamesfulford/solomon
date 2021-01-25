@@ -2,11 +2,12 @@
 
 export TAG=`git rev-parse HEAD`
 
-apt update -y && apt upgrade -y
-apt install -y python3-pip
-apt-get install -y mysql-client
-pip3 install --upgrade pip
-pip3 install --upgrade --user awscli
+# WIP undo commenting:
+# apt update -y && apt upgrade -y
+# apt install -y python3-pip
+# apt-get install -y mysql-client
+# pip3 install --upgrade pip
+# pip3 install --upgrade --user awscli
 
 # ECR is where images are pushed to by CI
 # `aws configure` was configured manually once
