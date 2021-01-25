@@ -16,7 +16,7 @@ pip3 install --upgrade --user awscli
 docker-compose -f docker-compose.yml -f docker-compose.prod.yml pull
 
 # ensure mysql is running so we can run stuff
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml up --no-deps mysql
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up --no-deps -d mysql
 
 # run migrations (might be no-op)
 ./update-db.sh
