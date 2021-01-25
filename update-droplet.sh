@@ -3,7 +3,7 @@
 export TAG=`git rev-parse HEAD`
 
 apt update -y && apt upgrade -y
-apt install -y python3-pip
+apt install -y python3-pip mysql-shell
 pip3 install --upgrade pip
 pip3 install --upgrade --user awscli
 
