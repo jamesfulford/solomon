@@ -1,6 +1,6 @@
 version: '3.4'
 
-# For development (automatically picked-up unless another -f override is specified)
+# For prod (-f overrides required)
 
 services:
 
@@ -17,26 +17,6 @@ services:
         condition: service_started
     healthcheck:
       interval: 5s
-
-  # included for convenience
-  # exits when complete (which causes prod deploy failure)
-  migrations:
-    image: 383314943195.dkr.ecr.us-east-1.amazonaws.com/solomon:latest
-    command: "python3 manage.py migrate"
-    networks:
-      - solomon
-    secrets:
-      - db-migration-username
-      - db-migration-password
-      - db-host
-      - db-port
-      - db-name
-      - django-secret-key
-    build:
-      context: ./backend
-    depends_on:
-      mysql:
-        condition: service_healthy
   
   # extending
   solomon-ui:

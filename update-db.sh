@@ -24,4 +24,4 @@ mysql -uroot -p`cat secrets/db-rootpassword` -h `cat secrets/db-host | sed "s/^m
 echo
 echo
 echo "Running migrations..."
-docker-compose -f migrations.compose.yml run --rm migrations
+docker-compose -f docker-compose.yml -f docker-compose.prod-yml -f migrations.compose.yml run --rm migrations
