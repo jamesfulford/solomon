@@ -60,8 +60,7 @@ services:
       - .:/tmp
     restart: always
     healthcheck:
-      # keep local root password in sync with local-secrets/db-rootpassword
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-prootpasswordforlocal"]
+      test: mysqladmin ping -uroot -p`cat /run/secrets/db-rootpassword`
       interval: 15s
       timeout: 3s
       retries: 3

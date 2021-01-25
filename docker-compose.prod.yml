@@ -1,0 +1,74 @@
+version: '3.4'
+
+# For prod (-f overrides required)
+
+services:
+
+  # extending
+  solomon:
+    build:
+      context: ./backend
+    ports:
+      - 3000:3000
+    environment:
+      - CORS_ORIGIN_WHITELIST=https://solomon.money
+    healthcheck:
+      interval: 5s
+  
+  # extending
+  solomon-ui:
+    healthcheck:
+      interval: 5s
+      retries: 12
+
+  # prod mysql (switch to managed service when costs are warranted)
+  mysql:
+    image: mysql:5.7
+    networks:
+      - solomon
+    volumes:
+      - ./mysql:/var/lib/mysql
+    restart: always
+    healthcheck:
+      test: mysqladmin ping -uroot -p`cat /run/secrets/db-rootpassword`
+      interval: 15s
+      timeout: 3s
+      retries: 3
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db-rootpassword
+    secrets:
+      - db-rootpassword
+
+  myadmin:
+    networks:
+      - solomon
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - 8090:80
+    environment:
+      PMA_HOST: mysql
+
+secrets:
+  db-name:
+    file: ./secrets/db-name
+
+  db-username:
+    file: ./secrets/db-username
+  db-password:
+    file: ./secrets/db-password
+
+  db-host:
+    file: ./secrets/db-host
+  db-port:
+    file: ./secrets/db-port
+
+  db-rootpassword:
+    file: ./secrets/db-rootpassword
+
+  django-secret-key:
+    file: ./secrets/django-secret-key
+  
+  configcat-key:
+    file: ./secrets/configcat-key

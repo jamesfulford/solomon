@@ -1,3 +1,3 @@
 #!/bin/bash
 
-mysql -uadmin -p`cat secrets/db-rootpassword` -h `cat secrets/db-host` -e "$@"
+mysql --protocol=TCP -uroot -p`cat secrets/db-rootpassword` -h `cat secrets/db-host | sed "s/^mysql$/localhost/g"` -e "$@"
