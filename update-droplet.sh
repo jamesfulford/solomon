@@ -16,12 +16,14 @@ export TAG=`git rev-parse HEAD`
 # a push should have been done earlier
 docker-compose -f docker-compose.yml -f docker-compose.prod.yml pull
 
-# ensure mysql is running so we can run stuff
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml up --no-deps -d mysql
 
+# ensure mysql is running so we can run migrations
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up --no-deps -d mysql
 # run migrations (might be no-op)
 ./update-db.sh
 
+# update containers
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up
 
-
+# cleanup
 docker system prune --force --all --volumes
