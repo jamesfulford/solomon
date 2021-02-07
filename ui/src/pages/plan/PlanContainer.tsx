@@ -33,13 +33,11 @@ export const PlanContainer = () => {
 
     // get flags
     useEffect(() => {
-        if (isAuthenticated) {
+        if (!isLoading && isAuthenticated) {
             dispatch(fetchFlags() as any);
             dispatch(fetchParameters() as any);
         }
-    }, [dispatch, isAuthenticated]);
-
-    // 
+    }, [dispatch, isAuthenticated, isLoading]);
     
     if (!isLoading && !isAuthenticated) {
         return <Container className="justify-content-middle">

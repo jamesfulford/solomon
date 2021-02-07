@@ -10,7 +10,13 @@ export class FlagApiService {
     constructor(private baseUrl: string) {}
 
     public fetchDayByDays(): Promise<IFlags> {
-        return axios.get(`${this.baseUrl}/api/flags`)
+        return axios.get(`${this.baseUrl}/api/flags`, {
+            raxConfig: {
+                retry: 5,
+                retryDelay: 200,
+                statusCodesToRetry: [[401, 401]],
+            }
+        })
             .then(r => {
                 return r.data as IFlags
             });

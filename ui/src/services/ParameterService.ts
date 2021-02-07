@@ -1,5 +1,9 @@
 import axios from "axios";
+import * as rax from 'retry-axios';
 import { IParameters } from "../store/reducers/parameters";
+
+
+rax.attach();
 
 type IApiParameters = Omit<IParameters, "endDate">;
 
@@ -7,7 +11,13 @@ export class ParameterApiService {
     constructor(private baseUrl: string) {}
 
     public fetchParameters(): Promise<IApiParameters> {
-        return axios.get(`${this.baseUrl}/api/parameters`)
+        return axios.get(`${this.baseUrl}/api/parameters`, {
+            raxConfig: {
+                retry: 5,
+                retryDelay: 200,
+                statusCodesToRetry: [[401, 401]],
+            }
+        })
             .then(r => {
                 return r.data as IApiParameters;
             });
