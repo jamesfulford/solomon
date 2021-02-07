@@ -7,6 +7,7 @@ apt install -y python3-pip
 apt-get install -y mysql-client
 pip3 install --upgrade pip
 pip3 install --upgrade --user awscli
+apt autoremove
 
 # ECR is where images are pushed to by CI
 # `aws configure` was configured manually once
