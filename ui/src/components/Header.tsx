@@ -2,6 +2,7 @@ import { useAuth0 } from '@auth0/auth0-react';
 import React from 'react';
 import Navbar from 'react-bootstrap/Navbar';
 import { Link } from 'react-router-dom';
+import { HeaderVerse } from './HeaderVerse';
 import logo from './MoneyWise.svg'
 
 export const Header = () => {
@@ -10,6 +11,7 @@ export const Header = () => {
         <Link to="/">
             <Navbar.Brand><img width={48} height={48} src={logo} alt="logo" />Solomon</Navbar.Brand>
         </Link>
+        <HeaderVerse />
         {isAuthenticated && <Link to="/plan">Plan</Link>}
         <LoginSection />
     </Navbar>
