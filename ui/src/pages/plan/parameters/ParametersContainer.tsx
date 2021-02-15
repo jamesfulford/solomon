@@ -78,7 +78,7 @@ export const ParametersContainer = () => {
                     }} />
             </div>
 
-            <button className="btn btn-outline-primary btn-sm" disabled={isPristine}>Update</button>
+            <button className="button-secondary" disabled={isPristine}>Update</button>
             {errorMessage && <span className="text-danger mt-2">{errorMessage}</span>}
             <div className="mt-2">
                 <Reconciler />
