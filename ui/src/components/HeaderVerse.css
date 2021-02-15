@@ -1,0 +1,22 @@
+.verse {
+    font-size: 12px;
+    font-style: italic;
+    color: var(--tertiary);
+}
+
+
+.show-verse-on-hover > .show-on-hover {
+    visibility: hidden;
+}
+
+.show-verse-on-hover:hover > .show-on-hover {
+    visibility: visible;
+    transition: opacity 0.5s;
+}
+
+
+/* @media (max-width: 320px) {
+    .show-verse-on-hover {
+        visibility: hidden;
+    }
+  } */

@@ -1,36 +1,32 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import React from 'react';
 import Navbar from 'react-bootstrap/Navbar';
-import { Link } from 'react-router-dom';
 import { HeaderVerse } from './HeaderVerse';
-import logo from './MoneyWise.svg'
 
 export const Header = () => {
-    const { isAuthenticated } = useAuth0();
-    return <Navbar bg="light" expand="lg" className="mb-3">
-        <Link to="/">
-            <Navbar.Brand><img width={48} height={48} src={logo} alt="logo" />Solomon</Navbar.Brand>
-        </Link>
+    return <Navbar bg="light" expand="lg">
+        <Navbar.Brand style={{ fontSize: 22 }}><span role="img" aria-label="Crown Logo" className="mr-2">👑</span>Solomon</Navbar.Brand>
         <HeaderVerse />
-        {isAuthenticated && <Link to="/plan">Plan</Link>}
         <LoginSection />
     </Navbar>
 }
 
 const LoginSection = () => {
-    const { isAuthenticated, isLoading, user, loginWithRedirect, logout } = useAuth0();
+    const { isAuthenticated, isLoading, loginWithRedirect, logout } = useAuth0();
     if (isLoading) {
         return null
     }
 
     if (isAuthenticated) {
         return <>
-            <span className="ml-auto">Hello, {user.name}</span>
-            <button className="btn btn-outline-primary ml-3" onClick={() => logout({ returnTo: window.location.origin })}>Logout</button> 
+            <button className="button-secondary ml-auto" onClick={() => logout({ returnTo: window.location.origin })}>Logout</button> 
         </>
     }
 
-    return <>
-        <button className="btn btn-outline-primary ml-auto" onClick={() => loginWithRedirect()}>Login</button>
-    </>
+    return <div className="ml-auto">
+        <button className="call-to-action" onClick={() => loginWithRedirect({
+            screen_hint: 'signup'
+        })}>Sign Up</button>
+        <button className="button-secondary ml-2" onClick={() => loginWithRedirect()}>Login</button>
+    </div>
 }

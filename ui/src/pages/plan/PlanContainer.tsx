@@ -17,6 +17,9 @@ import { getFlags } from '../../store/reducers/flags/getters';
 import { getParametersStatuses } from '../../store/reducers/parameters/getters';
 import { fetchParameters } from '../../store/reducers/parameters';
 
+import './Plan.css';
+import { getRules } from '../../store/reducers/rules/getters';
+
 
 export const PlanContainer = () => {
     const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
@@ -25,10 +28,12 @@ export const PlanContainer = () => {
     const dispatch = useThunkDispatch();
     const {
         flags,
-        parameters: { loading: parametersLoading }
+        parameters: { loading: parametersLoading },
+        hasRules,
     } = useSelector(state => ({
         flags: getFlags(state as any),
         parameters: getParametersStatuses(state as any),
+        hasRules: Boolean(getRules(state as any).data.length),
     }))
 
     // get flags
@@ -53,10 +58,16 @@ export const PlanContainer = () => {
         || !flags // loading flags
         || parametersLoading // loading parameters
     ) {
+        // TODO(jamesfulford): put an awesome loading screen
         return null;
     }
 
-    return <Container fluid style={{ paddingLeft: '10%', paddingRight: "10%" }}>
+    if (!hasRules) {
+        // TODO(jamesfulford): render an awesome onboarding component
+        // console.log("no rules found");
+    }
+
+    return <div className="plancontainer">
         <Row>
             <Col className="d-flex align-items-middle flex-column align-items-stretch">
                 <div className="d-flex align-items-end mb-3">
@@ -81,5 +92,5 @@ export const PlanContainer = () => {
                 <TransactionsContainer />
             </Col>
         </Row>
-    </Container>
+    </div>
 }

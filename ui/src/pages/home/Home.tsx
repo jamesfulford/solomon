@@ -1,21 +1,16 @@
 import React from 'react';
 import Jumbotron from 'react-bootstrap/Jumbotron';
-import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
-import { Link } from 'react-router-dom';
+import { useAuth0 } from '@auth0/auth0-react';
 
 export const Home = () => {
+    const { loginWithRedirect } = useAuth0();
     return <Container>
-        <Jumbotron>
-            <h1>Take back your financial future.</h1>
-            <p>
-                Lorem, ipsum dolor sit amet consectetur adipisicing elit. Alias inventore eos at aliquid omnis fugiat deleniti minus, ullam doloremque obcaecati fuga repellat nemo commodi magnam exercitationem expedita qui tenetur saepe?
-            </p>
-            <p>
-                <Link to="/plan">
-                    <Button variant="primary">Take Control</Button>
-                </Link>
-            </p>
+        <Jumbotron className="text-center mt-5">
+            <h1>Become Money's Master</h1>
+            <button className="call-to-action" onClick={() => loginWithRedirect({
+                screen_hint: 'signup'
+            })}>Make a Plan</button>
         </Jumbotron>
     </Container>
 }
