@@ -69,26 +69,12 @@ export const PlanContainer = () => {
 
     return <div className="plancontainer">
         <Row>
-            <Col className="d-flex align-items-middle flex-column align-items-stretch">
-                <div className="d-flex align-items-end mb-3">
-                    <Container className="text-center p-0">
-                        <h4>Parameters</h4>
-                        <ParametersContainer />
-                    </Container>
-                </div>
-                <Container className="text-center">
-                    <h4>Rules</h4>
-                </Container>
+            <Col lg={3}>
                 <RulesContainer />
             </Col>
             <Col lg={9}>
-                <Container className="text-center">
-                    <h4 data-testid="transactions">Upcoming Transactions</h4>
-                </Container>
-                <div style={{ minHeight: 450 }}>
-                    <DayByDayContainer />
-                </div>
-                <hr />
+                <ParametersContainer />
+                <DayByDayContainer />
                 <TransactionsContainer />
             </Col>
         </Row>
