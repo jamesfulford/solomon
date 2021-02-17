@@ -15,6 +15,10 @@ import { RequestStatus, setFlags, setFlagStatus } from '../../store/reducers/fla
 import { useDispatch, useSelector } from 'react-redux';
 import { AppState } from '../../store/reducers';
 import { IParameters, setParameters, setParametersAndRecalculate, setParametersStatus } from '../../store/reducers/parameters';
+import { IApiRule } from '../../services/RulesService';
+import { setTransactionsStatus } from '../../store/reducers/transactions';
+import { setDayByDaysStatus } from '../../store/reducers/daybydays';
+import { setRules, setRuleStatus } from '../../store/reducers/rules';
 
 describe('plan container', () => {
     function setAuth({ user = { name: 'James', userid: "user#1" }, loading=false, isAuthenticated=true }) {
@@ -30,7 +34,10 @@ describe('plan container', () => {
 
     function setStoreState(
         { flags, flagsLoading, flagsError }: { flags?: IFlags, flagsLoading: boolean, flagsError: boolean },
-        { params, paramsLoading, paramsError }: { params?: IParameters, paramsLoading: boolean, paramsError: boolean }
+        { params, paramsLoading, paramsError }: { params?: IParameters, paramsLoading: boolean, paramsError: boolean },
+        { rules, rulesLoading, rulesError }: { rules: IApiRule[], rulesLoading: boolean, rulesError: boolean },
+        { transactionsLoading, transactionsError }: { transactionsLoading: boolean, transactionsError: boolean },
+        { daybydaysLoading, daybydaysError }: { daybydaysLoading: boolean, daybydaysError: boolean },
     ) {
         const store = storeCreator();
         if (flags) {
@@ -55,6 +62,33 @@ describe('plan container', () => {
             store.dispatch(setParametersStatus(RequestStatus.ERROR));
         }
 
+        if (rules) {
+            store.dispatch(setRules(rules, { replace: true }));
+            store.dispatch(setRuleStatus(RequestStatus.STABLE));
+        }
+        if (rulesLoading) {
+            store.dispatch(setRuleStatus(RequestStatus.LOADING));
+        }
+        if (rulesError) {
+            store.dispatch(setRuleStatus(RequestStatus.ERROR));
+        }
+
+        store.dispatch(setTransactionsStatus(RequestStatus.STABLE));
+        if (transactionsLoading) {
+            store.dispatch(setTransactionsStatus(RequestStatus.LOADING));
+        }
+        if (transactionsError) {
+            store.dispatch(setTransactionsStatus(RequestStatus.ERROR));
+        }
+
+        store.dispatch(setDayByDaysStatus(RequestStatus.STABLE));
+        if (daybydaysLoading) {
+            store.dispatch(setDayByDaysStatus(RequestStatus.LOADING));
+        }
+        if (daybydaysError) {
+            store.dispatch(setDayByDaysStatus(RequestStatus.ERROR));
+        }
+
         (useSelector as jest.MockedFunction<(fn: (state: AppState) => any) => void>).mockImplementation(selector => selector(store.getState()))
 
         dispatch = jest.fn();
@@ -67,16 +101,19 @@ describe('plan container', () => {
         setStoreState(
             { flags: { highLowEnabled: false }, flagsLoading: false, flagsError: false },
             { params: { currentBalance: 0, setAside: 0, startDate: "2020-01-01", endDate: "2020-04-01" }, paramsLoading: false, paramsError: false },
+            { rules: [{ id: 'asdf', userid: 'qwer', name: 'zxcv', 'rrule': '', value: 2 }], rulesError: false, rulesLoading: false },
+            { transactionsError: false, transactionsLoading: false },
+            { daybydaysError: false, daybydaysLoading: false },
         );
         const { getByTestId } = render(<PlanContainer />);
-        const transactionsHeader = getByTestId("transactions");
+        const transactionsHeader = getByTestId("transactions-empty"); // redux gives no transactions back
         expect(transactionsHeader).toBeInTheDocument();
     });
 
     it('should render nothing if loading', () => {
         setAuth({ loading: true })
         const element = render(<PlanContainer />);
-        expect(element.container.textContent).toBe('');
+        expect(element.container.textContent).toBe('Loading...');
     });
 
     it('should render login button if no login', () => {
