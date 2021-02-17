@@ -1,9 +1,9 @@
 .currency-negative {
-    color: red;
+    color: var(--red);
 }
 
 .currency-positive {
-    color: black;
+    color: white;
 }
 
 .ruledescription {
@@ -13,8 +13,8 @@
     border-radius: 5px;
 }
 
-.ruledescription:hover {
-    background-color: #f8f9fa;
+.ruledescription:hover, .ruledescription-selected {
+    background-color: var(--tertiary);
 }
 
 .rulename {

@@ -19,14 +19,16 @@ function getRRuleDisplayString(rruleString: string): string {
 
 export const Rule = ({
     rule,
-    showModal = () => {}
+    showModal = () => {},
+    selected,
 }: {
     rule: IApiRule,
     showModal?: (id: string, rule: IApiRule) => void,
+    selected: boolean
 }) => {
     const editButtonHandler = useCallback(() => showModal(rule.id, rule), [rule, showModal])
     const rruleString = getRRuleDisplayString(rule.rrule);
-    return <div className="ruledescription p-2" onClick={editButtonHandler}>
+    return <div className={`ruledescription p-2 ${selected ? 'ruledescription-selected' : ''}`} onClick={editButtonHandler}>
         <div className="btn-toolbar justify-content-between" role="toolbar" aria-label="Toolbar with button groups">
             <div className="btn-group mr-2" role="group" aria-label="First group">
                 <div className="rulename">

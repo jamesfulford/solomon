@@ -9,13 +9,43 @@ import { hebrewMonthToDisplayNameMap } from './hebrew';
 import { IApiRuleMutate } from '../../../../services/RulesService';
 import { useSelector } from 'react-redux';
 import { getIsHighLowEnabled } from '../../../../store/reducers/flags/getters';
+import Container from 'react-bootstrap/Container';
 
 
 function frequencyIsIn(freq: WorkingState['rrule']['freq'], freqs: WorkingState['rrule']['freq'][]): boolean {
     return freqs.includes(freq);
 }
 
-export const AddEditRule = ({
+interface AddEditRuleFormProps {
+    onCreate: (rule: IApiRuleMutate) => Promise<void>,
+    onUpdate: (rule: IApiRuleMutate) => Promise<void>,
+    onDelete: () => Promise<void>,
+    rule?: IApiRuleMutate,
+}
+
+interface AddEditRuleProps extends AddEditRuleFormProps {
+    onDeselect: () => void
+}
+
+export const AddEditRule = ({ onDeselect, ...props}: AddEditRuleProps) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+
+    const isRuleSelected = Boolean(props.rule);
+    const shouldBeExpanded = isRuleSelected || isExpanded;
+    return <Container className="justify-content-middle text-center mt-2">
+        <button className="call-to-action mb-3 p-0" style={{ width: 50, height: 50, borderRadius: '50%', }} onClick={() => {
+            if (isRuleSelected) {
+                onDeselect();
+                setIsExpanded(false);
+                return;
+            }
+            setIsExpanded(e => !e);
+        }}>{ shouldBeExpanded ? '-' : '+' }</button>
+        { shouldBeExpanded && <AddEditRuleForm {...props} />}
+    </Container>;
+}
+
+const AddEditRuleForm = ({
     onCreate,
     onUpdate,
     onDelete,
@@ -88,7 +118,7 @@ export const AddEditRule = ({
                             field,
                         }: FieldProps) => <>
                             <label htmlFor="Name" className="sr-only">Rule name</label>
-                            <input className="form-control form-control-sm" id="Name" placeholder="Rule name" type="text" required maxLength={50} {...field} />
+                            <input className="form-control form-control-sm sl-input" id="Name" placeholder="Rule name" type="text" required maxLength={50} {...field} />
                         </>}
                     </Field>
 
@@ -97,7 +127,7 @@ export const AddEditRule = ({
                             field,
                         }: FieldProps) => <>
                             <label htmlFor="Value" className="sr-only">Value</label>
-                            <input className="form-control form-control-sm" id="Value" placeholder="Value $" type="text" maxLength={19} required pattern="-?[1-9][0-9]*\.?[0-9]{0,2}" {...field} />
+                            <input className="form-control form-control-sm sl-input" id="Value" placeholder="Value $" type="text" maxLength={19} required pattern="-?[1-9][0-9]*\.?[0-9]{0,2}" {...field} />
                         </>}
                     </Field>}
 
@@ -113,7 +143,7 @@ export const AddEditRule = ({
                                     field,
                                 }: FieldProps) => <>
                                     <label htmlFor="LowValue" className="sr-only">Bad (25%) Case Value</label>
-                                    <input className="form-control form-control-sm" id="LowValue" placeholder="Bad (25%) Case Value $" type="text" pattern="-?[0-9]+\.?[0-9]{0,2}?" {...field} />
+                                    <input className="form-control form-control-sm sl-input" id="LowValue" placeholder="Bad (25%) Case Value $" type="text" pattern="-?[0-9]+\.?[0-9]{0,2}?" {...field} />
                                 </>}
                             </Field>
 
@@ -122,7 +152,7 @@ export const AddEditRule = ({
                                     field,
                                 }: FieldProps) => <>
                                     <label htmlFor="Value" className="sr-only">Expected Case Value</label>
-                                    <input className="form-control form-control-sm" id="Value" placeholder="Expected Case Value $" type="text" pattern="-?[0-9]+\.?[0-9]{0,2}?" {...field} />
+                                    <input className="form-control form-control-sm sl-input" id="Value" placeholder="Expected Case Value $" type="text" pattern="-?[0-9]+\.?[0-9]{0,2}?" {...field} />
                                 </>}
                             </Field>
 
@@ -131,7 +161,7 @@ export const AddEditRule = ({
                                     field,
                                 }: FieldProps) => <>
                                     <label htmlFor="HighValue" className="sr-only">Good (75%) Case Value</label>
-                                    <input className="form-control form-control-sm" id="HighValue" placeholder="Good (75%) Case Value $" type="text" pattern="-?[0-9]+\.?[0-9]{0,2}?" {...field} />
+                                    <input className="form-control form-control-sm sl-input" id="HighValue" placeholder="Good (75%) Case Value $" type="text" pattern="-?[0-9]+\.?[0-9]{0,2}?" {...field} />
                                 </>}
                             </Field>
                         </>}
@@ -167,7 +197,7 @@ export const AddEditRule = ({
                                 field,
                             }: FieldProps) => <>
                                 <label htmlFor="Interval" className="sr-only">Interval</label>
-                                <input className="form-control form-control-sm" style={{ width: 48 }} id="Interval" placeholder="Interval" type="number" min="1" {...field} />
+                                <input className="form-control form-control-sm sl-input ml-2" style={{ width: 48 }} id="Interval" placeholder="Interval" type="number" min="1" {...field} />
                             </>}
                         </Field>}
 
@@ -179,7 +209,7 @@ export const AddEditRule = ({
                             field,
                         }: FieldProps) => <>
                             <label htmlFor="bymonthday" className="sr-only">Day of month</label>
-                            <input className="form-control form-control-sm" id="bymonthday" placeholder="Day" style={{ width: 64 }}
+                            <input className="form-control form-control-sm sl-input" id="bymonthday" placeholder="Day" style={{ width: 64 }}
                                 type="number" min="1" max="31" required
                                 {...field}
                                 />
@@ -210,7 +240,7 @@ export const AddEditRule = ({
                             field,
                         }: FieldProps) => <>
                             <label htmlFor="byhebrewday" className="sr-only">Day</label>
-                            <input className="form-control form-control-sm" id="byhebrewday" placeholder="Day" style={{ width: 64 }}
+                            <input className="form-control form-control-sm sl-input" id="byhebrewday" placeholder="Day" style={{ width: 64 }}
                                 type="number" min="1" max="30" required
                                 {...field}
                                 />
@@ -261,7 +291,7 @@ export const AddEditRule = ({
                         }: FieldProps) => <>
                             <label htmlFor="Start" className="sr-only">Start</label>
                             <input
-                                className="form-control form-control-sm" placeholder="Start Date" id="Start"
+                                className="form-control form-control-sm " placeholder="Start Date" id="Start"
                                 type="date" required={
                                     (interval > 1) || frequencyIsIn(freq, [ONCE, RRule.YEARLY])
                                 }
@@ -283,21 +313,21 @@ export const AddEditRule = ({
                 </div>}
 
                 {/* Explaining input */}
-                <div className="alert alert-light p-0 m-0 mt-1 text-center">
+                <div className="p-0 m-0 mt-2 text-center">
                     <RulePreview rule={currentRule} />
                 </div>
             
                 {/* Submission / Actions */}
                 <div className="d-flex flex-row-reverse justify-content-between">
                     <div className="d-flex flex-row-reverse align-items-center" style={{ overflow: 'clip' }}>
-                        <button className="btn btn-outline-primary btn-sm mb-2 mt-2">{(!canUpdate || intentionToCopy) ? 'Create' : `Update ${rule?.name}`}</button>
+                        <button className="button-secondary mb-2 mt-2">{(!canUpdate || intentionToCopy) ? 'Create' : `Update ${rule?.name}`}</button>
                         {canUpdate && <>
                             <label className="mb-1 mr-3" htmlFor="intentionToCopy">Copy</label>
                             <input id="intentionToCopy" type="checkbox" className="mr-2" checked={intentionToCopy} onChange={e => setIntentionToCopy(e.target.checked)}></input>
                         </>}
                     </div>
 
-                    {canUpdate && <button type="button" className="btn btn-outline-danger btn-sm mb-2 mt-2" onClick={e => {
+                    {canUpdate && <button type="button" className="button-secondary text-danger btn-sm mb-2 mt-2" onClick={e => {
                         e.preventDefault();
                         e.stopPropagation();
                         onDelete();

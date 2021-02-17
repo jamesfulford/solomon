@@ -1,8 +1,13 @@
 :root {
     --primary: #A5D1C0;
     --secondary: #61AB8F;
-    --tertiary: rgb(120, 120, 120);
-    --dark-background: rgb(50, 50, 50);
+    --tertiary: #787878;
+    --dark-background: #333333;
+    --red: #DB6B77;
+}
+
+::-webkit-calendar-picker-indicator {
+    filter: invert(1);
 }
 
 body {

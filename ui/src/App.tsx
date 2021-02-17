@@ -12,7 +12,7 @@ function App() {
   return (
     <>
       <Header />
-      { isAuthenticated ? <PlanContainer /> : <Home />}
+      { isAuthenticated ? <div style={{ minHeight: '85vh'}}><PlanContainer /></div> : <Home />}
       <Footer />
     </>
   );
