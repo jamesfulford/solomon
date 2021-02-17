@@ -14,11 +14,13 @@ export enum RuleType {
 interface SetRulesAction {
     type: RuleType.SET;
     rules: IApiRule[];
+    replace: boolean;
 }
-export function setRules(rules: IApiRule[]): SetRulesAction {
+export function setRules(rules: IApiRule[], { replace = false }): SetRulesAction {
     return {
         type: RuleType.SET,
         rules,
+        replace
     }
 }
 
@@ -131,7 +133,7 @@ export function fetchRules() {
 
         return RulesService.fetchRules()
             .then(rules => {
-                dispatch(setRules(rules));
+                dispatch(setRules(rules, { replace: true }));
                 dispatch(setRuleStatus(RequestStatus.STABLE));
             })
             .catch(e => {

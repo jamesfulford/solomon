@@ -26,7 +26,7 @@ export default (
                 overrideRuleMap[rule.id] = newrule as Omit<IApiRule, 'id'>;
             });
             return { ...state, rulemap: {
-                ...state.rulemap,
+                ...(!action.replace && state.rulemap),
                 ...overrideRuleMap,
             }};
         case RuleType.REMOVE:

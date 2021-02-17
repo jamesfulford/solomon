@@ -19,54 +19,133 @@ import { fetchParameters } from '../../store/reducers/parameters';
 
 import './Plan.css';
 import { getRules } from '../../store/reducers/rules/getters';
+import { fetchRules } from '../../store/reducers/rules';
+import { getDayByDay } from '../../store/reducers/daybydays/getters';
+import { getTransactions } from '../../store/reducers/transactions/getters';
 
+
+const Loading = () => {
+    return <Container className="justify-content-middle text-center mt-5 mb-5">
+        <div className="spinner-border text-light" role="status">
+            <span className="sr-only">Loading...</span>
+        </div>
+    </Container>;
+}
+
+const Error = ({ message }: { message?: string }) => {
+    return <Container className="justify-content-middle text-center mt-5 mb-5">
+        <span className="text-danger">{message || 'An error occurred. Please reload the page.'}</span>
+    </Container>;
+}
+
+const LoginPrompt = () => {
+    const { loginWithRedirect } = useAuth0();
+    return <Container className="justify-content-middle">
+        <div className="px-2 py-4"><p className="lead">You must be logged in!</p><br /><Button onClick={() => loginWithRedirect()}>Login</Button></div>
+    </Container>
+}
 
 export const PlanContainer = () => {
-    const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
+
+    // Load user and token
+    const { isAuthenticated, isLoading } = useAuth0();
     const token = useToken();
 
+    if (isLoading) {
+        return <Loading />
+    }
+
+    if (!isAuthenticated) {
+        return <LoginPrompt />
+    }
+
+    if (!token) {
+        return <Loading />
+    }
+
+    return <PlanContainerLoadContext />
+}
+
+const PlanContainerLoadContext = () => {
     const dispatch = useThunkDispatch();
+
+    // get flags
+    useEffect(() => {
+        dispatch(fetchFlags() as any);
+        dispatch(fetchParameters() as any);
+    }, [dispatch]);
+
     const {
         flags,
-        parameters: { loading: parametersLoading },
-        hasRules,
+        parametersStatuses: { loading: parametersLoading },
     } = useSelector(state => ({
         flags: getFlags(state as any),
-        parameters: getParametersStatuses(state as any),
-        hasRules: Boolean(getRules(state as any).data.length),
+        parametersStatuses: getParametersStatuses(state as any),
+    }))
+
+    // Wait if...
+    if (
+        !flags // loading flags
+        || parametersLoading // loading parameters
+    ) {
+        return <Loading />
+    }
+
+    return <PlanContainerLoadData />
+}
+
+const PlanContainerLoadData = () => {
+    const dispatch = useThunkDispatch();
+
+    const {
+        rules: { data: rules, loading: rulesLoading, error: rulesError },
+        daybydays: { loading: daybydaysLoading, error: daybydaysError },
+        transactions: { loading: transactionsLoading, error: transactionsError },
+    } = useSelector(state => ({
+        rules: getRules(state as any),
+        daybydays: getDayByDay(state as any),
+        transactions: getTransactions(state as any),
     }))
 
     // get flags
     useEffect(() => {
-        if (!isLoading && isAuthenticated) {
-            dispatch(fetchFlags() as any);
-            dispatch(fetchParameters() as any);
-        }
-    }, [dispatch, isAuthenticated, isLoading]);
-    
-    if (!isLoading && !isAuthenticated) {
-        return <Container className="justify-content-middle">
-            <div className="px-2 py-4"><p className="lead">You must be logged in!</p><br /><Button onClick={() => loginWithRedirect()}>Login</Button></div>
-        </Container>
+        dispatch(fetchRules() as any);
+    }, [dispatch]);
+
+    if (rulesError || daybydaysError || transactionsError) {
+        return <Error />;
     }
 
-
-    // Wait if...
-    if (
-        isLoading // loading user
-        || !token // getting token
-        || !flags // loading flags
-        || parametersLoading // loading parameters
-    ) {
-        // TODO(jamesfulford): put an awesome loading screen
-        return null;
+    if (rulesLoading || daybydaysLoading || transactionsLoading) {
+        return <Loading />;
     }
 
-    if (!hasRules) {
-        // TODO(jamesfulford): render an awesome onboarding component
-        // console.log("no rules found");
+    if (!rules?.length) {
+        return <Onboarding />;
     }
 
+    return <PlanContainerView />
+}
+
+
+const Onboarding = () => {
+    return <div className="plancontainer">
+        <Row>
+            <Col lg={3}>
+                <RulesContainer />
+            </Col>
+            <Col lg={9}>
+                <ParametersContainer />
+                <Container className="justify-content-middle text-center mt-5 mb-5">
+                    <h3 className="text-light">Welcome! Start by adding a rule.</h3>
+                </Container>
+            </Col>
+        </Row>
+    </div>
+}
+
+
+const PlanContainerView = () => {
     return <div className="plancontainer">
         <Row>
             <Col lg={3}>

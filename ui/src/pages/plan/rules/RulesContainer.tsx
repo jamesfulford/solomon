@@ -4,7 +4,7 @@ import sortBy from 'lodash/sortBy';
 import Container from 'react-bootstrap/Container';
 import { AddEditRule } from './AddEditRule';
 import { useThunkDispatch } from '../../../useDispatch';
-import { createRule, deleteRule, fetchRules, updateRule } from '../../../store/reducers/rules';
+import { createRule, deleteRule, updateRule } from '../../../store/reducers/rules';
 import { useSelector } from 'react-redux';
 import { getRules } from '../../../store/reducers/rules/getters';
 import { IApiRule, IApiRuleMutate } from '../../../services/RulesService';
@@ -12,11 +12,6 @@ import { IApiRule, IApiRuleMutate } from '../../../services/RulesService';
 
 export const RulesContainer = () => {
     const dispatch = useThunkDispatch();
-
-    // const [{ data, loading, error }, refetch]
-    React.useEffect(() => {
-        dispatch(fetchRules() as any);
-    }, [dispatch]);
 
     const {
         rules: { data, loading, error },
@@ -57,9 +52,13 @@ export const RulesContainer = () => {
         return deleteHandler(selectedRuleId);
     }, [selectedRuleId, deleteHandler])
 
+    const onDeselect = useCallback(() => {
+        setSelectedRuleId(undefined);
+    }, [setSelectedRuleId]);
+
     if (loading) {
         return <>
-            <AddEditRule onCreate={createNewRule} onUpdate={onUpdate} onDelete={onDelete} />
+            <AddEditRule onDeselect={onDeselect} onCreate={createNewRule} onUpdate={onUpdate} onDelete={onDelete} />
             <div className="spinner-border" role="status">
                 <span data-testid="rules-loading" className="visually-hidden"></span>
             </div>
@@ -68,7 +67,7 @@ export const RulesContainer = () => {
     
     if (error) {
         return <>
-            <AddEditRule onCreate={createNewRule} onUpdate={onUpdate} onDelete={onDelete} />
+            <AddEditRule onDeselect={onDeselect} onCreate={createNewRule} onUpdate={onUpdate} onDelete={onDelete} />
             <p data-testid="rules-load-error">Oops! Looks like we can't get your rules right now. Try reloading the page.</p>
         </>
     }
@@ -77,10 +76,8 @@ export const RulesContainer = () => {
 
     if (!rules?.length) { // empty
         return <>
-            <AddEditRule onCreate={createNewRule} onUpdate={onUpdate} onDelete={onDelete} />
-            <Container className="text-center">
-                <p data-testid="no-rules-found">You have no rules.</p>
-            </Container>
+            <AddEditRule onDeselect={onDeselect} onCreate={createNewRule} onUpdate={onUpdate} onDelete={onDelete} />
+            <Container data-testid="no-rules-found" className="text-center" />
         </>
     }
 
@@ -89,11 +86,11 @@ export const RulesContainer = () => {
     const sortedRules = sortBy(rules, (r: IApiRule) => r.value);
     
     return <>
-        <AddEditRule onCreate={createNewRule} onUpdate={onUpdate} onDelete={onDelete} rule={selectedRule} key={selectedRuleId} />
+        <AddEditRule onDeselect={onDeselect} onCreate={createNewRule} onUpdate={onUpdate} onDelete={onDelete} rule={selectedRule} key={selectedRuleId} />
 
         {sortedRules.map(rule => <Rule rule={rule} showModal={(id) => {
             console.log(id);
             setSelectedRuleId(id)
-        }} key={rule.id}/>)}
+        }} key={rule.id} selected={rule.id === selectedRuleId} />)}
     </>;
 }

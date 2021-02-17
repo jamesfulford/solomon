@@ -50,7 +50,7 @@ export const TransactionsContainer = () => {
 
     return <div data-testid="transactions-showing" className="table-responsive">
         <div className="text-right mb-1"><button className="btn btn-link" onClick={downloadCsv}>Download CSV</button></div>
-        <table className="table table-sm table-hover">
+        <table className="table table-sm" style={{ color: 'white' }}>
             <thead>
                 <tr>
                     <th>Day</th>

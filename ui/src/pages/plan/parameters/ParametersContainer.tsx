@@ -31,6 +31,8 @@ export const ParametersContainer = () => {
 
     const isPristine = String(parameters.currentBalance) === currentBalance && String(parameters.setAside) === setAside && parameters.startDate === startDate;
 
+    const nowDate = new Date().toISOString().split('T')[0];
+
     return <form onSubmit={e => {
         e.preventDefault();
         e.stopPropagation();
@@ -43,8 +45,8 @@ export const ParametersContainer = () => {
         setErrorMessage(undefined);
     }}>
         <div className="d-flex justify-content-between mb-2">
-            <div>
-                <span>On {startDate}</span>
+            <div className="d-flex align-items-center">
+                <h5 className="p-0 m-0">On <span className={nowDate !== startDate ? 'text-danger' : ''}>{startDate}</span></h5>
             </div>
             <div className="form-inline">
                 <label htmlFor="Balance">Balance</label>
@@ -67,8 +69,8 @@ export const ParametersContainer = () => {
                 <button className="button-secondary ml-3" disabled={isPristine}>Update</button>
             </div>
         </div>
-        {errorMessage && <span className="text-danger mt-2">{errorMessage}</span>}
-        <div className="mt-2">
+        <div className="d-flex justify-content-end">
+            {errorMessage && <span className="text-danger">{errorMessage}</span>}
             <Reconciler />
         </div>
     </form>;

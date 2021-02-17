@@ -11,21 +11,26 @@ import { IApiDayByDay } from '../../../services/DayByDayService';
 const options = {
     title: "",
     curveType: "none",
-    legend: { position: "top" },
+    legend: { position: "top", textStyle: { "color": "#FFFFFF" } },
     tooltip: {},
     hAxis: {
         minTextSpacing: 10,
-        format: "short"
+        format: "short",
+        textStyle: { "color": "#FFFFFF" }
+    },
+    vAxis: {
+        textStyle: { "color": "#FFFFFF" }
     },
     chartArea: {
         left: 60,
         width: '100%'
     },
+    backgroundColor: '#333333'
 };
 
-const black = '#4374E0'
-const green = '#488214';
-const red = '#dc3545';
+const black = '#A5D1C0'
+const green = '#61AB8F';
+const red = '#DB6B77';
 
 enum ChartTab {
     DISPOSABLE_INCOME = "Disposable Income",
@@ -142,6 +147,7 @@ export const DayByDayContainer = () => {
                     type="button"
                     className={"nav-link " + (chart === chartType ? 'active' : '')}
                     onClick={() => setChartType(chart as any)}
+                    style={{ backgroundColor: 'rgba(0, 0, 0, 0)', color: chart === chartType ? '#61AB8F' : '#A5D1C0' }}
                 >
                     {chart}
                 </button>

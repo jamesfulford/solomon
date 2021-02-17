@@ -36,19 +36,17 @@ export const Reconciler = () => {
         return null;
     }
 
-    return <div className="alert alert-warning pb-1">
+    return <div className="mr-3 p-1 pl-4" style={{ backgroundColor: 'rgb(0, 0, 0, 0)', border: '1px solid white', borderRadius: 5 }}>
         <span>Is your balance today <Currency value={daybyday.balance.close} />?</span>
-        <div className="d-flex justify-content-between mt-2">
-            <button className="btn btn-link btn-sm" onClick={e => {
-                e.preventDefault();
-                e.stopPropagation();
-                updateTodayAndBalance();
-            }}>No, I'll set my balance manually.</button>
-            <button className="btn btn-outline-success btn-sm" onClick={e => {
-                e.preventDefault();
-                e.stopPropagation();
-                updateTodayAndBalance(daybyday.balance.close);
-            }}>Yes</button>
-        </div>
+        <button className="button-secondary" style={{ color: 'var(--tertiary)', padding: 16 }} onClick={e => {
+            e.preventDefault();
+            e.stopPropagation();
+            updateTodayAndBalance();
+        }}>No, I'll set my balance manually.</button>
+        <button className="button-secondary" onClick={e => {
+            e.preventDefault();
+            e.stopPropagation();
+            updateTodayAndBalance(daybyday.balance.close);
+        }}>Yes</button>
     </div>;
 }

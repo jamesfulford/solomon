@@ -39,7 +39,7 @@ export const DurationSelector = () => {
     const computedDurationDays = getComputedDurationDays(startDate, daybyday.params.minimumEndDate);
 
     return <div className="text-center">
-        <button className="btn btn-outline-primary btn-sm mr-1" onClick={() => {setQueryRangeDays(Math.min(90, computedDurationDays || 90))}}>Default</button>
+        <button className="button-secondary mr-1" onClick={() => {setQueryRangeDays(Math.min(90, computedDurationDays || 90))}}>Default</button>
         {[
             { days: 365, display: '1y', danger: false },
             { days: 365 * 2, display: '2y', danger: false },
@@ -55,7 +55,7 @@ export const DurationSelector = () => {
                 return days > computedDurationDays;
             })
             .map(({ days, display, danger }) => {
-                return <button key={days} className={`btn ${danger ? 'btn-outline-danger' : 'btn-outline-primary'} btn-sm mr-1`} onClick={() => {setQueryRangeDays(days)}}>{display}</button>
+                return <button key={days} className="button-secondary mr-1" style={{ ...(danger && { color: 'var(--red)' }) }} onClick={() => {setQueryRangeDays(days)}}>{display}</button>
             })
         }
         <br />

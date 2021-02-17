@@ -2,6 +2,8 @@
 
 input[type="date"] {
     position: relative;
+    color: white;
+    background: var(--dark-background);
 }
 
 input[type="date"]:before {
@@ -11,16 +13,25 @@ input[type="date"]:before {
     left: 0;
     right: 0;
     bottom: 0;
-    background: #fff;
-    color: rgba(0, 0, 0, 0.65);
     pointer-events: none;
     line-height: 1.5;
     padding: 0 0.5rem;
     /* this differs from StackOverflow answer */
+    background: var(--dark-background);
+    color: white;
     padding-top: .2rem;
 }
 
 input[type="date"]:focus:before,
 input[type="date"]:not([value=""]):before {
     display: none;
+}
+
+input[type="text"]::placeholder, input[type="number"]::placeholder {
+    color: white;
+}
+
+select.form-control, select.form-control:focus {
+    background: var(--dark-background);
+    color: white;
 }
