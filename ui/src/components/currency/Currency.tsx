@@ -1,4 +1,5 @@
 import React from 'react';
+import './Currency.css'
 
 var formatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -10,7 +11,14 @@ function formatCurrency(value: number): string {
     return formatter.format(value);
 }
 
-export const Currency = ({ value }: { value: number }) => {
+export interface CurrencyProps {
+    /**
+     * US Dollar Amount to be displayed.
+     */
+    value: number,
+}
+
+export const Currency = ({ value }: CurrencyProps) => {
     const presentedValue = formatCurrency(value);
 
     if (value < 0) {

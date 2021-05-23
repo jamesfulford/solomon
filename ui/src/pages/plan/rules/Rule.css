@@ -1,11 +1,3 @@
-.currency-negative {
-    color: var(--red);
-}
-
-.currency-positive {
-    color: white;
-}
-
 .ruledescription {
     max-width: 100%;
     border: 1px solid #ddd;

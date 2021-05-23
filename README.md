@@ -1,6 +1,8 @@
 # Solomon
 ## Take back your bank account
 
+[Storybook](https://jamesfulford.github.io/solomon)
+
 ## Concepts
 
 - Rule: a recurring transaction. Saved in the app.
