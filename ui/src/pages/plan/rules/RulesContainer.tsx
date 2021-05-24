@@ -88,7 +88,7 @@ export const RulesContainer = () => {
     return <>
         <AddEditRule onDeselect={onDeselect} onCreate={createNewRule} onUpdate={onUpdate} onDelete={onDelete} rule={selectedRule} key={selectedRuleId} />
 
-        {sortedRules.map(rule => <Rule rule={rule} showModal={(id) => {
+        {sortedRules.map(rule => <Rule rule={rule} onClick={(id) => {
             console.log(id);
             setSelectedRuleId(id)
         }} key={rule.id} selected={rule.id === selectedRuleId} />)}

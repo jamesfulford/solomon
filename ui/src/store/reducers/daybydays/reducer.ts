@@ -11,7 +11,7 @@ const initialState = {
     status: RequestStatus.LOADING,
 };
 
-export default (
+const reducer = (
     state: DayByDaysState = initialState,
     action: DayByDayAction,
 ): DayByDaysState => {
@@ -24,3 +24,4 @@ export default (
             return state;
     }
 }
+export default reducer;

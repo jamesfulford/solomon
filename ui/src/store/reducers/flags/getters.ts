@@ -9,13 +9,13 @@ const defaultFlagValues: IFlags = {
     highLowEnabled: false,
 }
 
-function useFlagGetter(flag: keyof IFlags) {
+function buildFlagSelector(flag: keyof IFlags) {
     return (state: AppState): boolean => {
         return (state.flags.flags || defaultFlagValues)[flag]
     }
 }
 
-export const getIsHighLowEnabled = useFlagGetter('highLowEnabled');
+export const getIsHighLowEnabled = buildFlagSelector('highLowEnabled');
 
 export function getFlags(state: AppState): IFlags | undefined {
     // will return undefined if not loaded

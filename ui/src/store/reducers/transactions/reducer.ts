@@ -11,7 +11,7 @@ const initialState = {
     status: RequestStatus.STABLE,
 };
 
-export default (
+const reducer = (
     state: TransactionsState = initialState,
     action: TransactionAction,
 ): TransactionsState => {
@@ -24,3 +24,5 @@ export default (
             return state;
     }
 }
+
+export default reducer;

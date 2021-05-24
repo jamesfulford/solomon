@@ -19,13 +19,13 @@ function getRRuleDisplayString(rruleString: string): string {
 
 export interface RuleProps {
     rule: IApiRule,
-    showModal?: (id: string, rule: IApiRule) => void,
+    onClick?: (id: string, rule: IApiRule) => void,
     selected: boolean
 }
 
 export const Rule = ({
     rule,
-    showModal = () => {},
+    onClick: showModal = () => {},
     selected,
 }: RuleProps) => {
     const editButtonHandler = useCallback(() => showModal(rule.id, rule), [rule, showModal])

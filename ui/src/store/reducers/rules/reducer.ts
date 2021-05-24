@@ -13,7 +13,7 @@ const initialState = {
     status: RequestStatus.LOADING,
 };
 
-export default (
+const reducer = (
     state: RuleState = initialState,
     action: RuleAction,
 ): RuleState => {
@@ -42,3 +42,5 @@ export default (
             return state;
     }
 }
+
+export default reducer;

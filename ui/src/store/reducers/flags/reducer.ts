@@ -11,7 +11,7 @@ const initialState = {
     status: RequestStatus.STABLE,
 };
 
-export default (
+const reducer = (
     state: RuleState = initialState,
     action: FlagsAction,
 ): RuleState => {
@@ -27,3 +27,5 @@ export default (
             return state;
     }
 }
+
+export default reducer;
