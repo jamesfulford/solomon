@@ -1,0 +1,136 @@
+:root {
+    --primary: #A5D1C0;
+    --secondary: #61AB8F;
+    --tertiary: #787878;
+    --dark-background: #333333;
+    --red: #DB6B77;
+}
+
+::-webkit-calendar-picker-indicator {
+    -webkit-filter: invert(1);
+            filter: invert(1);
+}
+
+body {
+    background-color: #333333;
+    background-color: var(--dark-background);
+}
+
+.jumbotron {
+    background-color: #A5D1C0;
+    background-color: var(--primary);
+}
+
+.jumbotron > h1 {
+    color: rgb(50, 50, 50);
+    font-size: 3.5rem;
+    font-weight: 800;
+    margin-bottom: 40px;
+}
+
+.footer a {
+    color: rgb(120, 120, 120);
+}
+
+.footer a:hover {
+    color: rgb(190, 190, 190);
+}
+
+.jumbotron .call-to-action {
+    padding: 10px 80px;
+}
+
+.call-to-action {
+    background-color: #61AB8F;
+    background-color: var(--secondary);
+    padding: 5px 30px;
+    border: 4px solid #61AB8F;
+    border: 4px solid var(--secondary);
+    color: white;
+}
+
+/* secondary */
+.button-secondary {
+    background-color: rgba(0, 0, 0, 0);
+    padding: 5px 30px;
+    color: #A5D1C0;
+    color: var(--primary);
+    /* niet */
+    border: 0px solid #61AB8F;
+    border: 0px solid var(--secondary);
+}
+.button-secondary:hover {
+    color: #61AB8F;
+    color: var(--secondary);
+}
+.currency-negative {
+    color: var(--red);
+}
+
+.currency-positive {
+    color: white;
+}
+
+/* https://stackoverflow.com/questions/18146350/how-do-i-simulate-placeholder-functionality-on-input-date-field#:~:text=The%20HTML5%20date%20input%20field%20actually%20does%20not,any%20other%20format%20or%20text%20with%20be%20skipped. */
+
+input[type="date"] {
+    position: relative;
+    color: white;
+    background: var(--dark-background);
+}
+
+input[type="date"]:before {
+    content: attr(placeholder);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    line-height: 1.5;
+    padding: 0 0.5rem;
+    /* this differs from StackOverflow answer */
+    background: var(--dark-background);
+    color: white;
+    padding-top: .2rem;
+}
+
+input[type="date"]:focus:before,
+input[type="date"]:not([value=""]):before {
+    display: none;
+}
+
+input[type="text"]::-webkit-input-placeholder, input[type="number"]::-webkit-input-placeholder {
+    color: white;
+}
+
+input[type="text"]:-ms-input-placeholder, input[type="number"]:-ms-input-placeholder {
+    color: white;
+}
+
+input[type="text"]::placeholder, input[type="number"]::placeholder {
+    color: white;
+}
+
+select.form-control, select.form-control:focus {
+    background: var(--dark-background);
+    color: white;
+}
+
+.ruledescription {
+    max-width: 100%;
+    border: 1px solid #ddd;
+    overflow: hidden;
+    border-radius: 5px;
+}
+
+.ruledescription:hover, .ruledescription-selected {
+    background-color: var(--tertiary);
+}
+
+.rulename {
+    max-width: 300px;
+    overflow: hidden;
+}
+
+/*# sourceMappingURL=main.22adf6cf.chunk.css.map*/
