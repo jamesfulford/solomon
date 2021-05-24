@@ -1,8 +1,8 @@
 import React, { useCallback } from 'react';
 import './Rule.css';
-import { Currency } from '../../../components/currency/Currency';
-import { getPreviewDetails } from './AddEditRule/RulePreview';
-import { IApiRule } from '../../../services/RulesService';
+import { Currency } from '../../../../components/currency/Currency';
+import { getPreviewDetails } from '../AddEditRule/RulePreview';
+import { IApiRule } from '../../../../services/RulesService';
 
 
 function getRRuleDisplayString(rruleString: string): string {
@@ -17,15 +17,17 @@ function getRRuleDisplayString(rruleString: string): string {
     }
 }
 
+export interface RuleProps {
+    rule: IApiRule,
+    showModal?: (id: string, rule: IApiRule) => void,
+    selected: boolean
+}
+
 export const Rule = ({
     rule,
     showModal = () => {},
     selected,
-}: {
-    rule: IApiRule,
-    showModal?: (id: string, rule: IApiRule) => void,
-    selected: boolean
-}) => {
+}: RuleProps) => {
     const editButtonHandler = useCallback(() => showModal(rule.id, rule), [rule, showModal])
     const rruleString = getRRuleDisplayString(rule.rrule);
     return <div className={`ruledescription p-2 ${selected ? 'ruledescription-selected' : ''}`} onClick={editButtonHandler}>

@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react'
-import { Rule } from './Rule';
+import { Rule } from './rule/Rule';
 import sortBy from 'lodash/sortBy';
 import Container from 'react-bootstrap/Container';
 import { AddEditRule } from './AddEditRule';
