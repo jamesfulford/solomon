@@ -65,9 +65,9 @@ def use_global_exception_handler(f):
             return response
         except Exception as e:
             response_message = {
-                "message": "Internal Server Error: " + str(e)
+                "message": "Internal Server Error"
             }
-            logging.warn(response_message)
+            logging.error(response_message)
 
             response = JsonResponse(response_message)
             response.status_code = 500
