@@ -12,4 +12,5 @@ export const parameters = {
   },
 }
 
+import 'bootstrap/dist/css/bootstrap.min.css';
 import '../src/main.css'

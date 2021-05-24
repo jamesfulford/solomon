@@ -8,6 +8,7 @@ import { createRule, deleteRule, updateRule } from '../../../store/reducers/rule
 import { useSelector } from 'react-redux';
 import { getRules } from '../../../store/reducers/rules/getters';
 import { IApiRule, IApiRuleMutate } from '../../../services/RulesService';
+import { getIsHighLowEnabled } from '../../../store/reducers/flags/getters';
 
 
 export const RulesContainer = () => {
@@ -18,6 +19,10 @@ export const RulesContainer = () => {
     } = useSelector(state => ({
         rules: getRules(state as any),
     }))
+
+    const { highLowEnabled } = useSelector(state => ({
+        highLowEnabled: getIsHighLowEnabled(state as any),
+    }));
 
 
     const [selectedRuleId, setSelectedRuleId] = useState<string | undefined>();
@@ -58,7 +63,7 @@ export const RulesContainer = () => {
 
     if (loading) {
         return <>
-            <AddEditRule onDeselect={onDeselect} onCreate={createNewRule} onUpdate={onUpdate} onDelete={onDelete} />
+            <AddEditRule highLowEnabled={highLowEnabled} onDeselect={onDeselect} onCreate={createNewRule} onUpdate={onUpdate} onDelete={onDelete} />
             <div className="spinner-border" role="status">
                 <span data-testid="rules-loading" className="visually-hidden"></span>
             </div>
@@ -67,7 +72,7 @@ export const RulesContainer = () => {
     
     if (error) {
         return <>
-            <AddEditRule onDeselect={onDeselect} onCreate={createNewRule} onUpdate={onUpdate} onDelete={onDelete} />
+            <AddEditRule highLowEnabled={highLowEnabled} onDeselect={onDeselect} onCreate={createNewRule} onUpdate={onUpdate} onDelete={onDelete} />
             <p data-testid="rules-load-error">Oops! Looks like we can't get your rules right now. Try reloading the page.</p>
         </>
     }
@@ -76,7 +81,7 @@ export const RulesContainer = () => {
 
     if (!rules?.length) { // empty
         return <>
-            <AddEditRule onDeselect={onDeselect} onCreate={createNewRule} onUpdate={onUpdate} onDelete={onDelete} />
+            <AddEditRule highLowEnabled={highLowEnabled} onDeselect={onDeselect} onCreate={createNewRule} onUpdate={onUpdate} onDelete={onDelete} />
             <Container data-testid="no-rules-found" className="text-center" />
         </>
     }
@@ -86,7 +91,7 @@ export const RulesContainer = () => {
     const sortedRules = sortBy(rules, (r: IApiRule) => r.value);
     
     return <>
-        <AddEditRule onDeselect={onDeselect} onCreate={createNewRule} onUpdate={onUpdate} onDelete={onDelete} rule={selectedRule} key={selectedRuleId} />
+        <AddEditRule highLowEnabled={highLowEnabled} onDeselect={onDeselect} onCreate={createNewRule} onUpdate={onUpdate} onDelete={onDelete} rule={selectedRule} key={selectedRuleId} />
 
         {sortedRules.map(rule => <Rule rule={rule} onClick={(id) => {
             console.log(id);

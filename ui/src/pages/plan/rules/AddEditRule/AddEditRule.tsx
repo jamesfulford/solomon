@@ -7,8 +7,6 @@ import { convertWorkingStateToApiRuleMutate, ruleToWorkingState } from './transl
 import { RulePreview } from './RulePreview';
 import { hebrewMonthToDisplayNameMap } from './hebrew';
 import { IApiRuleMutate } from '../../../../services/RulesService';
-import { useSelector } from 'react-redux';
-import { getIsHighLowEnabled } from '../../../../store/reducers/flags/getters';
 import Container from 'react-bootstrap/Container';
 
 
@@ -16,14 +14,15 @@ function frequencyIsIn(freq: WorkingState['rrule']['freq'], freqs: WorkingState[
     return freqs.includes(freq);
 }
 
-interface AddEditRuleFormProps {
+export interface AddEditRuleFormProps {
     onCreate: (rule: IApiRuleMutate) => Promise<void>,
     onUpdate: (rule: IApiRuleMutate) => Promise<void>,
     onDelete: () => Promise<void>,
     rule?: IApiRuleMutate,
+    highLowEnabled?: boolean,
 }
 
-interface AddEditRuleProps extends AddEditRuleFormProps {
+export interface AddEditRuleProps extends AddEditRuleFormProps {
     onDeselect: () => void
 }
 
@@ -45,23 +44,15 @@ export const AddEditRule = ({ onDeselect, ...props}: AddEditRuleProps) => {
     </Container>;
 }
 
-const AddEditRuleForm = ({
+export const AddEditRuleForm = ({
     onCreate,
     onUpdate,
     onDelete,
-    rule
-}: {
-    onCreate: (rule: IApiRuleMutate) => Promise<void>,
-    onUpdate: (rule: IApiRuleMutate) => Promise<void>,
-    onDelete: () => Promise<void>,
-    rule?: IApiRuleMutate,
-}) => {
+    rule,
+    highLowEnabled = false
+}: AddEditRuleFormProps) => {
     const [intentionToCopy, setIntentionToCopy] = useState(false);
     const canUpdate = Boolean(rule && "id" in rule);
-
-    const { highLowEnabled } = useSelector(state => ({
-        highLowEnabled: getIsHighLowEnabled(state as any),
-    }));
 
     async function submit(fields: WorkingState, { setSubmitting }: any) {
         let final: IApiRuleMutate;
