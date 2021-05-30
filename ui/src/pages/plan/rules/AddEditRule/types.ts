@@ -20,10 +20,11 @@ export type WorkingState = Omit<
 > & {
     // omit overrides
     rrule: Partial<
-        Omit<Omit<Omit<
+        Omit<Omit<Omit<Omit<
             Options,
             'freq'>,
             'dtstart'>,
+            'byweekday'>,
             'until'> 
         & {
         freq: SupportedFrequency;
@@ -31,6 +32,8 @@ export type WorkingState = Omit<
         dtstart?: string;
         until?: string;
 
+        byweekday?: number[] | null;
+        
         byhebrewmonth?: number;
         byhebrewday?: number;
     }>,
