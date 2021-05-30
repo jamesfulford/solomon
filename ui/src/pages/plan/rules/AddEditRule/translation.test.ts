@@ -167,6 +167,14 @@ describe('editing translation', () => {
                 }).toString(),
             });
         });
+
+        it('should normalize byweekday to an array of numbers for sanity', () => {
+            const workingState = ruleToWorkingState(rules.find(r => r.name.includes("Weekly")));
+            expect(workingState.rrule.byweekday).toBeTruthy();
+            workingState.rrule.byweekday?.forEach(w => {
+                expect(typeof w).toBe('number');
+            });
+        });
     });
 
 
