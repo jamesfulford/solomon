@@ -1,9 +1,16 @@
 import RRule, { Options } from "rrule";
+import { Weekday, WeekdayStr } from "rrule";
 import { IFlags } from "../../../../services/FlagService";
 import { IApiRuleMutate } from "../../../../services/RulesService";
 import { extractHebrew } from "./hebrew";
 import { ONCE, SupportedFrequency, WorkingState, YEARLY_HEBREW } from "./types";
 
+// copied from rrule src code because not exported readily
+const ALL_WEEKDAYS = ['SU', 'MO', 'TU', 'WE', 'TR', 'FR', 'SA'];
+
+function frequenciesEqual(freq1: Options['freq'], freq2: Options['freq']) {
+    return String(freq1) === String(freq2);
+}
 
 function workingStateRRuleToString(rrule: WorkingState['rrule']): string {
     // serializing rrule for sending from UI to API.
@@ -29,8 +36,8 @@ function workingStateRRuleToString(rrule: WorkingState['rrule']): string {
         freq,
         dtstart: rrule.dtstart ? new Date(rrule.dtstart) : undefined,
         until: rrule.until ? new Date(rrule.until) : undefined,
-        bymonthday: freq === RRule.MONTHLY ? rrule.bymonthday : undefined,
-        byweekday: freq === RRule.WEEKLY ? rrule.byweekday : undefined,
+        bymonthday: frequenciesEqual(freq, RRule.MONTHLY) ? rrule.bymonthday : undefined,
+        byweekday: frequenciesEqual(freq, RRule.WEEKLY) ? rrule.byweekday : undefined,
 
         count: undefined,
         wkst: undefined,
@@ -47,6 +54,24 @@ function workingStateRRuleToString(rrule: WorkingState['rrule']): string {
     delete rruleOptions['byhebrewday']
 
     return new RRule(rruleOptions).toString();
+}
+
+function normalizeByWeekday(byweekday?: Options['byweekday']): number[] {
+    if (!byweekday) return [];
+
+    let _byweekday = byweekday;
+    if (!Array.isArray(_byweekday)) {
+        _byweekday = [_byweekday];
+    }
+
+    return _byweekday.map(w => {
+        if (Number.isInteger(w)) return w as number;
+        if (typeof w === "string") {
+            return ALL_WEEKDAYS.indexOf(w as WeekdayStr);
+        }
+        const _w = w as Weekday;
+        return _w.weekday;
+    });
 }
 
 function stringToWorkingStateRRule(rrulestring: string): WorkingState['rrule'] {
@@ -78,10 +103,11 @@ function stringToWorkingStateRRule(rrulestring: string): WorkingState['rrule'] {
 
     const dtstart = parsedOptions.dtstart?.toISOString().split("T")[0];
     const until = parsedOptions.until?.toISOString().split("T")[0];
+    
     return {
         ...parsedOptions,
         freq: libraryInferredOptions.count === 1 ? ONCE : freq,
-
+        byweekday: normalizeByWeekday(parsedOptions.byweekday),
         dtstart,
         until,
     };
