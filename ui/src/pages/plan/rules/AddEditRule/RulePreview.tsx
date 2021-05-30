@@ -51,6 +51,8 @@ export const getPreviewDetails = (rrulestring: string | undefined): {
 
 
 export function RulePreview({ rule }: { rule: IApiRuleMutate | undefined }) {
+    // TODO: useTime
+    const now = Date.now();
     
     const value = rule?.value;
 
@@ -60,9 +62,11 @@ export function RulePreview({ rule }: { rule: IApiRuleMutate | undefined }) {
             return [undefined, undefined];
         }
 
-        return rrule.all((d, index) => index <= 1)
-                .map(d => d.toISOString().split("T")[0]);
-    }, [isOnce, rrule]);
+        // next 2 occurences in the future (cap off at 3 years)
+        return rrule
+            .between(new Date(now), new Date(now + 1000 * 60 * 60 * 24 * 366 * 3), true, (_d, index) => index < 2)
+            .map(d => d.toISOString().split("T")[0]);
+    }, [isOnce, rrule, now]);
 
     return <div>
         <p className="m-0">
