@@ -1,6 +1,7 @@
 on:
-   push:
-     branches: [ main ]
+# CD disabled because server is off.
+#    push:
+#      branches: [ main ]
    workflow_dispatch:
 
 
